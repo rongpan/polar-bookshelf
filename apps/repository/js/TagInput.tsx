@@ -14,13 +14,20 @@ import {IDs} from '../../../web/js/util/IDs';
 import {NULL_FUNCTION} from '../../../web/js/util/Functions';
 import {Blackout} from '../../../web/js/ui/blackout/Blackout';
 import {Tag} from '../../../web/js/tags/Tags';
+import {GroupsSelector} from "../../../web/js/ui/group_sharing/GroupsSelector";
+import {GroupOptions} from "../../../web/js/ui/group_sharing/GroupOptions";
+import {
+    PrefetchedUserGroup,
+    PrefetchedUserGroupsBackgroundListener
+} from "../../../web/js/datastore/sharing/db/PrefetchedUserGroupsBackgroundListener";
+import {Group} from "../../../web/js/datastore/sharing/db/Groups";
 
 const log = Logger.create();
 
 const Styles: IStyleMap = {
 
     popover: {
-        width: '500px !important',
+        width: '600px !important',
         maxWidth: '9999px !important'
     },
 
@@ -128,13 +135,21 @@ export class TagInput extends React.Component<IProps, IState> {
             }
 
             return <div style={Styles.relatedTags}>
-                <div className="mr-1" style={Styles.relatedTagsLabel}>
+                <div className="mr-1 text-grey500"
+                     style={Styles.relatedTagsLabel}>
+
                     <strong>Related tags: </strong>
+
                 </div>
                 <RelatedTagsItems/>
             </div>;
 
         };
+
+        const prefetchedUserGroup
+            = PrefetchedUserGroupsBackgroundListener.get();
+
+        const groups = prefetchedUserGroup ? prefetchedUserGroup.groups : [];
 
         return (
 
@@ -143,15 +158,6 @@ export class TagInput extends React.Component<IProps, IState> {
                 <i id={this.id}
                    onClick={() => this.activate()}
                    className="fa fa-tag doc-button doc-button-inactive"/>
-
-                {/*tag-input-popover {*/}
-                {/*width: 500px !important;*/}
-                {/*max-width: 9999px !important;*/}
-            {/*}*/}
-
-                {/*.tag-input-popover label {*/}
-                {/*font-weight: bold;*/}
-            {/*}*/}
 
                 <Popover placement="auto"
                          isOpen={this.state.open}
@@ -188,12 +194,18 @@ export class TagInput extends React.Component<IProps, IState> {
                         </CreatableSelect>
 
                         <div>
-
                             <RelatedTagsWidget/>
-
                         </div>
 
-                        <div className="mt-1">
+                        <div className="mt-1 font-weight-bold mb-1">
+                            Share with groups:
+                        </div>
+
+                        <GroupsSelector options={GroupOptions.toGroupOptions(groups)}
+                                        selectedOptions={GroupOptions.toGroupOptions(groups)}
+                                        onChange={NULL_FUNCTION}/>
+
+                        <div className="mt-2">
 
                             <div style={{display: 'flex'}}>
 
@@ -327,7 +339,6 @@ interface IState {
      * The tags that are actively being selected but not yet applied.
      */
     readonly pendingTags: Tag[];
-
 
 }
 

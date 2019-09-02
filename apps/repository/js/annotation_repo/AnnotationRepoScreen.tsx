@@ -81,7 +81,15 @@ export default class AnnotationRepoScreen extends ReleasingReactComponent<IProps
 
         this.filtersHandler = new AnnotationRepoFiltersHandler(filters => filterEngine.onFiltered(filters));
 
-        const doRefresh = () => filterEngine.onProviderUpdated();
+        const doRefresh = () => {
+            filterEngine.onProviderUpdated();
+
+            // TODO: this would be the BEST time to update the shared tag database.
+
+            console.log("FIXME2: going to write now...");
+
+
+        };
 
         PersistenceLayerManagers.onPersistenceManager(this.props.persistenceLayerManager, (persistenceLayer) => {
 

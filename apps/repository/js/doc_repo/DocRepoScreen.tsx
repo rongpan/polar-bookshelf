@@ -507,6 +507,7 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
     private refresh() {
         this.docRepoFilters.refresh();
+        console.log("FIXME: refreshed");
     }
 
     /**
