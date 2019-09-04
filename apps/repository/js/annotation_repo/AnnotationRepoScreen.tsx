@@ -98,8 +98,7 @@ export default class AnnotationRepoScreen extends ReleasingReactComponent<IProps
 
         });
 
-        this.releaser.register(
-            RepoDocMetaLoaders.addThrottlingEventListener(this.props.repoDocMetaLoader, () => doRefresh()));
+        this.releaser.register(RepoDocMetaLoaders.addThrottlingEventListener(this.props.repoDocMetaLoader, () => doRefresh()));
 
         // do an initial refresh to get the first batch of data.
         doRefresh();

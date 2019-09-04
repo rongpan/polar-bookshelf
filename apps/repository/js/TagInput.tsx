@@ -173,7 +173,7 @@ export class TagInput extends React.Component<IProps, IState> {
 
                         {/*TODO unify this with TagInputWidget*/}
 
-                        <div className="pt-1 pb-1">
+                        <div className="mt-2 mb-1">
                             <strong>Assign tags to document:</strong>
                         </div>
 
@@ -193,11 +193,11 @@ export class TagInput extends React.Component<IProps, IState> {
 
                         </CreatableSelect>
 
-                        <div>
+                        <div className="mt-1 mb-1">
                             <RelatedTagsWidget/>
                         </div>
 
-                        <div className="mt-1 font-weight-bold mb-1">
+                        <div className="mt-2 font-weight-bold mb-1">
                             Share with groups:
                         </div>
 

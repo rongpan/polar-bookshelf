@@ -39,6 +39,7 @@ import {TreeState} from '../../../../web/js/ui/tree/TreeView';
 import {Arrays} from '../../../../web/js/util/Arrays';
 import {Numbers} from '../../../../web/js/util/Numbers';
 import {Instance} from "react-table";
+import {SharedDocTags} from "../../../../web/js/tags/shared/SharedDocTags";
 
 const log = Logger.create();
 
@@ -120,11 +121,10 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
         });
 
-        this.releaser.register(
-            RepoDocMetaLoaders.addThrottlingEventListener(this.props.repoDocMetaLoader, () => this.refresh()));
+        // used so we can refresh the UI
+        this.releaser.register(RepoDocMetaLoaders.addThrottlingEventListener(this.props.repoDocMetaLoader, () => this.refresh()));
 
-        this.releaser.register(
-            this.props.repoDocMetaLoader.addEventListener(event => {
+        this.releaser.register(this.props.repoDocMetaLoader.addEventListener(event => {
 
                 if (!DocRepoScreen.hasSentInitAnalytics && event.progress.progress === 100) {
                     this.emitInitAnalytics(this.props.repoDocMetaManager.repoDocInfoIndex.size());
@@ -133,6 +133,15 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
             })
         );
+        // used so we can refresh the UI
+        this.releaser.register(RepoDocMetaLoaders.addThrottlingEventListener(this.props.repoDocMetaLoader, () => {
+
+            // TODO: I dont' think we should do this EVERY time as when we're
+            // loading we're going to have fewer than teh right amount of tags.
+
+            SharedDocTags.write(this.props.repoDocMetaManager!.repoDocInfoIndex.toTagDescriptors());
+
+        }));
 
     }
 
@@ -268,7 +277,8 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
     public render() {
 
-        const tagsProvider = () => this.props.repoDocMetaManager!.repoDocInfoIndex.toTagDescriptors();
+        // const tagsProvider = () => this.props.repoDocMetaManager!.repoDocInfoIndex.toTagDescriptors();
+        const tagsProvider = () => SharedDocTags.read();
 
         return (
             <div id="doc-repository"
@@ -507,7 +517,6 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
     private refresh() {
         this.docRepoFilters.refresh();
-        console.log("FIXME: refreshed");
     }
 
     /**
