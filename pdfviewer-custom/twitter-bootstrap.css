@@ -114,6 +114,50 @@ button.dropdown-item:hover {
     background-color: var(--grey100);
 }
 
+
+.btn-circle.btn-xl {
+    width: 70px;
+    height: 70px;
+    padding: 10px 16px;
+    border-radius: 35px;
+    font-size: 24px;
+    line-height: 1.33;
+}
+
+.btn-circle {
+    width: 30px;
+    height: 30px;
+    padding: 6px 0px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.42857;
+}
+
+.border-top-1 {
+    border-top-width:2px !important;
+}
+
+.border-top-2 {
+    border-top-width:2px !important;
+}
+
+.border-top-3 {
+    border-top-width:3px !important;
+}
+
+.border-1 {
+    border-width:2px !important;
+}
+
+.border-2 {
+    border-width:2px !important;
+}
+
+.border-3 {
+    border-width:3px !important;
+}
+
 /* text-grey */
 .text-grey900 {
     color: var(--grey900);
@@ -276,5 +320,4 @@ button.dropdown-item:hover {
     --danger000: #FFE3E3;
 
 }
-
 

@@ -31,9 +31,9 @@ export class BackgroundListeners {
 
             get: () => {
 
-                if (! started) {
-                    throw new Error("Not started");
-                }
+                // if (! started) {
+                //     throw new Error("Not started");
+                // }
 
                 return value!;
 

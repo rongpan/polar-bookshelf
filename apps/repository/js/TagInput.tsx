@@ -21,6 +21,8 @@ import {
     PrefetchedUserGroupsBackgroundListener
 } from "../../../web/js/datastore/sharing/db/PrefetchedUserGroupsBackgroundListener";
 import {Group} from "../../../web/js/datastore/sharing/db/Groups";
+import {LeftRightSplit} from "../../../web/js/ui/left_right_split/LeftRightSplit";
+import {DialogSection} from "./ui/DialogSection";
 
 const log = Logger.create();
 
@@ -173,39 +175,49 @@ export class TagInput extends React.Component<IProps, IState> {
 
                         {/*TODO unify this with TagInputWidget*/}
 
-                        <div className="mt-2 mb-1">
-                            <strong>Assign tags to document:</strong>
-                        </div>
+                        <DialogSection iconClass="fas fa-tag">
+                            <div className="mb-1">
+                                <strong>Assign tags to document:</strong>
+                            </div>
 
-                        <CreatableSelect
-                            isMulti
-                            isClearable
-                            autoFocus
-                            onKeyDown={event => this.onKeyDown(event)}
-                            className="basic-multi-select"
-                            classNamePrefix="select"
-                            onChange={(selectedOptions) => this.handleChange(selectedOptions as TagOption[])}
-                            value={pendingTags}
-                            defaultValue={pendingTags}
-                            placeholder="Create or select tags ..."
-                            options={availableTagOptions}
-                            ref={ref => this.select = ref}>
+                            <CreatableSelect
+                                isMulti
+                                isClearable
+                                autoFocus
+                                onKeyDown={event => this.onKeyDown(event)}
+                                className="basic-multi-select"
+                                classNamePrefix="select"
+                                onChange={(selectedOptions) => this.handleChange(selectedOptions as TagOption[])}
+                                value={pendingTags}
+                                defaultValue={pendingTags}
+                                placeholder="Create or select tags ..."
+                                options={availableTagOptions}
+                                ref={ref => this.select = ref}>
 
-                        </CreatableSelect>
+                            </CreatableSelect>
 
-                        <div className="mt-1 mb-1">
-                            <RelatedTagsWidget/>
-                        </div>
+                            <div className="mt-1 mb-1">
+                                <RelatedTagsWidget/>
+                            </div>
 
-                        <div className="mt-2 font-weight-bold mb-1">
-                            Share with groups:
-                        </div>
+                        </DialogSection>
 
-                        <GroupsSelector options={GroupOptions.toGroupOptions(groups)}
-                                        selectedOptions={GroupOptions.toGroupOptions(groups)}
-                                        onChange={NULL_FUNCTION}/>
+                        <div className="mt-1"/>
 
-                        <div className="mt-2">
+                        <DialogSection iconClass="fas fa-users">
+
+                            <div className="font-weight-bold mb-1">
+                                Share with groups:
+                            </div>
+
+                            <GroupsSelector options={GroupOptions.toGroupOptions(groups)}
+                                            selectedOptions={GroupOptions.toGroupOptions(groups)}
+                                            onChange={NULL_FUNCTION}/>
+
+
+                        </DialogSection>
+
+                        <div className="mt-2 p-1">
 
                             <div style={{display: 'flex'}}>
 

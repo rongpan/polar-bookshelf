@@ -13,6 +13,10 @@ import {Group} from "../../js/datastore/sharing/db/Groups";
 import {ISODateTimeStrings} from "../../js/metadata/ISODateTimeStrings";
 import {GroupCard} from "../../../apps/repository/js/groups/GroupCard";
 import {LoadingProgress} from "../../js/ui/LoadingProgress";
+import {TagInput} from "../../../apps/repository/js/TagInput";
+import {RelatedTags} from "../../js/tags/related/RelatedTags";
+import {PrefetchedUserGroupsBackgroundListener} from "../../js/datastore/sharing/db/PrefetchedUserGroupsBackgroundListener";
+import {TagOption} from "../../../apps/repository/js/TagOption";
 
 const styles = {
     swatch: {
@@ -97,20 +101,6 @@ class App<P> extends React.Component<{}, IAppState> {
         //     }
         // };
 
-        const tags = [
-            '/CompSci/Google',
-            '/CompSci/Linux',
-            '/CompSci/Microsoft',
-            '/CompSci/Programming Languages/C++',
-            '/CompSci/Programming Languages/Java',
-            '/History/WWII',
-            '/History/United States/WWII',
-        ].map(current => Tags.create(current))
-         .map(current => {
-             const count = Math.floor(Math.random() * 100);
-             return {...current, count};
-         });
-
         // // const root: TNode<Tag> = TagNodes.create(...tags);
         // Dialogs.prompt({
         //                    title: "Enter the name of a new folder:",
@@ -131,11 +121,44 @@ class App<P> extends React.Component<{}, IAppState> {
             created: ISODateTimeStrings.create()
         };
 
+        PrefetchedUserGroupsBackgroundListener.start();
+
+        const relatedTags = new RelatedTags();
         return (
 
             <div style={{margin: '5px'}}>
 
-                <LoadingProgress/>
+                <TagInput availableTags={[]} relatedTags={relatedTags}/>
+
+
+                <div style={{display: 'flex'}} className="border-top border-top-3 border-primary pt-2">
+                    <div style={{
+                             verticalAlign: 'top'
+                         }}>
+
+                        <button type="button"
+                                className="btn btn-primary btn-circle btn-xl">
+                            <i className="fas fa-tag"/>
+
+                        </button>
+
+                    </div>
+
+                    <div className="pl-1"
+                         style={{
+                             verticalAlign: 'top',
+                             display: 'flex',
+                             flexGrow: 1
+                         }}>
+
+                        <div className="mt-2 mb-1">
+                            <strong>Assign tags to document:</strong>
+                        </div>
+
+                    </div>
+                </div>
+
+                {/*<LoadingProgress/>*/}
 
                 {/*<MockFolderTree/>*/}
 
