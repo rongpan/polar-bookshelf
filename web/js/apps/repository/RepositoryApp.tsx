@@ -8,7 +8,7 @@ import {
     PersistenceLayerManager,
     PersistenceLayerTypes
 } from '../../datastore/PersistenceLayerManager';
-import {HashRouter, Route, Switch} from 'react-router-dom';
+import {BrowserRouter, HashRouter, Route, Switch} from 'react-router-dom';
 import {SyncBar, SyncBarProgress} from '../../ui/sync_bar/SyncBar';
 import {DocRepoAnkiSyncController} from '../../controller/DocRepoAnkiSyncController';
 import AnnotationRepoScreen
@@ -59,6 +59,9 @@ import {GroupScreen} from "../../../../apps/repository/js/group/GroupScreen";
 import {AuthRequired} from "../../../../apps/repository/js/AuthRequired";
 import {UIModes} from "../../ui/uimodes/UIModes";
 import {HighlightsScreen} from "../../../../apps/repository/js/group/highlights/HighlightsScreen";
+import {ReactRouters} from "../../ui/ReactRouters";
+import {GroupHighlightScreen} from "../../../../apps/repository/js/group/highlight/GroupHighlightScreen";
+import {PrefetchedUserGroupsBackgroundListener} from "../../datastore/sharing/db/PrefetchedUserGroupsBackgroundListener";
 
 const log = Logger.create();
 
@@ -109,6 +112,8 @@ export class RepositoryApp {
             new ToasterService().start();
 
             new ProgressService().start();
+
+            await PrefetchedUserGroupsBackgroundListener.start();
 
             await this.doLoadExampleDocs();
 
@@ -307,37 +312,46 @@ export class RepositoryApp {
                             {/*}*/}
                         {/*]}/>*/}
 
-                {/*<HashRouter hashType="noslash">*/}
+                <BrowserRouter>
 
-                {/*    <Switch>*/}
-                {/*        <Route exact path='/(logout|overview|login|configured|invite|premium)?' render={renderDocRepoScreen}/>*/}
-                {/*        <Route exact path='/annotations' render={renderAnnotationRepoScreen}/>*/}
-                {/*        <Route exact path='/whats-new' render={renderWhatsNewScreen}/>*/}
-                {/*        <Route exact path='/community' render={renderCommunityScreen}/>*/}
-                {/*        <Route exact path='/stats' render={renderStatsScreen}/>*/}
-                {/*        <Route exact path='/logs' render={renderLogsScreen}/>*/}
-                {/*        <Route exact path='/editors-picks' render={editorsPicksScreen}/>*/}
-                {/*        <Route exact path='/plans' render={premiumScreen}/>*/}
-                {/*        <Route exact path='/support' render={supportScreen}/>*/}
+                    <Switch location={ReactRouters.createLocationWithPathnameHash()}>
 
-                {/*        <Route path='/group/:group/highlights' render={renderGroupHighlightsScreen}/>*/}
-                {/*        <Route path='/group/' render={renderGroupScreen}/>*/}
+                        <Route exact path='/#annotations' render={renderAnnotationRepoScreen} />
 
-                {/*        <Route exact path='/groups' render={renderGroupsScreen}/>*/}
-                {/*        <Route exact path='/groups/create' render={renderCreateGroupScreen}/>*/}
+                        <Route exact path='/#whats-new' render={renderWhatsNewScreen} />
 
-                {/*    </Switch>*/}
+                        <Route exact path='/#(logout|overview|login|configured|invite|premium)?' render={renderDocRepoScreen}/>
 
-                {/*</HashRouter>*/}
+                        <Route exact path='/#community' render={renderCommunityScreen}/>
 
-                {/*<HashRouter hashType="noslash">*/}
+                        <Route exact path='/#stats' render={renderStatsScreen}/>
 
-                {/*    <Switch>*/}
-                {/*        <Route exact path='/premium' render={premiumScreen}/>*/}
-                {/*    </Switch>*/}
+                        <Route exact path='/#logs' render={renderLogsScreen}/>
 
-                {/*</HashRouter>*/}
+                        <Route exact path='/#editors-picks' render={editorsPicksScreen}/>
 
+                        <Route exact path='/#plans' render={premiumScreen}/>
+
+                        <Route exact path='/#support' render={supportScreen}/>
+
+                        <Route exact path='/#premium' render={premiumScreen}/>
+
+                        <Route path='/group/:group/highlights' render={renderGroupHighlightsScreen}/>
+                        <Route path='/group/:group/docs' render={renderGroupScreen}/>
+
+                        <Route path='/group/:group/highlight/:id' render={renderGroupHighlightScreen}/>
+
+                        <Route path='/group/:group' render={renderGroupHighlightsScreen}/>
+
+                        <Route exact path='/groups' render={renderGroupsScreen}/>
+
+                        <Route exact path='/groups/create' render={renderCreateGroupScreen}/>
+
+                        <Route exact path='/' render={renderDocRepoScreen}/>
+
+                    </Switch>
+
+                </BrowserRouter>
 
                 {/*Used for file uploads.  This has to be on the page and can't be*/}
                 {/*selectively hidden by components.*/}
@@ -350,6 +364,7 @@ export class RepositoryApp {
                 {/*       style={{display: 'none'}}/>*/}
 
             </div>
+            rootElement
 
         );
         //

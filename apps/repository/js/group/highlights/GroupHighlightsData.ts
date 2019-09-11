@@ -7,5 +7,4 @@ export interface GroupHighlightsData {
     readonly id: GroupIDStr;
     readonly group: Group;
     readonly docAnnotationProfileRecords: ReadonlyArray<ProfileRecord<GroupDocAnnotation>>;
-
 }

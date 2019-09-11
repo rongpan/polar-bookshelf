@@ -1,4 +1,6 @@
 import * as React from 'react';
+import {Link} from "react-router-dom";
+import {ReactRouterLinks, Target} from "../ReactRouterLinks";
 
 export class SimpleTab extends React.Component<IProps, IState> {
 
@@ -15,23 +17,7 @@ export class SimpleTab extends React.Component<IProps, IState> {
 
     public render() {
 
-        const isActive = () => {
-
-            const {href} = this.props;
-
-            if (href === "#" && document.location.hash === "") {
-                return true;
-            }
-
-            if (href.startsWith("#")) {
-                return document.location.hash === href;
-            }
-
-            return document.location.href === href;
-
-        };
-
-        const active = isActive();
+        const active = ReactRouterLinks.isActive(this.props.target);
 
         const computeBorderColor = () => {
 
@@ -57,19 +43,17 @@ export class SimpleTab extends React.Component<IProps, IState> {
 
             <div>
 
-                <a href={this.props.href}
-                   className="p-2 ml-1 mr-1"
-                   onMouseEnter={() => this.toggleHover()}
-                   onMouseLeave={() => this.toggleHover()}
-                   style={{
-                       color,
-                       textDecoration: 'none',
-                       borderBottom
-                   }}>
-
+                <Link to={this.props.target}
+                      className="p-2 ml-1 mr-1"
+                      onMouseEnter={() => this.toggleHover()}
+                      onMouseLeave={() => this.toggleHover()}
+                      style={{
+                        color,
+                        textDecoration: 'none',
+                        borderBottom
+                    }}>
                     {this.props.text}
-
-                </a>
+                </Link>
 
             </div>
 
@@ -83,11 +67,11 @@ export class SimpleTab extends React.Component<IProps, IState> {
 }
 
 export interface IProps {
-    readonly href: string;
+    readonly target: Target;
     readonly text: string;
 }
 
 export interface IState {
     readonly hover: boolean;
-
 }
+

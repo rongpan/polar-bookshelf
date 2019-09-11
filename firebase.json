@@ -16,7 +16,15 @@
         "destination": "/apps/repository/index.html"
       },
       {
-        "source": "/group",
+        "source": "/group/:group/docs",
+        "destination": "/apps/repository/index.html"
+      },
+      {
+        "source": "/group/:group/highlight/:id",
+        "destination": "/apps/repository/index.html"
+      },
+      {
+        "source": "/group/:group",
         "destination": "/apps/repository/index.html"
       },
       {
@@ -40,7 +48,6 @@
         "source": "/pdfjsWorker-bundle.js",
         "destination": "/web/dist/pdfjsWorker-bundle.js"
       }
-
     ]
   }
 }

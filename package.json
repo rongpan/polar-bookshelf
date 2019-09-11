@@ -1,13 +1,14 @@
 {
   "name": "polar-bookshelf",
-  "version": "1.31.2",
+  "version": "1.32.9",
   "description": "Polar Bookshelf",
   "main": "main.js",
+  "private": true,
   "scripts": {
     "start": "electron .",
     "testit": "echo ./dist/polar-bookshelf_${npm_package_version}_amd64.snap",
     "build-appx": "npm run-script setup-dist-appx && npm run-script compile && electron-builder --config=electron-builder.yml --win appx --publish never",
-    "build-webapp": "npx webpack && ./scripts/build-webapp.sh",
+    "build-webapp": "npx tsc && npx webpack && ./scripts/build-webapp.sh",
     "setup-dist-default": "npm run-script verify-electron-version && cp web/js/dist_config/DefaultDistConfig.ts web/js/dist_config/DistConfig.ts",
     "setup-dist-appx": "cp web/js/dist_config/AppXDistConfig.ts web/js/dist_config/DistConfig.ts",
     "publish-linux-snapcraft": "snapcraft push --release stable ./dist/polar-bookshelf-${npm_package_version}-amd64.snap",
@@ -82,7 +83,6 @@
     "dtsmake": "0.0.10",
     "electron": "^5.0.6",
     "electron-builder": "~20.34.0",
-    "electron-mocha": "~6.0.4",
     "fork-ts-checker-webpack-plugin": "^0.5.2",
     "install": "^0.12.2",
     "jsdom": "^15.0.0",
@@ -186,9 +186,11 @@
     "node-fetch": "~2.3.0",
     "npm": "~6.5.0",
     "opencollective-postinstall": "~2.0.1",
+    "path-to-regexp": "^3.0.0",
     "pdfjs-dist": "~2.0.943",
+    "polar-backend-shared": "^1.32.9",
     "polar-loader": "1.0.3",
-    "polar-shared": "^2.0.17",
+    "polar-shared": "^1.32.9",
     "popper.js": "~1.14.4",
     "prettify": "~0.1.7",
     "prop-types": "~15.6.2",
@@ -228,7 +230,8 @@
     "underscore": "~1.9.1",
     "universal-analytics": "~0.4.20",
     "uuid": "~3.3.2",
-    "workbox-cli": "^4.2.0"
+    "workbox-cli": "^4.2.0",
+    "polar-webapp-links": "1.32.9"
   },
   "collective": {
     "type": "opencollective",

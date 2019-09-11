@@ -1,9 +1,9 @@
 import * as React from 'react';
 import {PersistenceLayerManager} from '../../../../web/js/datastore/PersistenceLayerManager';
-import {Group} from "../../../../web/js/datastore/sharing/db/Groups";
 import {GroupDocInfoCard} from "./GroupDocInfoCard";
-import {GroupDocInfo} from "../../../../web/js/datastore/sharing/GroupDocInfos";
 import {GroupData} from "./GroupData";
+import {LoadingProgress} from "../../../../web/js/ui/LoadingProgress";
+import {Pagination} from "../../../../web/js/ui/Pagination";
 
 export class GroupTable extends React.Component<IProps, IState> {
 
@@ -16,16 +16,19 @@ export class GroupTable extends React.Component<IProps, IState> {
         const {groupData} = this.props;
 
         if (! groupData) {
-            return <div/>;
+            return <LoadingProgress/>;
         }
 
         return (
 
-            <div className="border-bottom">
-                {groupData.groupDocInfos.map(groupDocInfo =>
-                    <GroupDocInfoCard persistenceLayerProvider={() => this.props.persistenceLayerManager.get()}
-                                      key={groupDocInfo.fingerprint} {...groupDocInfo}/>)}
-            </div>
+            <Pagination results={groupData.groupDocInfos}>
+                <div className="border-bottom">
+
+                    {groupData.groupDocInfos.map(groupDocInfo =>
+                        <GroupDocInfoCard persistenceLayerProvider={() => this.props.persistenceLayerManager.get()}
+                                          key={groupDocInfo.fingerprint} {...groupDocInfo}/>)}
+                </div>
+            </Pagination>
 
         );
     }

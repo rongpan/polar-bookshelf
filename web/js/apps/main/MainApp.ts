@@ -1,5 +1,5 @@
 import {app, BrowserWindow} from 'electron';
-import {WebserverConfig} from '../../backend/webserver/WebserverConfig';
+import {WebserverConfigs} from '../../backend/webserver/WebserverConfig';
 import {FileRegistry} from '../../backend/webserver/FileRegistry';
 import {ProxyServerConfig} from '../../backend/proxyserver/ProxyServerConfig';
 import {CacheRegistry} from '../../backend/proxyserver/CacheRegistry';
@@ -25,6 +25,7 @@ import {RendererAnalyticsService} from '../../ga/RendererAnalyticsService';
 import {AnalyticsFileLoader} from './file_loaders/AnalyticsFileLoader';
 import {DefaultFileLoader} from './file_loaders/DefaultFileLoader';
 import {FileImportRequests} from '../repository/FileImportRequests';
+import {DefaultRewrites} from "polar-backend-shared/src/webserver/DefaultRewrites";
 
 declare var global: any;
 
@@ -52,11 +53,12 @@ export class MainApp {
         // TODO: move this so that we don't expose 'global' here.
         global.datastore = this.datastore;
 
-        const webserverConfig = WebserverConfig.create({
+        const webserverConfig = WebserverConfigs.create({
             dir: AppPath.get(),
             port: WEBSERVER_PORT,
             host: 'localhost',
             useSSL: false,
+            rewrites: DefaultRewrites.create()
         });
 
         const fileRegistry = new FileRegistry(webserverConfig);

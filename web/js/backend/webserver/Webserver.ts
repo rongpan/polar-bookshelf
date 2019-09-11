@@ -1,24 +1,32 @@
-// start a simple static HTTP server only listening on localhost
-
 import {WebserverConfig} from './WebserverConfig';
 import {FileRegistry} from './FileRegistry';
 import {Logger} from '../../logger/Logger';
 import {Preconditions} from '../../Preconditions';
 import {Paths} from '../../util/Paths';
 
-import express, {Express, RequestHandler} from 'express';
-import {NextFunction, Request, Response} from 'express';
+import express, {
+    Express,
+    NextFunction,
+    Request,
+    RequestHandler,
+    Response
+} from 'express';
 import serveStatic from 'serve-static';
 import {ResourceRegistry} from './ResourceRegistry';
 import * as http from "http";
 import * as https from "https";
 import {PathParams} from 'express-serve-static-core';
 import {FilePaths} from '../../util/FilePaths';
+import {Rewrite, Rewrites} from "./Rewrites";
+import {PathToRegexps} from "./PathToRegexps";
 
 const log = Logger.create();
 
 const STATIC_CACHE_MAX_AGE = 365 * 24 * 60 * 60;
 
+/**
+ * Start a simple static HTTP server only listening on localhost
+ */
 export class Webserver implements WebRequestHandler {
 
     private readonly webserverConfig: WebserverConfig;
@@ -45,6 +53,10 @@ export class Webserver implements WebRequestHandler {
         express.static.mime.define({ 'text/html': ['chtml'] });
 
         this.app = express();
+
+        // handle rewrites FIRST so that we can send URLs to the right destination
+        // before all other handlers.
+        this.registerRewrites();
 
         this.app.use((req, res, next) => {
 
@@ -82,6 +94,7 @@ export class Webserver implements WebRequestHandler {
             console.info('====');
             next();
         };
+
 
         // this.app.use(requestLogger);
 
@@ -202,6 +215,43 @@ export class Webserver implements WebRequestHandler {
             } catch (e) {
                 log.error(`Could not handle serving file. (req.path=${req.path})`, e);
             }
+
+        });
+
+    }
+
+    private registerRewrites() {
+
+        const rewrites = this.webserverConfig.rewrites || [];
+
+        const computeRewrite = (url: string): Rewrite | undefined => {
+
+            for (const rewrite of rewrites) {
+
+                // TODO: it's probably not efficient to build this regex each
+                // time
+                const regex = PathToRegexps.pathToRegexp(rewrite.source);
+
+                if (Rewrites.matchesRegex(regex, url)) {
+                    return rewrite;
+                }
+
+            }
+
+            return undefined;
+
+        };
+
+        this.app!.use(function(req, res, next) {
+
+            const rewrite = computeRewrite(req.url);
+
+            if (rewrite) {
+                req.url = rewrite.destination;
+            }
+
+
+            next();
 
         });
 

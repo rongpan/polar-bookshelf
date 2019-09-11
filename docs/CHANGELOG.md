@@ -1,4 +1,28 @@
 
+# 1.32.2
+
+- Fixed a bad bug which caused the sidebar to continually reload over and over again. 
+  We can still make it faster by using pure components I think.
+
+# 1.32.1
+
+- Better name for the root node (Documents and Annotations)
+
+- URL nav should work in android now...
+
+# 1.32.0
+
+- Fixed a bug that prevented mobile working properly.
+
+- Fixed wrap in dropdown buttons.
+
+- Fixed a bug with the MessageBox modal where the background wasn't inherited 
+  and the zIndex was wrong.
+
+- Rewrite of URL handling so that /groups are real URLs not hash URLs.
+
+- Fixed bug with overflow handling and the app not properly using scrollbars.
+
 # 1.31.1
 
 - /groups doesn't require auth now... auth is only triggered when you try to add

@@ -103,8 +103,9 @@ export class RepoSidebar extends React.Component<IProps, IState> {
 
                     <div className="ml-4">
                         <SimpleTabs>
-                            <SimpleTab href="#" text="Document Repository"/>
-                            <SimpleTab href="#groups" text="Groups"/>
+                            <SimpleTab target={{pathname: "/", hash: "#"}} text="Document Repository"/>
+                            <SimpleTab target={{pathname: "/", hash: "#annotations"}} text="Annotations"/>
+                            <SimpleTab target={{pathname: "/groups"}} text="Groups"/>
                         </SimpleTabs>
                     </div>
 
@@ -141,21 +142,21 @@ export class RepoSidebar extends React.Component<IProps, IState> {
 
                         <RepoSidebarItem id="sidebar-item-documents"
                                          tooltip="Manage all documents you're reading including filtering and sorting."
-                                         href="#"
+                                         target={{pathname: "/"}}
                                          onClick={() => this.toggle()}
                                          iconClassName="fas fa-archive"
                                          text="Documents"/>
 
                         <RepoSidebarItem id="sidebar-item-annotations"
                                          tooltip="Manage all annotations of all your documents in one central view."
-                                         href="#annotations"
+                                         target={{pathname: "/", hash: "annotations"}}
                                          onClick={() => this.toggle()}
                                          iconClassName="fas fa-layer-group"
                                          text="Annotations"/>
 
                         <RepoSidebarItem id="sidebar-item-groups"
                                          tooltip="Show public groups"
-                                         href="#groups"
+                                         target={{pathname: "/groups"}}
                                          onClick={() => this.toggle()}
                                          iconClassName="fas fa-user-friends"
                                          text="Groups"/>
@@ -167,35 +168,35 @@ export class RepoSidebar extends React.Component<IProps, IState> {
 
                         <RepoSidebarItem id="sidebar-item-stats"
                                          tooltip="Show stats on your usage of Polar including stats on tags, rate of document addition, etc."
-                                         href="#stats"
+                                         target={{pathname: "/", hash: "stats"}}
                                          onClick={() => this.toggle()}
                                          iconClassName="fas fa-chart-line"
                                          text="Statistics"/>
 
                         <RepoSidebarItem id="sidebar-item-logs"
                                          tooltip="Show logs on internal activity during background operations like cloud activity and sync."
-                                         href="#logs"
+                                         target={{pathname: "/", hash: "logs"}}
                                          onClick={() => this.toggle()}
                                          iconClassName="fas fa-info-circle"
                                          text="Logs"/>
 
                         <RepoSidebarItem id="sidebar-item-support"
                                          tooltip="Get support for Polar."
-                                         href="#support"
+                                         target={{pathname: "/", hash: "support"}}
                                          onClick={() => this.toggle()}
                                          iconClassName="fas fa-hands-helping"
                                          text="Support"/>
 
                         <RepoSidebarItem id="sidebar-item-upgrade-to-premium"
                                          tooltip="Upgrade to Polar Premium and get the best Polar experience possible."
-                                         href="#plans"
+                                         target={{pathname: "/", hash: "plans"}}
                                          onClick={() => this.toggle()}
                                          iconClassName="fas fa-certificate"
                                          text="Upgrade to Premium"/>
 
                         <RepoSidebarItem id="sidebar-item-whatsnew"
                                          tooltip="Find out what's new with each Polar release."
-                                         href="#whats-new"
+                                         target={{pathname: "/", hash: "whats-new"}}
                                          onClick={() => this.toggle()}
                                          iconClassName="fas fa-bullhorn"
                                          text="Whats New"/>
