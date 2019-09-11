@@ -143,16 +143,16 @@ export class RepositoryApp {
 
         }
 
-        // const renderDocRepoScreen = () => {
-        //     return (
-        //         <AuthRequired authStatus={authStatus}>
-        //             <DocRepoScreen persistenceLayerManager={this.persistenceLayerManager}
-        //                                 updatedDocInfoEventDispatcher={updatedDocInfoEventDispatcher}
-        //                                 repoDocMetaManager={this.repoDocInfoManager}
-        //                                 repoDocMetaLoader={this.repoDocInfoLoader}/>
-        //         </AuthRequired>
-        //     );
-        // };
+        const renderDocRepoScreen = () => {
+            return (
+                <AuthRequired authStatus={authStatus}>
+                    <DocRepoScreen persistenceLayerManager={this.persistenceLayerManager}
+                                        updatedDocInfoEventDispatcher={updatedDocInfoEventDispatcher}
+                                        repoDocMetaManager={this.repoDocInfoManager}
+                                        repoDocMetaLoader={this.repoDocInfoLoader}/>
+                </AuthRequired>
+            );
+        };
 
         //
         // const renderAnnotationRepoScreen = () => {
@@ -270,7 +270,6 @@ export class RepositoryApp {
         //     .catch(err => log.error("Unable to listen for plan upgrades: ", err));
 
         renderer(
-
             <div style={{height: '100%'}}>
 
             {/*<PrioritizedSplashes persistenceLayerManager={this.persistenceLayerManager}/>*/}
@@ -316,36 +315,36 @@ export class RepositoryApp {
 
                     <Switch location={ReactRouters.createLocationWithPathnameHash()}>
 
-                        <Route exact path='/#annotations' render={renderAnnotationRepoScreen} />
+                {/*        /!*<Route exact path='/#annotations' render={renderAnnotationRepoScreen} />*!/*/}
 
-                        <Route exact path='/#whats-new' render={renderWhatsNewScreen} />
+                {/*        /!*<Route exact path='/#whats-new' render={renderWhatsNewScreen} />*!/*/}
 
-                        <Route exact path='/#(logout|overview|login|configured|invite|premium)?' render={renderDocRepoScreen}/>
+                {/*        /!*<Route exact path='/#(logout|overview|login|configured|invite|premium)?' render={renderDocRepoScreen}/>*!/*/}
 
-                        <Route exact path='/#community' render={renderCommunityScreen}/>
+                {/*        /!*<Route exact path='/#community' render={renderCommunityScreen}/>*!/*/}
 
-                        <Route exact path='/#stats' render={renderStatsScreen}/>
+                {/*        /!*<Route exact path='/#stats' render={renderStatsScreen}/>*!/*/}
 
-                        <Route exact path='/#logs' render={renderLogsScreen}/>
+                {/*        /!*<Route exact path='/#logs' render={renderLogsScreen}/>*!/*/}
 
-                        <Route exact path='/#editors-picks' render={editorsPicksScreen}/>
+                {/*        /!*<Route exact path='/#editors-picks' render={editorsPicksScreen}/>*!/*/}
 
-                        <Route exact path='/#plans' render={premiumScreen}/>
+                {/*        /!*<Route exact path='/#plans' render={premiumScreen}/>*!/*/}
 
-                        <Route exact path='/#support' render={supportScreen}/>
+                {/*        /!*<Route exact path='/#support' render={supportScreen}/>*!/*/}
 
-                        <Route exact path='/#premium' render={premiumScreen}/>
+                {/*        /!*<Route exact path='/#premium' render={premiumScreen}/>*!/*/}
 
-                        <Route path='/group/:group/highlights' render={renderGroupHighlightsScreen}/>
-                        <Route path='/group/:group/docs' render={renderGroupScreen}/>
+                {/*        /!*<Route path='/group/:group/highlights' render={renderGroupHighlightsScreen}/>*!/*/}
+                {/*        /!*<Route path='/group/:group/docs' render={renderGroupScreen}/>*!/*/}
 
-                        <Route path='/group/:group/highlight/:id' render={renderGroupHighlightScreen}/>
+                {/*        /!*<Route path='/group/:group/highlight/:id' render={renderGroupHighlightScreen}/>*!/*/}
 
-                        <Route path='/group/:group' render={renderGroupHighlightsScreen}/>
+                {/*        /!*<Route path='/group/:group' render={renderGroupHighlightsScreen}/>*!/*/}
 
-                        <Route exact path='/groups' render={renderGroupsScreen}/>
+                {/*        /!*<Route exact path='/groups' render={renderGroupsScreen}/>*!/*/}
 
-                        <Route exact path='/groups/create' render={renderCreateGroupScreen}/>
+                {/*        /!*<Route exact path='/groups/create' render={renderCreateGroupScreen}/>*!/*/}
 
                         <Route exact path='/' render={renderDocRepoScreen}/>
 
@@ -364,7 +363,6 @@ export class RepositoryApp {
                 {/*       style={{display: 'none'}}/>*/}
 
             </div>
-            rootElement
 
         );
         //
@@ -535,3 +533,4 @@ export function defaultRenderer(element: React.ReactElement<any>) {
     );
 
 }
+

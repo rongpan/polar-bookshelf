@@ -12,7 +12,7 @@ describe('SSR', function() {
         const renderer = (element: React.ReactElement<any>): void => {
 
             console.log("rendering...");
-            const out = ReactDOMServer.renderToString(<div></div>);
+            const out = ReactDOMServer.renderToString(element);
             console.log(out);
             console.log("rendering...done");
 

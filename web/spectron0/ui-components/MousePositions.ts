@@ -1,5 +1,4 @@
 
-
 export interface MousePosition {
     readonly clientX: number;
     readonly clientY: number;
