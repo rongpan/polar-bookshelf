@@ -15,6 +15,8 @@ async function createPDFViewer() {
 
     const pdfLinkService = new PDFLinkService();
 
+    // FIXME: is the text area working?
+
     const pdfViewer = new PDFViewer({
         container: container as HTMLDivElement,
         linkService: pdfLinkService,
@@ -28,7 +30,7 @@ async function createPDFViewer() {
     });
 
     pdfLinkService.setViewer(pdfViewer);
-    // pdfViewer.setFindController(pdfFindController);
+    pdfViewer.setFindController(pdfFindController);
 
     const loadingTask = PDFJS.getDocument({
         url,
@@ -40,6 +42,9 @@ async function createPDFViewer() {
 
     pdfViewer.setDocument(pdfDocument);
     pdfLinkService.setDocument(pdfDocument, url);
+
+    // has to be set AFTER the loading promise
+    // pdfViewer.currentScale = 2;
 
 }
 
