@@ -117,77 +117,81 @@
 
 <script>
     // require("./content");
+    require("./pdfviewer");
 
-    async function doTest() {
-
-        // const { PDFJSStatic, PDFPageViewport, PDFViewer, PDFFindController, PDFLinkService } from 'pdfjs-dist';
-        // import * as pdfjsLib from 'pdfjs-dist/build/pdf';
-        // import * as pdfjsViewer from 'pdfjs-dist/lib/web/pdf_viewer';
-        // import * as pdfjsLinkService from 'pdfjs-dist/lib/web/pdf_link_service';
-        // import * as pdfjsFindController from 'pdfjs-dist/lib/web/pdf_find_controller';
-
-        const pdfjsLib = require('pdfjs-dist/build/pdf');
-        const pdfjsViewer = require('pdfjs-dist/lib/web/pdf_viewer');
-        const pdfjsLinkService = require('pdfjs-dist/lib/web/pdf_link_service');
-        const pdfjsFindController  = require('pdfjs-dist/lib/web/pdf_find_controller');
-
-        const container = document.getElementById('viewerContainer');
-
-        if (! container) {
-            throw new Error("No container");
-        }
-
-        const pdfLinkService = new pdfjsLinkService.PDFLinkService();
-        const pdfFindController = new pdfjsFindController.PDFFindController({
-            linkService: pdfLinkService,
-        });
-        //
-
-        // FIXME: I think I ahve to specify a custom RenderingQueue here because right now it renders ALL the pages...
-        // and I need to limit this to say += 10 pages..
-
-        // FIXME: how do we change the zoom
-
-        // FIXME: how do we render the thumbnails
-
-        // FIXME: the textarea overlay isn't setup to work
-
-        const pdfElement = new pdfjsViewer.PDFViewer({
-            container: container,
-            linkService: this.pdfLinkService,
-            findController: this.pdfFindController,
-            enhanceTextSelection: true,
-            textLayerMode: 2
-        });
-
-        // FIXME: the scale is important here too...
-
-        //
-        pdfLinkService.setViewer(pdfElement);
-        //
-        // // Loading document.
-
-        // const url = '../../../docs/examples/pdf/bigtable.pdf';
-        const url = '../../../test.pdf';
-
-        pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../node_modules/pdfjs-dist/build/pdf.worker.js';
-
-        const loadingTask = pdfjsLib.getDocument({
-            url,
-            cMapUrl: '../../../node_modules/pdfjs-dist/cmaps/',
-            cMapPacked: true,
-            pdfFindController: this.pdfFindController,
-        });
-        //
-        const pdfDocument = await loadingTask.promise;
-
-        pdfElement.setDocument(pdfDocument);
-        pdfLinkService.setDocument(pdfDocument, null);
-        pdfFindController.setDocument(pdfDocument);
-
-    }
-
-    doTest().catch(err => console.error(err));
+    // async function doTest() {
+    //
+    //     // const { PDFJSStatic, PDFPageViewport, PDFViewer, PDFFindController, PDFLinkService } from 'pdfjs-dist';
+    //     // import * as pdfjsLib from 'pdfjs-dist/build/pdf';
+    //     // import * as pdfjsViewer from 'pdfjs-dist/lib/web/pdf_viewer';
+    //     // import * as pdfjsLinkService from 'pdfjs-dist/lib/web/pdf_link_service';
+    //     // import * as pdfjsFindController from 'pdfjs-dist/lib/web/pdf_find_controller';
+    //
+    //     const pdfjsLib = require('pdfjs-dist/build/pdf');
+    //
+    //     console.log("FIXME: pdfjsLib: " , pdfjsLib);
+    //
+    //     const pdfjsViewer = require('pdfjs-dist/lib/web/pdf_viewer');
+    //     const pdfjsLinkService = require('pdfjs-dist/lib/web/pdf_link_service');
+    //     const pdfjsFindController  = require('pdfjs-dist/lib/web/pdf_find_controller');
+    //
+    //     const container = document.getElementById('viewerContainer');
+    //
+    //     if (! container) {
+    //         throw new Error("No container");
+    //     }
+    //
+    //     const pdfLinkService = new pdfjsLinkService.PDFLinkService();
+    //     const pdfFindController = new pdfjsFindController.PDFFindController({
+    //         linkService: pdfLinkService,
+    //     });
+    //     //
+    //
+    //     // FIXME: I think I ahve to specify a custom RenderingQueue here because right now it renders ALL the pages...
+    //     // and I need to limit this to say += 10 pages..
+    //
+    //     // FIXME: how do we change the zoom
+    //
+    //     // FIXME: how do we render the thumbnails
+    //
+    //     // FIXME: the textarea overlay isn't setup to work
+    //
+    //     const pdfElement = new pdfjsViewer.PDFViewer({
+    //         container: container,
+    //         linkService: this.pdfLinkService,
+    //         findController: this.pdfFindController,
+    //         enhanceTextSelection: true,
+    //         textLayerMode: 2
+    //     });
+    //
+    //     // FIXME: the scale is important here too...
+    //
+    //     //
+    //     pdfLinkService.setViewer(pdfElement);
+    //     //
+    //     // // Loading document.
+    //
+    //     // const url = '../../../docs/examples/pdf/bigtable.pdf';
+    //     const url = '../../../test.pdf';
+    //
+    //     pdfjsLib.GlobalWorkerOptions.workerSrc = '../../../node_modules/pdfjs-dist/build/pdf.worker.js';
+    //
+    //     const loadingTask = pdfjsLib.getDocument({
+    //         url,
+    //         cMapUrl: '../../../node_modules/pdfjs-dist/cmaps/',
+    //         cMapPacked: true,
+    //         pdfFindController: this.pdfFindController,
+    //     });
+    //     //
+    //     const pdfDocument = await loadingTask.promise;
+    //
+    //     pdfElement.setDocument(pdfDocument);
+    //     pdfLinkService.setDocument(pdfDocument, null);
+    //     pdfFindController.setDocument(pdfDocument);
+    //
+    // }
+    //
+    // doTest().catch(err => console.error(err));
 
 </script>
 

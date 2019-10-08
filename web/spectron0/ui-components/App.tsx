@@ -1,14 +1,8 @@
 import * as React from 'react';
 import {Tags} from '../../js/tags/Tags';
-import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
 import {Group} from "../../js/datastore/sharing/db/Groups";
 import {ISODateTimeStrings} from "polar-shared/src/metadata/ISODateTimeStrings";
-import {ManualDropdown} from "../../../apps/repository/js/doc_repo/ManaulDropdown";
-import DropdownItem from 'reactstrap/lib/DropdownItem';
-import {DropdownMenu, DropdownToggle} from "reactstrap";
-import {FakePopup} from "./FakePopup";
-import { BasicPopup } from './BasicPopup';
-import { PDFViewer } from './PDFViewer';
+import {PDFViewer} from './PDFViewer';
 
 const styles = {
     swatch: {

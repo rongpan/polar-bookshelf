@@ -9,6 +9,8 @@ console.log("Running with pdf.js version: " + PDFJS.version);
 // TODO: I'm not sure this is the safest way to find the worker path.
 PDFJS.GlobalWorkerOptions.workerSrc = '../../../node_modules/pdfjs-dist/build/pdf.worker.js';
 
+console.log(PDFJS.GlobalWorkerOptions);
+
 const log = Logger.create();
 
 console.log("FIXME: ", (PDFJS as any).renderTextLayer);
