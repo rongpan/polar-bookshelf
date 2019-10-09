@@ -15,7 +15,18 @@ async function createPDFViewer() {
 
     const pdfLinkService = new PDFLinkService();
 
-    // FIXME: is the text area working?
+    // the text area is working!
+    //
+    // FIXME: I think I ahve to specify a custom RenderingQueue here because right now it renders ALL the pages...
+    //
+    //     // and I need to limit this to say += 10 pages..
+    //
+    //     // FIXME: how do we change the zoom
+    //
+    //     // FIXME: how do we render the thumbnails
+    //
+    // FIXME: center the page properly
+    // FIXME make sure all the background and spacing is proper on the PDF
 
     const pdfViewer = new PDFViewer({
         container: container as HTMLDivElement,
@@ -30,7 +41,7 @@ async function createPDFViewer() {
     });
 
     pdfLinkService.setViewer(pdfViewer);
-    pdfViewer.setFindController(pdfFindController);
+    // pdfViewer.setFindController(pdfFindController);
 
     const loadingTask = PDFJS.getDocument({
         url,
