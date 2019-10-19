@@ -1,9 +1,7 @@
 import * as React from 'react';
-import {SimpleTooltip} from '../../../../web/js/ui/tooltip/SimpleTooltip';
 import {AppRuntime} from '../../../../web/js/AppRuntime';
 import DropdownToggle from 'reactstrap/lib/DropdownToggle';
 import DropdownMenu from 'reactstrap/lib/DropdownMenu';
-import DropdownItem from 'reactstrap/lib/DropdownItem';
 import {ManualDropdown} from '../doc_repo/ManaulDropdown';
 import {SimpleTooltipEx} from '../../../../web/js/ui/tooltip/SimpleTooltipEx';
 import {AddContentDropdownItem} from './AddContentDropdownItem';
@@ -22,6 +20,7 @@ export class AddContentButton extends React.PureComponent<IProps, IState> {
         this.doCaptureWebPage = this.doCaptureWebPage.bind(this);
         this.doFileUpload = this.doFileUpload.bind(this);
         this.triggerFileUpload = this.triggerFileUpload.bind(this);
+        this.doAddViaDOI = this.doAddViaDOI.bind(this);
 
         this.state = {
             open: false
@@ -78,6 +77,16 @@ export class AddContentButton extends React.PureComponent<IProps, IState> {
 
                     </AddContentDropdownItem>
 
+                    <AddContentDropdownItem id="add-content-via-doi"
+                                            hidden={false}
+                                            tooltip="Add via DOI"
+                                            onClick={() => this.doAddViaDOI()}>
+
+                        <i className="fab fa-chrome"/>
+                        &nbsp; Add via DOI
+
+                    </AddContentDropdownItem>
+
                 </DropdownMenu>
 
             </ManualDropdown>
@@ -113,6 +122,10 @@ export class AddContentButton extends React.PureComponent<IProps, IState> {
         this.doAccountVerifiedAction(() => this.props.captureWebPage());
     }
 
+    private doAddViaDOI() {
+        this.doAccountVerifiedAction(() => this.props.addViaDOI());
+    }
+
     private doFileUpload() {
         this.doAccountVerifiedAction(() => this.triggerFileUpload());
     }
@@ -130,6 +143,7 @@ export class AddContentButton extends React.PureComponent<IProps, IState> {
 interface IProps {
     readonly importFromDisk: () => void;
     readonly captureWebPage: () => void;
+    readonly addViaDOI: () => void;
 }
 
 interface IState {

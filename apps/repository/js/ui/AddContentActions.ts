@@ -1,6 +1,10 @@
 import {RendererAnalytics} from '../../../../web/js/ga/RendererAnalytics';
 import {remote} from 'electron';
 import {Logger} from 'polar-shared/src/logger/Logger';
+import {Dialogs} from "../../../../web/js/ui/dialogs/Dialogs";
+import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
+import {DOILookup} from "../../../../../polar-app-public/polar-search-api-client/src/api/search/client/DOILookup";
+import {Toaster} from "../../../../web/js/ui/toaster/Toaster";
 
 const log = Logger.create();
 
@@ -26,6 +30,34 @@ export class AddContentActions {
 
     private static getController(): IMainAppController {
         return remote.getGlobal('mainAppController');
+    }
+
+    public static cmdAddViaDOI() {
+
+
+        const onDone = (doi: string) => {
+
+            const handler = async () => {
+                const results = await DOILookup.lookup(doi);
+
+                if (results.entries.length === 1) {
+
+                    console.log("FIXME: ", results);
+                } else {
+                    Toaster.warning("No documents found for DOI: "  + doi, "No documents found.");
+                }
+
+            };
+
+            handler().catch(err => log.error(err));
+
+        };
+
+        const onCancel = NULL_FUNCTION;
+
+        // 10.1038/nature12373
+        Dialogs.prompt({title: "Enter a document DOI: ", onDone, onCancel})
+
     }
 
 }

@@ -33,7 +33,8 @@ export class DocRepoButtonBar extends React.Component<IProps, IState> {
                      }}>
 
                     <AddContentButton importFromDisk={() => AddContentActions.cmdImportFromDisk()}
-                                      captureWebPage={() => AddContentActions.cmdCaptureWebPage()}/>
+                                      captureWebPage={() => AddContentActions.cmdCaptureWebPage()}
+                                      addViaDOI={() => AddContentActions.cmdAddViaDOI()}/>
 
                 </div>
 
