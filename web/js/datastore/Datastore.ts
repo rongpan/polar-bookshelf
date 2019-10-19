@@ -3,7 +3,7 @@ import {DocMetaFileRef, DocMetaFileRefs, DocMetaRef} from './DocMetaRef';
 import {DeleteResult} from './Datastore';
 import {Backend} from 'polar-shared/src/datastore/Backend';
 import {DocFileMeta} from './DocFileMeta';
-import {FileHandle, FileHandles} from 'polar-shared/src/util/Files';
+import {FileHandle, FileHandles, Files} from 'polar-shared/src/util/Files';
 import {DatastoreMutation, DefaultDatastoreMutation} from './DatastoreMutation';
 import {Progress, ProgressListener} from 'polar-shared/src/util/ProgressTracker';
 import {AsyncProvider} from 'polar-shared/src/util/Providers';
@@ -22,6 +22,8 @@ import {BackendFileRef} from "polar-shared/src/datastore/BackendFileRef";
 import {Visibility} from "polar-shared/src/datastore/Visibility";
 import {FileRef} from "polar-shared/src/datastore/FileRef";
 import {PathStr, URLStr} from "polar-shared/src/util/Strings";
+import {Blobs} from "polar-shared/src/util/Blobs";
+import {Streams} from "polar-shared/src/util/Streams";
 
 export interface Datastore extends BinaryDatastore, WritableDatastore {
 
@@ -339,7 +341,7 @@ export interface WritableBinaryMetaDatastore {
     // writeFileMeta(backend: Backend, ref: FileRef, docFileMeta: DocFileMeta): Promise<void>;
 }
 
-export namespace sources {
+export namespace source {
 
     export interface FileSource {
         readonly file: PathStr;
@@ -368,6 +370,8 @@ export namespace sources {
         readonly url: URLStr;
     }
 
+    export type Type = 'file' | 'buffer' | 'string' | 'blob' | 'stream' | 'url';
+
     export type DataSourceLiteral = FileSource | BufferSource | StrSource | BlobSource | StreamSource | URLSource;
 
     /**
@@ -390,33 +394,61 @@ export namespace sources {
 
         }
 
-    }
+        public static toType(input: DataSourceLiteral): Type {
 
-}
+            const data: any = input;
 
-export type BinaryFileData = FileHandle | Buffer | string | Blob | NodeJS.ReadableStream;
+            if (typeof data.str) {
+                return 'string';
+            } else if (data.buffer) {
+                return 'buffer';
+            } else if (data.blob) {
+                return 'blob';
+            } else if (data.file) {
+                return 'file';
+            } else if (data.url) {
+                return 'url';
+            } else if (data.stream) {
+                return 'stream';
+            } else {
+                throw new Error("Unknown type");
+            }
 
-export type BinaryFileDataType = 'file-handle' | 'buffer' | 'string' | 'blob' | 'readable-stream';
+        }
 
-export class BinaryFileDatas {
+        public static async toBuffer(data: DataSource): Promise<Buffer> {
 
-   public static toType(data: BinaryFileData): BinaryFileDataType {
+            const dataLiteral = await source.DataSources.toLiteral(data);
 
-        if (typeof data === 'string') {
-            return 'string';
-        } else if (data instanceof Buffer) {
-            return 'buffer';
-        } else if (data instanceof Blob) {
-            return 'blob';
-        } else if (FileHandles.isFileHandle(data)) {
-            return 'file-handle';
-        } else {
-            return 'readable-stream';
+            switch (source.DataSources.toType(dataLiteral)) {
+
+                case "file":
+                    const file = (<source.FileSource> dataLiteral).file;
+                    return await Files.readFileAsync(file);
+                case "buffer":
+                    const buffer = (<source.BufferSource> dataLiteral).buffer;
+                    return buffer;
+                case "string":
+                    const str = (<source.StrSource> dataLiteral).str;
+                    return Buffer.from(str);
+                case "blob":
+                    const blob = (<source.BlobSource> dataLiteral).blob;
+                    return Buffer.from(await Blobs.toArrayBuffer(blob));
+                case "stream":
+                    const stream = (<source.StreamSource> dataLiteral).stream;
+                    return Streams.toBuffer(stream);
+                case "url":
+                    throw new Error("not implemented for url yet");
+
+            }
+
         }
 
     }
 
 }
+
+export type BinaryFileData = source.DataSource;
 
 export function isBinaryFileData(data: any): boolean {
 

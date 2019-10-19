@@ -1,4 +1,4 @@
-import {Datastore, DatastoreID, ErrorListener, InitResult} from './Datastore';
+import {Datastore, DatastoreID, ErrorListener, InitResult, source} from './Datastore';
 import {BinaryFileData} from './Datastore';
 import {WriteFileOpts} from './Datastore';
 import {isBinaryFileData} from './Datastore';
@@ -39,10 +39,13 @@ export class HybridRemoteDatastore extends RemoteDatastore {
             throw new Error("Data is not BinaryFileData");
         }
 
-        const toDiskData = (): BinaryFileData | NodeJS.ReadableStream => {
+        const toDiskData = (): BinaryFileData => {
 
-            if (data instanceof Blob) {
-                return Blobs.toStream(data);
+            if ((<any> data).blob) {
+                // we can't have this as a blob in nodejs land and we have to convert it
+                // to a stream
+                const blob = (<source.BlobSource> data).blob;
+                return {stream: Blobs.toStream(blob)};
             } else {
                 return data;
             }

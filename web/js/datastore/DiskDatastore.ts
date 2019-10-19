@@ -9,7 +9,7 @@ import {
     ErrorListener,
     InitResult,
     PrefsProvider,
-    SnapshotResult
+    SnapshotResult, source
 } from './Datastore';
 import {WriteFileOpts} from './Datastore';
 import {Preconditions} from 'polar-shared/src/Preconditions';
@@ -296,7 +296,33 @@ export class DiskDatastore extends AbstractDatastore implements Datastore {
         // TODO maybe make this accept a function that creates a readable stream.
         type DiskBinaryFileData = FileHandle | Buffer | string | NodeJS.ReadableStream;
 
-        const diskData = <DiskBinaryFileData> data;
+        const toDiskBinaryFileData = async (): Promise<DiskBinaryFileData> => {
+
+            const dataLiteral = await source.DataSources.toLiteral(data);
+
+            switch (source.DataSources.toType(dataLiteral)) {
+
+                case "file":
+                    const path = (<source.FileSource> dataLiteral).file;
+                    return {path};
+                case "buffer":
+                    return (<source.BufferSource> dataLiteral).buffer;
+                case "string":
+                    const str = (<source.StrSource> dataLiteral).str;
+                    return str;
+                case "blob":
+                    throw new Error("Type not handled: blob");
+                case "stream":
+                    const stream = (<source.StreamSource> dataLiteral).stream;
+                    return stream;
+                case "url":
+                    throw new Error("Type not handled: url");
+
+            }
+
+        };
+
+        const diskData = await toDiskBinaryFileData();
 
         await Files.writeFileAsync(fileReference.path, diskData, {existing: 'link'});
 

@@ -298,7 +298,7 @@ export class MockDocMetas {
         docMeta.docInfo.filename = fileRef.name;
         docMeta.docInfo.backend = Backend.STASH;
 
-        await datastore.writeFile(Backend.STASH, fileRef, {path: pdfPath});
+        await datastore.writeFile(Backend.STASH, fileRef, {file: pdfPath});
 
         await datastore.writeDocMeta(docMeta);
 

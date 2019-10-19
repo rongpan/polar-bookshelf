@@ -362,7 +362,7 @@ class DefaultAreaHighlightCommitter implements AreaHighlightCommitter {
         const {datastore, docMeta} = this.opts;
         const {image, oldImage, blob} = this;
 
-        await datastore.writeFile(image.src.backend, image.src, blob);
+        await datastore.writeFile(image.src.backend, image.src, {blob});
 
         // now force a write of all the data and the current in memory version
         // will be written including the above skipped mutation.

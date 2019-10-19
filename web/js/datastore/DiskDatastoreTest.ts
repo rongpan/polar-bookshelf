@@ -180,7 +180,8 @@ describe("DiskDatastore", async function() {
         const diskDatastore = new DiskDatastore();
         await diskDatastore.init();
 
-        await diskDatastore.writeFile(Backend.STASH, {name: 'example.pdf'}, await Files.readFileAsync(path));
+        const buffer = await Files.readFileAsync(path);
+        await diskDatastore.writeFile(Backend.STASH, {name: 'example.pdf'}, {buffer});
 
         const pdfPath = FilePaths.join(dataDir, "stash", "example.pdf");
 

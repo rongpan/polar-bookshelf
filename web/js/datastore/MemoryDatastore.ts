@@ -11,7 +11,7 @@ import {
     SnapshotResult,
     DatastoreOverview,
     PrefsProvider,
-    DatastorePrefs
+    DatastorePrefs, BinaryFileData, source
 } from './Datastore';
 import {isPresent, Preconditions} from 'polar-shared/src/Preconditions';
 import {DocMetaFileRef, DocMetaRef} from './DocMetaRef';
@@ -35,6 +35,9 @@ import {NetworkLayer} from './Datastore';
 import {WriteOpts} from './Datastore';
 import {IDocInfo} from "polar-shared/src/metadata/IDocInfo";
 import {FileRef} from "polar-shared/src/datastore/FileRef";
+import {Streams} from "polar-shared/src/util/Streams";
+import {isBlockScopeBoundary} from "tslint";
+import {Blobs} from "polar-shared/src/util/Blobs";
 
 const log = Logger.create();
 
@@ -97,20 +100,12 @@ export class MemoryDatastore extends AbstractDatastore implements Datastore {
 
     public async writeFile(backend: Backend,
                            ref: FileRef,
-                           data: FileHandle | Buffer | string,
+                           data: BinaryFileData,
                            opts: WriteFileOpts = new DefaultWriteFileOpts()): Promise<DocFileMeta> {
 
         const key = MemoryDatastore.toFileRefKey(backend, ref);
 
-        let buff: Buffer | undefined;
-
-        if (typeof data === 'string') {
-            buff = Buffer.from(data);
-        } else if (data instanceof Buffer) {
-            buff = data;
-        } else {
-            buff = await Files.readFileAsync(data.path);
-        }
+        const buff = await source.DataSources.toBuffer(data);
 
         const meta = opts.meta || {};
 

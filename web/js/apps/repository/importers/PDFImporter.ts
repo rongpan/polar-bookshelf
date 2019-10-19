@@ -193,10 +193,10 @@ export class PDFImporter {
                 log.info("Reading data from URL: ", docPath);
                 const response = await fetch(docPath);
                 const blob = await response.blob();
-                return blob;
+                return {blob};
             }
 
-            return <FileHandle> {path: docPath};
+            return {file: docPath};
 
         };
 
