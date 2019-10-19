@@ -1,6 +1,6 @@
 import {
     AbstractDatastore,
-    BinaryFileData,
+    BinaryFileData, BinaryFileDatas,
     Datastore,
     DatastoreCapabilities,
     DatastoreConsistency,
@@ -421,8 +421,6 @@ export class FirebaseDatastore extends AbstractDatastore implements Datastore, W
                 return this.getFile(backend, ref);
             }
 
-            let uploadTask: firebase.storage.UploadTask;
-
             const uid = FirebaseDatastores.getUserID();
 
             // stick the uid into the metadata which we use for authorization of the
@@ -436,27 +434,39 @@ export class FirebaseDatastore extends AbstractDatastore implements Datastore, W
                 metadata.cacheControl = storagePath.settings.cacheControl;
             }
 
-            if (typeof data === 'string') {
-                uploadTask = fileRef.putString(data, 'raw', metadata);
-            } else if (data instanceof Blob) {
-                uploadTask = fileRef.put(data, metadata);
-            } else {
+            const toUploadTask = async (): Promise<firebase.storage.UploadTask> => {
 
-                if (FileHandles.isFileHandle(data)) {
+                switch(BinaryFileDatas.toType(data)) {
 
-                    // This only happens in the desktop app so we can read file URLs
-                    // to blobs and otherwise it converts URLs to files.
-                    const fileHandle = <FileHandle> data;
+                    // FIXME: we can ONLY upload with a blob here so I should make this have a blob factory and possibly
+                    // figure out how to add the listeners without starting the stream
 
-                    const fileURL = FilePaths.toURL(fileHandle.path);
-                    const blob = await URLs.toBlob(fileURL);
-                    uploadTask = fileRef.put(blob, metadata);
+                    case "file-handle":
+                        // This only happens in the desktop app so we can read file URLs
+                        // to blobs and otherwise it converts URLs to files.
+                        const fileHandle = <FileHandle> data;
 
-                } else {
-                    uploadTask = fileRef.put(Uint8Array.from(<Buffer> data), metadata);
+                        const fileURL = FilePaths.toURL(fileHandle.path);
+                        const blob = await URLs.toBlob(fileURL);
+                        return fileRef.put(blob, metadata);
+
+                    case "buffer":
+                        return fileRef.put(Uint8Array.from(<Buffer> data), metadata);
+
+                    case "string":
+                        return fileRef.putString(<string> data, 'raw', metadata);
+
+                    case "blob":
+                        return fileRef.put(<Blob> data, metadata);
+
+                    case "readable-stream":
+                        throw new Error("Readable stream not supported");
+
                 }
 
-            }
+            };
+
+            const uploadTask: firebase.storage.UploadTask = await toUploadTask();
 
             // TODO: we can get progress from the uploadTask here.
 
