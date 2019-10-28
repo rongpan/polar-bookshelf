@@ -63,13 +63,14 @@ function createItems(render: IRender) {
 
     const {annotations} = render;
 
-    annotations.map(annotation => {
+    for(let idx = 0; idx < annotations.length; ++idx) {
+        const annotation = annotations[idx];
         result.push (<DocAnnotationComponent key={annotation.id}
+                                             idx={idx}
                                              annotation={annotation}
                                              persistenceLayerProvider={render.persistenceLayerProvider}
                                              doc={render.doc}/>);
-    });
-
+    }
 
     return result;
 

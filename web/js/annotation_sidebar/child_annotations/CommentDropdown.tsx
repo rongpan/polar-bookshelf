@@ -1,20 +1,7 @@
 import * as React from 'react';
-import {Dropdown, DropdownItem, DropdownMenu, DropdownToggle, Tooltip} from 'reactstrap';
-import {Logger} from 'polar-shared/src/logger/Logger';
-import {IStyleMap} from '../../react/IStyleMap';
+import {Dropdown, DropdownItem, DropdownMenu, DropdownToggle} from 'reactstrap';
 import {DocAnnotation} from '../DocAnnotation';
 import {ConfirmPopover} from '../../ui/confirm/ConfirmPopover';
-
-const log = Logger.create();
-
-const Styles: IStyleMap = {
-
-    DropdownMenu: {
-        zIndex: 999,
-        fontSize: '14px'
-    },
-
-};
 
 export class CommentDropdown extends React.Component<IProps, IState> {
 

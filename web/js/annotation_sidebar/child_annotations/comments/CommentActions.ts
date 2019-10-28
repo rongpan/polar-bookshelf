@@ -5,7 +5,6 @@ import {Comment} from "../../../metadata/Comment";
 import {Comments} from "../../../metadata/Comments";
 import {ISODateTimeStrings} from "polar-shared/src/metadata/ISODateTimeStrings";
 import {DocMetas} from "../../../metadata/DocMetas";
-import {DocMeta} from "../../../metadata/DocMeta";
 import {IDocMeta} from "polar-shared/src/metadata/IDocMeta";
 
 const log = Logger.create();

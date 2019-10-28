@@ -38,28 +38,38 @@ export class DocAnnotationComponent extends React.Component<IProps, IState> {
 
         const key = 'doc-annotation-' + annotation.id;
 
-        if (annotation.annotationType === AnnotationType.AREA_HIGHLIGHT) {
+        const createAnnotationComponent = () => {
 
-            return (
-                <AreaHighlightAnnotationComponent key={key}
-                                                  annotation={annotation}
-                                                  doc={this.props.doc}/>
-            );
+            if (annotation.annotationType === AnnotationType.AREA_HIGHLIGHT) {
 
-        } else {
+                return (
+                    <AreaHighlightAnnotationComponent key={key}
+                                                      annotation={annotation}
+                                                      doc={this.props.doc}/>
+                );
 
-            return (
-                <TextHighlightAnnotationComponent key={key}
-                                                  annotation={annotation}
-                                                  doc={this.props.doc}/>
-            );
+            } else {
 
-        }
+                return (
+                    <TextHighlightAnnotationComponent key={key}
+                                                      annotation={annotation}
+                                                      doc={this.props.doc}/>
+                );
 
+            }
+
+        };
+
+        const annotationComponent = createAnnotationComponent();
+
+        return (<div tabIndex={this.props.idx}>
+            {annotationComponent}
+        </div>);
 
     }
 
 }
+
 interface IProps {
 
     readonly persistenceLayerProvider: PersistenceLayerProvider;
@@ -67,6 +77,11 @@ interface IProps {
     readonly annotation: DocAnnotation;
 
     readonly doc: Doc;
+
+    /**
+     * The index of this component in the tab order.
+     */
+    readonly idx: number;
 
 }
 
