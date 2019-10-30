@@ -285,3 +285,81 @@ button.dropdown-item:hover {
 }
 
 
+
+
+/*:root {*/
+
+/*    --blue: rgb(0,25,51); !* inverted from #007bff *!*/
+/*    --cyan: rgb(5,32,37); !* inverted from #17a2b8 *!*/
+/*    --danger000: rgb(51,45,45); !* inverted from  #FFE3E3 *!*/
+/*    --danger100: rgb(51,38,38); !* inverted from  #FFBDBD *!*/
+/*    --danger200: rgb(51,31,31); !* inverted from  #FF9B9B *!*/
+/*    --danger300: rgb(50,21,21); !* inverted from  #F86A6A *!*/
+/*    --danger400: rgb(48,16,16); !* inverted from  #EF4E4E *!*/
+/*    --danger500: rgb(45,9,11); !* inverted from  #E12D39 *!*/
+/*    --danger600: rgb(41,3,7); !* inverted from  #CF1124 *!*/
+/*    --danger700: rgb(34,2,6); !* inverted from  #AB091E *!*/
+/*    --danger800: rgb(28,1,5); !* inverted from  #8A041A *!*/
+/*    --danger900: rgb(19,1,4); !* inverted from  #610316 *!*/
+/*    --danger: rgb(44,11,14); !* inverted from #dc3545 *!*/
+/*    --dark: rgb(10,12,13); !* inverted from #343a40 *!*/
+/*    --gray-dark: rgb(10,12,13); !* inverted from #343a40 *!*/
+/*    --gray: rgb(22,23,25); !* inverted from #6c757d *!*/
+/*    --green: rgb(8,33,14); !* inverted from #28a745 *!*/
+/*    --grey000: rgb(49,49,49); !* inverted from  #F7F7F7 *!*/
+/*    --grey100: rgb(45,45,45); !* inverted from  #E1E1E1 *!*/
+/*    --grey200: rgb(41,41,41); !* inverted from  #CFCFCF *!*/
+/*    --grey300: rgb(35,35,35); !* inverted from  #B1B1B1 *!*/
+/*    --grey400: rgb(32,32,32); !* inverted from  #9E9E9E *!*/
+/*    --grey500: rgb(25,25,25); !* inverted from  #7E7E7E *!*/
+/*    --grey600: rgb(20,20,20); !* inverted from  #626262 *!*/
+/*    --grey700: rgb(16,16,16); !* inverted from  #515151 *!*/
+/*    --grey800: rgb(12,12,12); !* inverted from  #3B3B3B *!*/
+/*    --grey900: rgb(7,7,7); !* inverted from  #222222 *!*/
+/*    --indigo: rgb(20,3,48); !* inverted from #6610f2 *!*/
+/*    --info: rgb(5,32,37); !* inverted from #17a2b8 *!*/
+/*    --light: rgb(50,50,50); !* inverted from #f8f9fa *!*/
+/*    --orange: rgb(51,25,4); !* inverted from #fd7e14 *!*/
+/*    --pink: rgb(46,12,28); !* inverted from #e83e8c *!*/
+/*    --primary-background-color: rgb(51,51,51); !* inverted from  #FFFFFF *!*/
+/*    --primary-text-color: rgb(0,0,0); !* inverted from  #000000 *!*/
+/*    --primary000: rgb(46,49,51); !* inverted from  #E6F6FF *!*/
+/*    --primary100: rgb(37,45,51); !* inverted from  #BAE3FF *!*/
+/*    --primary200: rgb(25,39,50); !* inverted from  #7CC4FA *!*/
+/*    --primary300: rgb(14,33,49); !* inverted from  #47A3F3 *!*/
+/*    --primary400: rgb(7,27,47); !* inverted from  #2186EB *!*/
+/*    --primary500: rgb(2,21,42); !* inverted from  #0967D2 *!*/
+/*    --primary600: rgb(1,16,36); !* inverted from  #0552B5 *!*/
+/*    --primary700: rgb(1,14,32); !* inverted from  #03449E *!*/
+/*    --primary800: rgb(0,10,25); !* inverted from  #01337D *!*/
+/*    --primary900: rgb(0,7,18); !* inverted from  #002159 *!*/
+/*    --primary: rgb(0,25,51); !* inverted from #007bff *!*/
+/*    --purple: rgb(22,13,39); !* inverted from #6f42c1 *!*/
+/*    --red: rgb(44,11,14); !* inverted from #dc3545 *!*/
+/*    --secondary: rgb(22,23,25); !* inverted from #6c757d *!*/
+/*    --selected-background-color: rgb(0,35,47); !* inverted from  #00afec *!*/
+/*    --selected-text-color: rgb(51,51,51); !* inverted from  #FFFFFF *!*/
+/*    --success: rgb(8,33,14); !* inverted from #28a745 *!*/
+/*    --teal: rgb(6,40,30); !* inverted from #20c997 *!*/
+/*    --warning: rgb(51,39,1); !* inverted from #ffc107 *!*/
+/*    --white: rgb(51,51,51); !* inverted from  #ffffff *!*/
+/*    --yellow: rgb(51,39,1); !* inverted from #ffc107 *!*/
+
+/*}*/
+
+/*body {*/
+/*    color: var(--white);*/
+/*}*/
+
+
+.input[type=button] {
+    background-color: var(--dark);
+    color: var(--light);
+}
+
+:root {
+    --primary-background-color: var(--white);
+    --primary-text-color: var(--dark);
+    --selected-background-color: var(--primary);
+    --selected-text-color: var(--light);
+}
