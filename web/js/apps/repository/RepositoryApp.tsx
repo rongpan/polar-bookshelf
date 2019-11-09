@@ -64,8 +64,13 @@ import {GroupHighlightScreen} from "../../../../apps/repository/js/group/highlig
 import {PrefetchedUserGroupsBackgroundListener} from "../../datastore/sharing/db/PrefetchedUserGroupsBackgroundListener";
 import {PlatformStyles} from "../../ui/PlatformStyles";
 import {Devices} from "../../util/Devices";
+import {HotKeys} from "react-hotkeys";
 
 const log = Logger.create();
+
+const KEY_MAP = {
+    FIND: ["F"]
+};
 
 export class RepositoryApp {
 
@@ -306,47 +311,50 @@ export class RepositoryApp {
                 <SyncBar progress={syncBarProgress}/>
 
                 <RepositoryTour/>
+                <HotKeys keyMap={KEY_MAP}>
 
-                <BrowserRouter>
+                    <BrowserRouter>
 
-                    <Switch location={ReactRouters.createLocationWithPathnameHash()}>
+                        <Switch location={ReactRouters.createLocationWithPathnameHash()}>
 
-                        <Route exact path='/#annotations' render={renderAnnotationRepoScreen} />
+                            <Route exact path='/#annotations' render={renderAnnotationRepoScreen} />
 
-                        <Route exact path='/#whats-new' render={renderWhatsNewScreen} />
+                            <Route exact path='/#whats-new' render={renderWhatsNewScreen} />
 
-                        <Route exact path='/#(logout|overview|login|configured|invite|premium)?' render={renderDocRepoScreen}/>
+                            <Route exact path='/#(logout|overview|login|configured|invite|premium)?' render={renderDocRepoScreen}/>
 
-                        <Route exact path='/#community' render={renderCommunityScreen}/>
+                            <Route exact path='/#community' render={renderCommunityScreen}/>
 
-                        <Route exact path='/#stats' render={renderStatsScreen}/>
+                            <Route exact path='/#stats' render={renderStatsScreen}/>
 
-                        <Route exact path='/#logs' render={renderLogsScreen}/>
+                            <Route exact path='/#logs' render={renderLogsScreen}/>
 
-                        <Route exact path='/#editors-picks' render={editorsPicksScreen}/>
+                            <Route exact path='/#editors-picks' render={editorsPicksScreen}/>
 
-                        <Route exact path='/#plans' render={premiumScreen}/>
+                            <Route exact path='/#plans' render={premiumScreen}/>
 
-                        <Route exact path='/#support' render={supportScreen}/>
+                            <Route exact path='/#support' render={supportScreen}/>
 
-                        <Route exact path='/#premium' render={premiumScreen}/>
+                            <Route exact path='/#premium' render={premiumScreen}/>
 
-                        <Route path='/group/:group/highlights' render={renderGroupHighlightsScreen}/>
-                        <Route path='/group/:group/docs' render={renderGroupScreen}/>
+                            <Route path='/group/:group/highlights' render={renderGroupHighlightsScreen}/>
+                            <Route path='/group/:group/docs' render={renderGroupScreen}/>
 
-                        <Route path='/group/:group/highlight/:id' render={renderGroupHighlightScreen}/>
+                            <Route path='/group/:group/highlight/:id' render={renderGroupHighlightScreen}/>
 
-                        <Route path='/group/:group' render={renderGroupHighlightsScreen}/>
+                            <Route path='/group/:group' render={renderGroupHighlightsScreen}/>
 
-                        <Route exact path='/groups' render={renderGroupsScreen}/>
+                            <Route exact path='/groups' render={renderGroupsScreen}/>
 
-                        <Route exact path='/groups/create' render={renderCreateGroupScreen}/>
+                            <Route exact path='/groups/create' render={renderCreateGroupScreen}/>
 
-                        <Route exact path='/' render={renderDefaultScreenByDevice}/>
+                            <Route exact path='/' render={renderDefaultScreenByDevice}/>
 
-                    </Switch>
+                        </Switch>
 
-                </BrowserRouter>
+                    </BrowserRouter>
+
+                </HotKeys>
 
                 {/*Used for file uploads.  This has to be on the page and can't be*/}
                 {/*selectively hidden by components.*/}

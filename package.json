@@ -195,6 +195,7 @@
     "react-dom": "~16.7.0",
     "react-fast-compare": "^2.0.4",
     "react-ga": "~2.5.3",
+    "react-hotkeys": "^2.0.0",
     "react-joyride": "^2.0.5",
     "react-json-view": "~1.19.1",
     "react-jsonschema-form": "~1.0.6",

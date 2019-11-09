@@ -21,6 +21,7 @@ import {FlashcardTaskAction} from "../../../apps/repository/js/reviewer/cards/Fl
 import {FlashcardTaskActions} from "../../../apps/repository/js/reviewer/cards/FlashcardTaskActions";
 import {FlashcardCard} from "../../../apps/repository/js/reviewer/cards/FlashcardCard";
 import {Preconditions} from "polar-shared/src/Preconditions";
+import {HotKeys} from "react-hotkeys";
 
 const styles = {
     swatch: {
@@ -249,6 +250,24 @@ export class App<P> extends React.Component<{}, IAppState> {
         // const taskReps = createReadingTaskReps();
         const taskReps = createFlashcardTaskReps();
 
+        const keyMap = {
+            FIND: 'backspace'
+        };
+
+        // FIXME: I think this all requires the most recent version of react... and I thinkw e have to update this
+        // with useCallback from the documentation or it won't work.
+
+        // FIXME: the single key bindings like 'f' don't seem to work properly but other than that this seems super
+        // easy to setup and work with .
+
+        const doFind = () => {
+            console.log("FIXME within find... ");
+        };
+
+        const handlers = {
+            FIND: doFind
+        };
+
         return (
 
             <div>
@@ -259,12 +278,23 @@ export class App<P> extends React.Component<{}, IAppState> {
 
                 {/*<StartReviewButton onClick={NULL_FUNCTION}/>*/}
 
-                <LightModal>
-                    <Reviewer taskReps={taskReps}
-                              onRating={(id, answer) => console.log("got answer: ", id, answer)}
-                              onSuspended={NULL_FUNCTION}
-                              onFinished={() => console.log('finished')}/>
-                </LightModal>
+                <HotKeys keyMap={keyMap}>
+
+                    <HotKeys handlers={handlers}>
+                        <div>
+                            This is some text.
+                        </div>
+
+                        <input type="text"></input>
+                    </HotKeys>
+                </HotKeys>
+
+                {/*<LightModal>*/}
+                {/*    <Reviewer taskReps={taskReps}*/}
+                {/*              onRating={(id, answer) => console.log("got answer: ", id, answer)}*/}
+                {/*              onSuspended={NULL_FUNCTION}*/}
+                {/*              onFinished={() => console.log('finished')}/>*/}
+                {/*</LightModal>*/}
 
                 {/*<div style={{width: '500px', height: '700px', display: 'flex'}}*/}
                 {/*     className="border">*/}
