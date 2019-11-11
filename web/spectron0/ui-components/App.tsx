@@ -3,13 +3,23 @@ import {Tags} from 'polar-shared/src/tags/Tags';
 import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
 import {Group} from "../../js/datastore/sharing/db/Groups";
 import {ISODateTimeStrings} from "polar-shared/src/metadata/ISODateTimeStrings";
-import {ManualDropdown} from "../../../apps/repository/js/doc_repo/ManaulDropdown";
-import DropdownItem from 'reactstrap/lib/DropdownItem';
-import {DropdownMenu, DropdownToggle, Input} from "reactstrap";
-import {FakePopup} from "./FakePopup";
-import { BasicPopup } from './BasicPopup';
-import { PDFViewer } from './PDFViewer';
-import {Review, Reviewer} from "../../../apps/repository/js/reviewer/Reviewer";
+import {
+    TasksCalculator
+} from "polar-spaced-repetition/src/spaced_repetition/scheduler/S2Plus/TasksCalculator";
+import {Reviewer} from "../../../apps/repository/js/reviewer/Reviewer";
+import {LightModal} from "../../js/ui/LightModal";
+import {AnnotationType} from 'polar-shared/src/metadata/AnnotationType';
+import {Lorems} from "polar-shared/src/util/Lorems";
+import {Flashcards} from "../../js/metadata/Flashcards";
+import {Refs} from "polar-shared/src/metadata/Refs";
+import {RepoAnnotations} from "../../../apps/repository/js/RepoAnnotations";
+import {DocInfos} from "../../js/metadata/DocInfos";
+import {ReviewerTasks} from "../../../apps/repository/js/reviewer/ReviewerTasks";
+import {FlashcardTaskAction} from "../../../apps/repository/js/reviewer/cards/FlashcardTaskAction";
+import {FlashcardTaskActions} from "../../../apps/repository/js/reviewer/cards/FlashcardTaskActions";
+import {FlashcardCard} from "../../../apps/repository/js/reviewer/cards/FlashcardCard";
+import {Preconditions} from "polar-shared/src/Preconditions";
+import {Task, TaskRep} from "polar-spaced-repetition-api/src/scheduler/S2Plus/S2Plus";
 
 const styles = {
     swatch: {
@@ -94,6 +104,17 @@ export class App<P> extends React.Component<{}, IAppState> {
         //     }
         // };
 
+        // Dialogs.confirm({title: 'hello world',
+        //                  subtitle: 'Some really bad stuff is happening right now which you should probably look into.',
+        //                  onConfirm: NULL_FUNCTION,
+        //                  type: 'warning'});
+
+        // Dialogs.prompt({title: 'Give me something ',
+        //                 onCancel: NULL_FUNCTION,
+        //                 onDone: NULL_FUNCTION});
+
+        // PreviewWarnings.createDialog(NULL_FUNCTION);
+
         const tags = [
             '/CompSci/Google',
             '/CompSci/Linux',
@@ -103,10 +124,10 @@ export class App<P> extends React.Component<{}, IAppState> {
             '/History/WWII',
             '/History/United States/WWII',
         ].map(current => Tags.create(current))
-         .map(current => {
-             const count = Math.floor(Math.random() * 100);
-             return {...current, count};
-         });
+            .map(current => {
+                const count = Math.floor(Math.random() * 100);
+                return {...current, count};
+            });
 
         // // const root: TNode<Tag> = TagNodes.create(...tags);
         // Dialogs.prompt({
@@ -136,65 +157,136 @@ export class App<P> extends React.Component<{}, IAppState> {
 
         };
 
-        const lorem = `
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris nec faucibus ligula. Ut nec consectetur nisi, in euismod ipsum. Curabitur euismod ipsum in enim varius consequat. Ut ligula justo, tristique in lacus non, imperdiet euismod tortor. Integer efficitur euismod erat a malesuada. Aliquam erat volutpat. Morbi ut tempus est. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Quisque efficitur est magna, quis pharetra ex hendrerit quis.
 
-Proin tincidunt, quam eu ornare vehicula, nisl ipsum iaculis massa, ut sollicitudin leo nisl at sem. Mauris molestie nunc nec nisl sollicitudin, a venenatis ex dictum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ultricies, odio at viverra dapibus, ligula ex vulputate libero, sed maximus velit sem et nibh. In hac habitasse platea dictumst. Aliquam aliquam eros eget cursus interdum. Etiam eros mauris, condimentum eget odio ut, convallis tempor turpis.
+        const createReadingTaskReps = () => {
 
-Curabitur quis luctus quam, in fermentum ipsum. Nullam a consequat lectus. Nulla consectetur, diam luctus placerat accumsan, velit sapien porttitor sem, nec feugiat est elit ac odio. Duis condimentum, arcu id venenatis convallis, metus mi pellentesque magna, nec rutrum nulla sapien sit amet libero. In pretium sodales accumsan. Vivamus pulvinar pretium arcu quis lacinia. Vestibulum sed interdum diam. Aenean id rhoncus ligula, non pretium nisl. Etiam ut nisl volutpat, pharetra nisi sed, facilisis sem. Fusce eget orci nunc. Vivamus iaculis auctor sapien ornare accumsan. Morbi tempus ornare sapien nec consectetur. Maecenas interdum mollis porta. In leo orci, ultrices in ornare ut, dignissim et erat. Quisque eu eros quis justo faucibus porttitor. Phasellus ac rutrum nunc.
+            const lorem = Lorems.mediumLength();
 
-Nullam auctor porttitor diam, in aliquam ante. Sed iaculis felis in lorem varius, in molestie velit ultricies. Morbi lectus tellus, condimentum vel sollicitudin et, aliquet eget nibh. In nunc neque, gravida vitae malesuada nec, hendrerit non enim. Integer a volutpat odio. Aliquam non pretium massa, non sagittis augue. Praesent pellentesque vitae ex non efficitur. Donec vel ultricies mauris, nec fermentum metus. Phasellus rutrum libero odio. Duis eu feugiat mi. Vivamus non orci erat. Donec ac ante ac sapien pellentesque commodo convallis a eros. Quisque ultrices, nibh ac maximus congue, purus risus tempus nisl, vitae tempor dui sapien id lacus. Phasellus leo orci, iaculis nec tristique ut, venenatis a nunc. Proin ac accumsan tellus.
+            const tasks: ReadonlyArray<Task<string>> = [
+                {
+                    id: "10102",
+                    action: lorem,
+                    created: ISODateTimeStrings.create(),
+                    color: 'red',
+                    mode: 'reading'
+                },
+                {
+                    id: "10101",
+                    action: "this is the first one",
+                    created: ISODateTimeStrings.create(),
+                    color: 'yellow',
+                    mode: 'reading'
+                },
+                {
+                    id: "10102",
+                    action: "this is the second one",
+                    created: ISODateTimeStrings.create(),
+                    color: 'yellow',
+                    mode: 'reading'
+                },
+            ];
 
-Vivamus ullamcorper massa vitae dui placerat, et vehicula odio sollicitudin. Nulla gravida et mauris vel aliquam. Praesent tristique ipsum sem, et pulvinar nulla hendrerit a. In nec felis eget lacus dapibus lobortis. Vestibulum finibus odio et metus eleifend, luctus elementum neque consectetur. Phasellus at eros metus. Sed lacinia tellus at nisl cursus pretium. Duis molestie pulvinar urna, eget bibendum ante accumsan et. Vestibulum eu convallis massa. Fusce ut urna erat.        
+            return tasks.map(task => TasksCalculator.createInitialLearningState(task));
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris nec faucibus ligula. Ut nec consectetur nisi, in euismod ipsum. Curabitur euismod ipsum in enim varius consequat. Ut ligula justo, tristique in lacus non, imperdiet euismod tortor. Integer efficitur euismod erat a malesuada. Aliquam erat volutpat. Morbi ut tempus est. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Quisque efficitur est magna, quis pharetra ex hendrerit quis.
+        };
 
-Proin tincidunt, quam eu ornare vehicula, nisl ipsum iaculis massa, ut sollicitudin leo nisl at sem. Mauris molestie nunc nec nisl sollicitudin, a venenatis ex dictum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ultricies, odio at viverra dapibus, ligula ex vulputate libero, sed maximus velit sem et nibh. In hac habitasse platea dictumst. Aliquam aliquam eros eget cursus interdum. Etiam eros mauris, condimentum eget odio ut, convallis tempor turpis.
+        // const createFlashcardTaskReps = async (): Promise<ReadonlyArray<TaskRep<FlashcardTaskAction>>> => {
+        //
+        //     const ref = Refs.create('1234', 'text-highlight');
+        //
+        //     const flashcard = Flashcards.createFrontBack('What is the capital of California? ', 'Sacramento', ref);
+        //
+        //     const docInfo = DocInfos.create('0x0001', 1);
+        //     const repoAnnotation = RepoAnnotations.toRepoAnnotation(null!, flashcard, AnnotationType.FLASHCARD, docInfo);
+        //     const repoAnnotations = [repoAnnotation];
+        //
+        //     return ReviewerTasks.createFlashcardTasks(repoAnnotations, 10);
+        //
+        // };
 
-Curabitur quis luctus quam, in fermentum ipsum. Nullam a consequat lectus. Nulla consectetur, diam luctus placerat accumsan, velit sapien porttitor sem, nec feugiat est elit ac odio. Duis condimentum, arcu id venenatis convallis, metus mi pellentesque magna, nec rutrum nulla sapien sit amet libero. In pretium sodales accumsan. Vivamus pulvinar pretium arcu quis lacinia. Vestibulum sed interdum diam. Aenean id rhoncus ligula, non pretium nisl. Etiam ut nisl volutpat, pharetra nisi sed, facilisis sem. Fusce eget orci nunc. Vivamus iaculis auctor sapien ornare accumsan. Morbi tempus ornare sapien nec consectetur. Maecenas interdum mollis porta. In leo orci, ultrices in ornare ut, dignissim et erat. Quisque eu eros quis justo faucibus porttitor. Phasellus ac rutrum nunc.
+        const createFlashcardTaskReps = (): ReadonlyArray<TaskRep<FlashcardTaskAction>> => {
+            const ref = Refs.create('1234', 'text-highlight');
 
-Nullam auctor porttitor diam, in aliquam ante. Sed iaculis felis in lorem varius, in molestie velit ultricies. Morbi lectus tellus, condimentum vel sollicitudin et, aliquet eget nibh. In nunc neque, gravida vitae malesuada nec, hendrerit non enim. Integer a volutpat odio. Aliquam non pretium massa, non sagittis augue. Praesent pellentesque vitae ex non efficitur. Donec vel ultricies mauris, nec fermentum metus. Phasellus rutrum libero odio. Duis eu feugiat mi. Vivamus non orci erat. Donec ac ante ac sapien pellentesque commodo convallis a eros. Quisque ultrices, nibh ac maximus congue, purus risus tempus nisl, vitae tempor dui sapien id lacus. Phasellus leo orci, iaculis nec tristique ut, venenatis a nunc. Proin ac accumsan tellus.
+            const createFrontAndBackAction = () => {
+                const flashcard = Flashcards.createFrontBack('What is the capital of California? ', 'Sacramento', ref);
+                const flashcardTaskActions = FlashcardTaskActions.create(flashcard);
+                return flashcardTaskActions[0];
+            };
 
-Vivamus ullamcorper massa vitae dui placerat, et vehicula odio sollicitudin. Nulla gravida et mauris vel aliquam. Praesent tristique ipsum sem, et pulvinar nulla hendrerit a. In nec felis eget lacus dapibus lobortis. Vestibulum finibus odio et metus eleifend, luctus elementum neque consectetur. Phasellus at eros metus. Sed lacinia tellus at nisl cursus pretium. Duis molestie pulvinar urna, eget bibendum ante accumsan et. Vestibulum eu convallis massa. Fusce ut urna erat.        \`;
+            const createClozeAction = () => {
+                const flashcard = Flashcards.createCloze('The capital of california is {{c1::Sacramento}}.', ref);
+                const flashcardTaskActions = FlashcardTaskActions.create(flashcard);
+                return flashcardTaskActions[0];
+            };
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris nec faucibus ligula. Ut nec consectetur nisi, in euismod ipsum. Curabitur euismod ipsum in enim varius consequat. Ut ligula justo, tristique in lacus non, imperdiet euismod tortor. Integer efficitur euismod erat a malesuada. Aliquam erat volutpat. Morbi ut tempus est. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Quisque efficitur est magna, quis pharetra ex hendrerit quis.
+            const clozeAction = createClozeAction();
 
-Proin tincidunt, quam eu ornare vehicula, nisl ipsum iaculis massa, ut sollicitudin leo nisl at sem. Mauris molestie nunc nec nisl sollicitudin, a venenatis ex dictum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ultricies, odio at viverra dapibus, ligula ex vulputate libero, sed maximus velit sem et nibh. In hac habitasse platea dictumst. Aliquam aliquam eros eget cursus interdum. Etiam eros mauris, condimentum eget odio ut, convallis tempor turpis.
+            Preconditions.assertPresent(clozeAction, 'clozeAction');
 
-Curabitur quis luctus quam, in fermentum ipsum. Nullam a consequat lectus. Nulla consectetur, diam luctus placerat accumsan, velit sapien porttitor sem, nec feugiat est elit ac odio. Duis condimentum, arcu id venenatis convallis, metus mi pellentesque magna, nec rutrum nulla sapien sit amet libero. In pretium sodales accumsan. Vivamus pulvinar pretium arcu quis lacinia. Vestibulum sed interdum diam. Aenean id rhoncus ligula, non pretium nisl. Etiam ut nisl volutpat, pharetra nisi sed, facilisis sem. Fusce eget orci nunc. Vivamus iaculis auctor sapien ornare accumsan. Morbi tempus ornare sapien nec consectetur. Maecenas interdum mollis porta. In leo orci, ultrices in ornare ut, dignissim et erat. Quisque eu eros quis justo faucibus porttitor. Phasellus ac rutrum nunc.
+            const tasks: ReadonlyArray<Task<FlashcardTaskAction>> = [
+                {
+                    id: "10102",
+                    action: clozeAction,
+                    created: ISODateTimeStrings.create(),
+                    color: 'red',
+                    mode: 'flashcard'
+                },
+                {
+                    id: "10102",
+                    action: createFrontAndBackAction(),
+                    created: ISODateTimeStrings.create(),
+                    color: 'red',
+                    mode: 'flashcard'
+                }
+            ];
 
-Nullam auctor porttitor diam, in aliquam ante. Sed iaculis felis in lorem varius, in molestie velit ultricies. Morbi lectus tellus, condimentum vel sollicitudin et, aliquet eget nibh. In nunc neque, gravida vitae malesuada nec, hendrerit non enim. Integer a volutpat odio. Aliquam non pretium massa, non sagittis augue. Praesent pellentesque vitae ex non efficitur. Donec vel ultricies mauris, nec fermentum metus. Phasellus rutrum libero odio. Duis eu feugiat mi. Vivamus non orci erat. Donec ac ante ac sapien pellentesque commodo convallis a eros. Quisque ultrices, nibh ac maximus congue, purus risus tempus nisl, vitae tempor dui sapien id lacus. Phasellus leo orci, iaculis nec tristique ut, venenatis a nunc. Proin ac accumsan tellus.
+            return tasks.map(task => TasksCalculator.createInitialLearningState(task));
 
-Vivamus ullamcorper massa vitae dui placerat, et vehicula odio sollicitudin. Nulla gravida et mauris vel aliquam. Praesent tristique ipsum sem, et pulvinar nulla hendrerit a. In nec felis eget lacus dapibus lobortis. Vestibulum finibus odio et metus eleifend, luctus elementum neque consectetur. Phasellus at eros metus. Sed lacinia tellus at nisl cursus pretium. Duis molestie pulvinar urna, eget bibendum ante accumsan et. Vestibulum eu convallis massa. Fusce ut urna erat.        \`;
+        };
 
-`;
 
-        const reviews: ReadonlyArray<Review> = [
-            {
-                id: "10102",
-                text: lorem,
-                created: ISODateTimeStrings.create(),
-                color: 'red'
-            },
-            {
-                id: "10101",
-                text: "this is the first one",
-                created: ISODateTimeStrings.create(),
-                color: 'yellow'
-            },
-            {
-                id: "10102",
-                text: "this is the second one",
-                created: ISODateTimeStrings.create(),
-                color: 'yellow'
-            },
-        ];
+        // const taskReps = createReadingTaskReps();
+        const taskReps = createFlashcardTaskReps();
 
         return (
 
-            <div style={{margin: '5px'}}>
+            <div>
 
-                <Reviewer reviews={reviews} onAnswer={(id, answer) => console.log("got answer: ", id, answer)} onFinished={() => console.log('finished')}/>
+                {/*<AnnotationTypeSelector selected={[AnnotationType.FLASHCARD]} onSelected={selected => console.log('selected: ', selected)}/>*/}
+
+                {/*<ColorSelectorBox/>*/}
+
+                {/*<StartReviewButton onClick={NULL_FUNCTION}/>*/}
+
+                <LightModal>
+                    <Reviewer taskReps={taskReps}
+                              onRating={(id, answer) => console.log("got answer: ", id, answer)}
+                              onSuspended={NULL_FUNCTION}
+                              onFinished={() => console.log('finished')}/>
+                </LightModal>
+
+                {/*<div style={{width: '500px', height: '700px', display: 'flex'}}*/}
+                {/*     className="border">*/}
+
+                {/*    <Flashcard front={<div>front</div>}*/}
+                {/*               back={<div>back</div>}*/}
+                {/*               answers={<div>answers</div>}/>*/}
+
+                {/*</div>*/}
+
+                {/*<div className="border border-dark m-1" style={{width: '450px'}}>*/}
+                {/*    <DocSidebar fingerprint="0x01" updated={ISODateTimeStrings.create()}/>*/}
+                {/*</div>*/}
+
+                {/*<div className="border border-dark m-1" style={{width: '450px'}}>*/}
+                {/*    <DocSidebar fingerprint="0x01"*/}
+                {/*                title="Bitcoin: A Peer-to-Peer Electronic Cash System"*/}
+                {/*                subtitle="A purely peer-to-peer version of electronic cash would allow online payments to be sent directly from one party to another without going through a financial institution."*/}
+                {/*                authors={authors}*/}
+                {/*                updated={ISODateTimeStrings.create()}*/}
+                {/*                url='http://www.example.com/this/is/a/long-path/00000000000000000000000000000000000000000000000000.pdf'*/}
+                {/*                published="2017"/>*/}
+                {/*</div>*/}
 
                 {/*<PDFViewer src="foo"/>*/}
 

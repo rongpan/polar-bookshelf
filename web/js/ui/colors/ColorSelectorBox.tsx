@@ -1,5 +1,4 @@
 import * as React from 'react';
-import {NULL_FUNCTION} from 'polar-shared/src/util/Functions';
 import {ColorButton} from './ColorButton';
 
 interface ColorButtonsRowProps extends IProps {
@@ -8,16 +7,21 @@ interface ColorButtonsRowProps extends IProps {
 
 const ColorButtonsRow = (props: ColorButtonsRowProps) => {
 
-    return <div>
+    const selected = props.selected || [];
+
+    return <div style={{display: 'flex'}}>
         {props.colors.map(color =>
-          <ColorButton key={color} {...props} color={color}/>)}
+          <ColorButton key={color}
+                       selected={selected.includes(color)}
+                       onSelected={props.onSelected}
+                       color={color}/>)}
     </div>;
 
 };
 
 const ColorButtonsRow0 = (props: IProps) => {
 
-    const colors = ['yellow', 'red', 'green', '#FFFF00', '#F96676'];
+    const colors = ['yellow', 'red', 'green', '#9900EF', '#FF6900'];
 
     return <ColorButtonsRow {...props} colors={colors}/>;
 
@@ -32,8 +36,7 @@ const ColorButtonsRow1 = (props: IProps) => {
 };
 
 const ColorButtonsRow2 = (props: IProps) => {
-
-    const colors = ['#F78DA7', '#9900EF', '#FF6900', '#FCB900', '#7BDCB5'];
+    const colors = ['#F78DA7', '#FFFF00', '#F96676', '#FCB900', '#7BDCB5'];
 
     return <ColorButtonsRow {...props} colors={colors}/>;
 
@@ -90,8 +93,6 @@ export class ColorSelectorBox extends React.PureComponent<IProps, IState> {
 
         const props = this.props;
 
-        const onSelected = props.onSelected || NULL_FUNCTION;
-
         return (
             <div>
 
@@ -104,8 +105,16 @@ export class ColorSelectorBox extends React.PureComponent<IProps, IState> {
 }
 
 
+export type ColorStr = string;
+
 interface IProps {
-    readonly onSelected?: (color: string) => void;
+
+    readonly selected?: ReadonlyArray<ColorStr>;
+
+    readonly onSelected?: (color: ColorStr) => void;
+
+    // readonly clearable?: boolean;
+
 }
 
 interface IState {

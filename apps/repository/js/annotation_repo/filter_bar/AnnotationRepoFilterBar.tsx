@@ -1,10 +1,11 @@
 import * as React from 'react';
 import {TagsDB} from '../../TagsDB';
-import InputGroup from 'reactstrap/lib/InputGroup';
-import Input from 'reactstrap/lib/Input';
-import {PartialAnnotationRepoFilters, UpdateFiltersCallback} from '../AnnotationRepoFiltersHandler';
+import {UpdateFiltersCallback} from '../AnnotationRepoFiltersHandler';
 import {Placement} from 'popper.js';
-import {HighlightColorFilterButton} from "./HighlightColorFilterButton";
+import {Reviewers} from "../../reviewer/Reviewers";
+import {RepoAnnotation} from "../../RepoAnnotation";
+import {StartReviewButton} from "./StartReviewButton";
+import {TextFilter} from "./TextFilter";
 
 export class AnnotationRepoFilterBar extends React.PureComponent<IProps, IState> {
 
@@ -27,61 +28,32 @@ export class AnnotationRepoFilterBar extends React.PureComponent<IProps, IState>
         return (
 
             <div id="filter-bar"
+                 className="pr-1"
                  style={{
                      display: 'flex',
                  }}>
 
-                <div className="header-filter-box mr-1 pl-1"
-                     style={{
-                         whiteSpace: 'nowrap',
-                         marginTop: 'auto',
-                         marginBottom: 'auto',
-                         flexGrow: 1
-                     }}>
+                {/*<div className="header-filter-box mr-1 pl-1"*/}
+                {/*     style={{*/}
+                {/*         whiteSpace: 'nowrap',*/}
+                {/*         marginTop: 'auto',*/}
+                {/*         marginBottom: 'auto',*/}
+                {/*         flexGrow: 1*/}
+                {/*     }}>*/}
 
-                    <div className="header-filter-box">
+                {/*    <div className="header-filter-box m-0">*/}
 
-                        <InputGroup size="sm">
+                {/*        <TextFilter updateFilters={this.props.updateFilters}/>*/}
 
-                            <Input id="filter_title"
-                                   type="text"
-                                   placeholder="Filter by annotation text"
-                                   onChange={(value) => this.props.updateFilters({text: value.target.value})}/>
+                {/*    </div>*/}
 
-                        </InputGroup>
+                {/*</div>*/}
 
-                    </div>
+                {/*/!*<HighlightColorFilterButton onSelected={color => this.props.updateFilters({color})}/>*!/*/}
 
-                </div>
+                {/*<StartReviewButton onClick={() => Reviewers.start(this.props.repoAnnotations, 10)}/>*/}
 
-                {/*<Button color="light" className="p-0">*/}
-                {/*    <i className="fas fa-swatchbook"/>*/}
-                {/*</Button>*/}
-
-
-                {/*<Popover placement="bottom"*/}
-                {/*         trigger="legacy"*/}
-                {/*         fade={false}*/}
-                {/*         delay={0}*/}
-                {/*         isOpen={this.state.open}*/}
-                {/*         target={id}*/}
-                {/*         toggle={this.deactivate}>*/}
-
-                {/*    <PopoverBody className="shadow rounded p-2"*/}
-                {/*                 style={{backgroundColor: '#ffffff'}}>*/}
-
-                {/*        <ColorSelectorBox onSelected={(color) => {*/}
-                {/*            this.deactivate();*/}
-                {/*            onSelected(color);*/}
-                {/*        }}/>*/}
-
-                {/*    </PopoverBody>*/}
-
-                {/*</Popover>*/}
-
-                <HighlightColorFilterButton onSelected={color => this.props.updateFilters({color})}/>
-
-                <Right/>
+                {/*<Right/>*/}
 
             </div>
 
@@ -92,6 +64,8 @@ export class AnnotationRepoFilterBar extends React.PureComponent<IProps, IState>
 }
 
 export interface IProps {
+
+    readonly repoAnnotations: ReadonlyArray<RepoAnnotation>;
 
     /**
      * An index of the currently available tags.

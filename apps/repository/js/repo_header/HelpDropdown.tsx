@@ -9,8 +9,7 @@ import {TrackedDropdownItem} from './TrackedDropdownItem';
 import {ipcRenderer} from 'electron';
 import {AppUpdates} from '../../../../web/js/updates/AppUpdates';
 import {DistConfig} from '../../../../web/js/dist_config/DistConfig';
-
-const SURVEY_LINK = 'https://kevinburton1.typeform.com/to/BuX1Ef';
+import {Platforms} from "../../../../web/js/util/Platforms";
 
 export class HelpDropdown extends React.PureComponent<IProps, IState> {
 
@@ -31,7 +30,7 @@ export class HelpDropdown extends React.PureComponent<IProps, IState> {
                                 color="light"
                                 caret>
 
-                    <i className="fas fa-question" style={{fontSize: '17px'}}></i>
+                    <i className="fas fa-question" style={{fontSize: '17px'}}/>
 
                 </DropdownToggle>
 
@@ -52,12 +51,14 @@ export class HelpDropdown extends React.PureComponent<IProps, IState> {
                                       icon="fas fa-hands-helping"/>
 
                     <HelpDropdownItem id="chat-link"
+                                      hidden={Platforms.isMobile()}
                                       title="Chat"
                                       tooltip="Chat with other Polar users live via chat (Discord)"
                                       link="https://discord.gg/GT8MhA6"
                                       icon="fab fa-discord"/>
 
                     <HelpDropdownItem id="create-issue-link"
+                                      hidden={Platforms.isMobile()}
                                       title="Create Issue"
                                       tooltip="Create an issue (bug or feature) for the developer to investigate."
                                       link="https://github.com/burtonator/polar-bookshelf/issues/new/choose"
@@ -74,7 +75,7 @@ export class HelpDropdown extends React.PureComponent<IProps, IState> {
 
                     <DropdownItem divider hidden={! DistConfig.ENABLE_PURCHASES} />
 
-                    <HelpDropdownItem hidden={! DistConfig.ENABLE_PURCHASES}
+                    <HelpDropdownItem hidden={! DistConfig.ENABLE_PURCHASES || Platforms.isMobile()}
                                       id="donate-link"
                                       title="Donate"
                                       tooltip="Donate to Polar to support development."
@@ -90,6 +91,15 @@ export class HelpDropdown extends React.PureComponent<IProps, IState> {
                                          trackingCategory="help-check-for-update"
                                          hidden={!updatesEnabled}
                                          onClick={() => ipcRenderer.send('app-update:check-for-update')}/>
+
+                    <DropdownItem divider/>
+
+                    <TrackedDropdownItem id="sidebar-item-logs"
+                                         title="Logs"
+                                         tooltip="Show logs on internal activity during background operations like cloud activity and sync."
+                                         icon="fas fa-info-circle"
+                                         onClick={() => document.location.href = '/#logs'}
+                                         trackingCategory="help-logs"/>
 
                 </DropdownMenu>
 

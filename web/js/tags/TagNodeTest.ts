@@ -81,7 +81,8 @@ describe('TagNode', function() {
             ].map(current => Tags.create(current))
              .map(current => {
                     const count = 1;
-                    return {...current, count};
+                    const members = ['0101'];
+                    return {...current, count, members};
                 });
 
             assertJSON(TagNodes.createFoldersRoot({tags, type: 'folder'}), {
@@ -97,7 +98,10 @@ describe('TagNode', function() {
                                 "value": {
                                     "count": 1,
                                     "id": "/foo/bar",
-                                    "label": "/foo/bar"
+                                    "label": "/foo/bar",
+                                    "members": [
+                                        "0101"
+                                    ]
                                 }
                             }
                         ],
@@ -108,18 +112,24 @@ describe('TagNode', function() {
                         "value": {
                             "count": 1,
                             "id": "/foo",
-                            "label": "/foo"
+                            "label": "/foo",
+                            "members": [
+                                "0101"
+                            ]
                         }
                     }
                 ],
-                "count": 2,
+                "count": 1,
                 "id": "/",
                 "name": "/",
                 "path": "/",
                 "value": {
-                    "count": 2,
+                    "count": 1,
                     "id": "/",
-                    "label": "/"
+                    "label": "/",
+                    "members": [
+                        "0101"
+                    ]
                 }
             });
 
@@ -133,7 +143,8 @@ describe('TagNode', function() {
             ].map(current => Tags.create(current))
                 .map(current => {
                     const count = 1;
-                    return {...current, count};
+                    const members = ['0101'];
+                    return {...current, count, members};
                 });
 
             assertJSON(TagNodes.createFoldersRoot({tags, type: 'folder'}), {
@@ -149,7 +160,10 @@ describe('TagNode', function() {
                                 "value": {
                                     "count": 1,
                                     "id": "/career/compsci",
-                                    "label": "/career/compsci"
+                                    "label": "/career/compsci",
+                                    "members": [
+                                        "0101"
+                                    ]
                                 }
                             }
                         ],
@@ -160,7 +174,8 @@ describe('TagNode', function() {
                         "value": {
                             "count": 0,
                             "id": "/career",
-                            "label": "/career"
+                            "label": "/career",
+                            "members": []
                         }
                     }
                 ],
@@ -171,7 +186,10 @@ describe('TagNode', function() {
                 "value": {
                     "count": 1,
                     "id": "/",
-                    "label": "/"
+                    "label": "/",
+                    "members": [
+                        "0101"
+                    ]
                 }
             });
 
@@ -188,7 +206,8 @@ describe('TagNode', function() {
                 "value": {
                     "count": 0,
                     "id": "/",
-                    "label": "/"
+                    "label": "/",
+                    "members": []
                 }
             });
 

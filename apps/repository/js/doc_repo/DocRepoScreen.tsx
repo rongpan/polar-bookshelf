@@ -40,6 +40,7 @@ import {Arrays} from "polar-shared/src/util/Arrays";
 import {Numbers} from "polar-shared/src/util/Numbers";
 import {DraggingSelectedDocs} from "./SelectedDocs";
 import {TreeState} from "../../../../web/js/ui/tree/TreeState";
+import {DocSidebar} from "../../../../web/spectron0/ui-components/DocSidebar";
 
 const log = Logger.create();
 
@@ -71,6 +72,8 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
         this.onDocDeleted = this.onDocDeleted.bind(this);
         this.onDocSetTitle = this.onDocSetTitle.bind(this);
         this.onSelectedColumns = this.onSelectedColumns.bind(this);
+        this.onDocSidebarVisible = this.onDocSidebarVisible.bind(this);
+
 
         this.onFilterByTitle = this.onFilterByTitle.bind(this);
         this.onToggleFilterArchived = this.onToggleFilterArchived.bind(this);
@@ -85,11 +88,15 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
         this.getSelected = this.getSelected.bind(this);
 
+        this.onDragStart = this.onDragStart.bind(this);
+        this.onDragEnd = this.onDragEnd.bind(this);
+
         this.state = {
             data: [],
             tags: [],
             columns: new DocRepoTableColumns(),
-            selected: []
+            selected: [],
+            docSidebarVisible: false
         };
 
         const onRefreshed: RefreshedCallback = repoDocInfos => this.doRefresh(repoDocInfos);
@@ -202,15 +209,31 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
     }
 
-    private getSelected(): RepoDocInfo[] {
+    private getSelected(): ReadonlyArray<RepoDocInfo> {
 
-        const resolvedState = this.reactTable!.getResolvedState();
+        if (! this.reactTable) {
+            return [];
+        }
+
+        interface TableItem {
+            readonly _original: RepoDocInfo;
+        }
+
+        interface IResolvedState {
+            readonly sortedData: ReadonlyArray<TableItem>;
+            readonly page: number;
+            readonly pageSize: number;
+        }
+
+        const resolvedState: IResolvedState = this.reactTable!.getResolvedState();
 
         const sortedData = resolvedState.sortedData;
 
+        const offset = (resolvedState.page) * resolvedState.pageSize;
+
         const result: RepoDocInfo[] =
             this.state.selected
-                .map(selectedIdx => sortedData[selectedIdx])
+                .map(selectedIdx => sortedData[offset + selectedIdx])
                 .filter(item => isPresent(item))
                 .map(item => item._original);
 
@@ -273,8 +296,25 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
         const tagsProvider = () => this.props.repoDocMetaManager!.repoDocInfoIndex.toTagDescriptors();
 
+        const selectedDocs = this.getSelected();
+        const primaryDoc = selectedDocs.length > 0 ? selectedDocs[0] : undefined ;
+
+        const docActive = {
+            right: 'd-none-mobile',
+            splitter: 'd-none-mobile'
+        };
+
+        const docInactive = {
+            right: 'd-none',
+            splitter: 'd-none'
+        };
+
+
+        const rightDocComponentClassNames = this.state.docSidebarVisible ? docActive : docInactive;
+
         return (
             <div id="doc-repository"
+                 className=""
                  style={{
                      height: '100%'
                  }}>
@@ -288,7 +328,7 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
                         <div id="header-filter">
 
                             <div style={{display: 'flex'}}
-                                 className="mt-1 mb-1">
+                                 className="p-1">
 
                                 <div className=""
                                      style={{
@@ -313,6 +353,8 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
                                                       tagsDBProvider={() => this.props.repoDocMetaManager!.tagsDB}
                                                       refresher={() => this.refresh()}
                                                       filteredTags={this.docRepoFilters.filters.filteredTags}
+                                                      docSidebarVisible={this.state.docSidebarVisible}
+                                                      onDocSidebarVisible={visible => this.onDocSidebarVisible(visible)}
                                                       right={
                                                    <div className="d-mobile-none"
                                                         style={{whiteSpace: 'nowrap', marginTop: 'auto', marginBottom: 'auto'}}>
@@ -334,12 +376,13 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
                     </header>
 
-
                     <Dock
                         componentClassNames={{
                             left: 'd-none-mobile',
                             splitter: 'd-none-mobile'
                         }}
+                        side='left'
+                        initialWidth={300}
                         left={
                             <div style={{
                                 display: 'flex' ,
@@ -370,52 +413,75 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
                             </div>
                         }
                         right={
+                            <Dock
+                                componentClassNames={rightDocComponentClassNames}
+                                side='right'
+                                initialWidth={300}
+                                left={
 
-                            <DocRepoTable columns={this.state.columns}
-                                          selected={this.state.selected}
-                                          data={this.state.data}
-                                          relatedTags={this.props.repoDocMetaManager!.relatedTags}
-                                          synchronizingDocLoader={this.synchronizingDocLoader}
-                                          tagsProvider={() => tagsProvider()}
-                                          writeDocInfoTags={(repoDocInfo, tags) => this.props.repoDocMetaManager!.writeDocInfoTags(repoDocInfo, tags)}
-                                          deleteDocInfo={repoDocInfo => this.props.repoDocMetaManager.deleteDocInfo(repoDocInfo)}
-                                          writeDocInfoTitle={(repoDocInfo, title) => this.props.repoDocMetaManager.writeDocInfoTitle(repoDocInfo, title)}
-                                          writeDocInfo={docInfo => this.props.repoDocMetaManager.writeDocInfo(docInfo)}
-                                          refresh={() => this.refresh()}
-                                          onDocDeleteRequested={repoDocInfos => this.onDocDeleteRequested(repoDocInfos)}
-                                          onDocDeleted={repoDocInfos => this.onDocDeleted(repoDocInfos)}
-                                          onDocSetTitle={(repoDocInfo, title) => this.onDocSetTitle(repoDocInfo, title)}
-                                          onDocTagged={(repoDocInfo, tags) => this.onDocTagged(repoDocInfo, tags)}
-                                          onMultiDeleted={() => this.onMultiDeleted()}
-                                          selectRow={(selectedIdx, event1, checkbox) => this.selectRow(selectedIdx, event1, checkbox)}
-                                          onSelected={selected => this.onSelected(selected)}
-                                          onReactTable={reactTable => this.reactTable = reactTable}
-                                          onDragStart={(event) => {
+                                    <DocRepoTable columns={this.state.columns}
+                                                  selected={this.state.selected}
+                                                  data={this.state.data}
+                                                  relatedTags={this.props.repoDocMetaManager!.relatedTags}
+                                                  synchronizingDocLoader={this.synchronizingDocLoader}
+                                                  tagsProvider={() => tagsProvider()}
+                                                  writeDocInfoTags={(repoDocInfo, tags) => this.props.repoDocMetaManager!.writeDocInfoTags(repoDocInfo, tags)}
+                                                  deleteDocInfo={repoDocInfo => this.props.repoDocMetaManager.deleteDocInfo(repoDocInfo)}
+                                                  writeDocInfoTitle={(repoDocInfo, title) => this.props.repoDocMetaManager.writeDocInfoTitle(repoDocInfo, title)}
+                                                  writeDocInfo={docInfo => this.props.repoDocMetaManager.writeDocInfo(docInfo)}
+                                                  refresh={() => this.refresh()}
+                                                  onDocDeleteRequested={repoDocInfos => this.onDocDeleteRequested(repoDocInfos)}
+                                                  onDocDeleted={repoDocInfos => this.onDocDeleted(repoDocInfos)}
+                                                  onDocSetTitle={(repoDocInfo, title) => this.onDocSetTitle(repoDocInfo, title)}
+                                                  onDocTagged={(repoDocInfo, tags) => this.onDocTagged(repoDocInfo, tags)}
+                                                  onMultiDeleted={() => this.onMultiDeleted()}
+                                                  selectRow={(selectedIdx, event1, checkbox) => this.selectRow(selectedIdx, event1, checkbox)}
+                                                  onSelected={selected => this.onSelected(selected)}
+                                                  onReactTable={reactTable => this.reactTable = reactTable}
+                                                  onDragStart={event => this.onDragStart(event)}
+                                                  onDragEnd={() => this.onDragEnd()}/>
 
-                                              // TODO: move this to a dedicated function.
+                                }
+                                right={
+                                    <div>
+                                        <DocSidebar meta={primaryDoc ? primaryDoc.docInfo : undefined}
+                                                    persistenceLayerProvider={() => this.props.persistenceLayerManager.get()}/>
+                                    </div>
+                                }
+                            />
 
-                                              // TODO: this actually DOES NOT work but it's a better effect than the
-                                              // default and a lot less confusing.  In the future we should migrate
-                                              // to showing the thumbnail of the doc once we have this feature
-                                              // implemented.
-
-                                              const src: HTMLElement = document.createElement("div");
-
-                                              // https://kryogenix.org/code/browser/custom-drag-image.html
-                                              event.dataTransfer!.setDragImage(src, 0, 0);
-
-                                              DraggingSelectedDocs.set(this.getSelected())
-                                          }}
-                                          onDragEnd={() => DraggingSelectedDocs.clear()}/>
-                        }
-                        side='left'
-                        initialWidth={300}/>
+                        }/>
 
 
                 </FixedNav>
             </div>
 
         );
+    }
+
+    private onDragStart(event: DragEvent) {
+
+        const configureDragImage = () => {
+            // TODO: this actually DOES NOT work but it's a better effect than the
+            // default and a lot less confusing.  In the future we should migrate
+            // to showing the thumbnail of the doc once we have this feature
+            // implemented.
+
+            const src: HTMLElement = document.createElement("div");
+
+            // https://kryogenix.org/code/browser/custom-drag-image.html
+            event.dataTransfer!.setDragImage(src, 0, 0);
+        };
+
+        configureDragImage();
+
+        const selected = this.getSelected();
+        DraggingSelectedDocs.set(selected);
+
+    }
+
+    private onDragEnd() {
+        DraggingSelectedDocs.clear();
     }
 
     private async onDocTagged(repoDocInfo: RepoDocInfo, tags: ReadonlyArray<Tag>) {
@@ -436,6 +502,10 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
             onConfirm: () => this.onDocDeleted(...repoDocInfos),
         });
 
+    }
+
+    private onDocSidebarVisible(docSidebarVisible: boolean) {
+        this.setState({...this.state, docSidebarVisible});
     }
 
     private onDocDeleted(...repoDocInfos: RepoDocInfo[]) {
@@ -584,6 +654,7 @@ interface IState {
     readonly tags: ReadonlyArray<TagDescriptor>;
     readonly columns: DocRepoTableColumns;
     readonly selected: ReadonlyArray<number>;
+    readonly docSidebarVisible: boolean;
 }
 
 

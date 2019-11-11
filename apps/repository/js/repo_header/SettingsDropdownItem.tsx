@@ -1,7 +1,5 @@
 import * as React from 'react';
 import {TrackedDropdownItem} from './TrackedDropdownItem';
-import {LocalPrefs} from '../../../../web/js/util/LocalPrefs';
-import {PrefsProvider} from '../../../../web/js/datastore/Datastore';
 import {Prefs} from '../../../../web/js/util/prefs/Prefs';
 
 const ICON_ON = "fas fa-check text-primary";

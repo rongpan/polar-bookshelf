@@ -18,10 +18,16 @@ import {RepoDocMetaLoaders} from '../RepoDocMetaLoaders';
 import {AnnotationRepoFiltersHandler} from './AnnotationRepoFiltersHandler';
 import ReleasingReactComponent from '../framework/ReleasingReactComponent';
 import {TagDescriptor} from '../../../../web/js/tags/TagNode';
-import {Tag, TagStr} from 'polar-shared/src/tags/Tags';
-import {Tags} from 'polar-shared/src/tags/Tags';
+import {Tag, Tags, TagStr} from 'polar-shared/src/tags/Tags';
 import {FilteredTags} from '../FilteredTags';
 import {TreeState} from "../../../../web/js/ui/tree/TreeState";
+import {Row} from "../../../../web/js/ui/layout/Row";
+import {Reviewers} from "../reviewer/Reviewers";
+import {TextFilter} from "./filter_bar/TextFilter";
+import {HighlightColorFilterButton} from "./filter_bar/controls/color/HighlightColorFilterButton";
+import {AnnotationTypeSelector} from "./filter_bar/controls/annotation_type/AnnotationTypeSelector";
+import {StartReviewDropdown} from "./filter_bar/StartReviewDropdown";
+import {RepetitionMode} from "polar-spaced-repetition-api/src/scheduler/S2Plus/S2Plus";
 
 export default class AnnotationRepoScreen extends ReleasingReactComponent<IProps, IState> {
 
@@ -44,6 +50,7 @@ export default class AnnotationRepoScreen extends ReleasingReactComponent<IProps
 
         this.onSelectedFolders = this.onSelectedFolders.bind(this);
         this.onUpdatedTags = this.onUpdatedTags.bind(this);
+        this.startReview = this.startReview.bind(this);
 
         this.state = {
             data: [],
@@ -110,6 +117,38 @@ export default class AnnotationRepoScreen extends ReleasingReactComponent<IProps
                 <header>
                     <RepoHeader persistenceLayerManager={this.props.persistenceLayerManager}/>
 
+                    <Row id="header-filter"
+                         className="border-bottom p-1">
+                        <Row.Main>
+                            {/*<StartReviewButton onClick={() => this.startReview('flashcard')}/>*/}
+                            <StartReviewDropdown onFlashcards={() => this.startReview('flashcard')}
+                                                 onReading={() => this.startReview('reading')}/>
+                        </Row.Main>
+
+                        <Row.Right>
+
+                            <div style={{display: 'flex'}}>
+
+                                <div className="mr-1">
+                                    <AnnotationTypeSelector selected={this.filtersHandler.filters.annotationTypes || []}
+                                                            onSelected={annotationTypes => this.filtersHandler.update({annotationTypes})}/>
+                                </div>
+
+                                <div className="mr-1">
+                                    <HighlightColorFilterButton selected={this.filtersHandler.filters.colors}
+                                                                onSelected={selected => this.filtersHandler.update({colors: selected})}/>
+                                </div>
+
+                                <div className="d-none-mobile">
+                                    <TextFilter updateFilters={filters => this.filtersHandler.update(filters)}/>
+                                </div>
+
+                            </div>
+
+                        </Row.Right>
+
+                    </Row>
+
                     <MessageBanner/>
 
                 </header>
@@ -174,6 +213,14 @@ export default class AnnotationRepoScreen extends ReleasingReactComponent<IProps
         this.filtersHandler.update({filteredTags});
     }
 
+    private startReview(mode: RepetitionMode = 'reading') {
+        const persistenceLayer = this.props.persistenceLayerManager.get();
+        const datastoreCapabilities = persistenceLayer.capabilities();
+        const prefs = persistenceLayer.datastore.getPrefs();
+
+        Reviewers.start(datastoreCapabilities, prefs.get().prefs, this.state.data, mode, 10);
+    }
+
 }
 
 export interface IProps {
@@ -187,6 +234,7 @@ export interface IProps {
     readonly repoDocMetaManager: RepoDocMetaManager;
 
     readonly repoDocMetaLoader: RepoDocMetaLoader;
+
 }
 
 export interface IState {

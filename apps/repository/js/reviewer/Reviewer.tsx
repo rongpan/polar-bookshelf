@@ -1,39 +1,48 @@
 import * as React from 'react';
 import {Button, Progress} from "reactstrap";
 import {AnnotationPreview} from "../annotation_repo/AnnotationPreview";
-import {ISODateTimeString} from "polar-shared/src/metadata/ISODateTimeStrings";
-import {IDStr} from "polar-shared/src/util/Strings";
-import {HighlightColor} from "polar-shared/src/metadata/IBaseHighlight";
 import {Percentages} from "polar-shared/src/util/Percentages";
-import {Answer} from "../../../../../polar-app-public/polar-spaced-repetition-api/src/scheduler/S2Plus/S2Plus";
+import {Answer, Rating} from "polar-spaced-repetition-api/src/scheduler/S2Plus/S2Plus";
+import {
+    ReadingTaskAction,
+    TaskRep
+} from "polar-spaced-repetition/src/spaced_repetition/scheduler/S2Plus/TasksCalculator";
+import {Platforms} from "../../../../web/js/util/Platforms";
+import {Row} from "../../../../web/js/ui/layout/Row";
+import {FlashcardCard} from "./cards/FlashcardCard";
+import {FlashcardTaskAction} from "./cards/FlashcardTaskAction";
+import {ReadingCard} from "./cards/ReadingCard";
 
-export class Reviewer extends React.Component<IProps, IState> {
+export class Reviewer<A> extends React.Component<IProps<A>, IState<A>> {
 
-    constructor(props: IProps, context: any) {
+    constructor(props: IProps<A>, context: any) {
         super(props, context);
 
-        this.onAnswer = this.onAnswer.bind(this);
+        this.onRating = this.onRating.bind(this);
+        this.doNext = this.doNext.bind(this);
+        this.onSuspended = this.onSuspended.bind(this);
 
-        const pending = [...this.props.reviews];
-        const total = this.props.reviews.length;
-        const review = pending.shift();
+        const pending = [...this.props.taskReps];
+        const total = this.props.taskReps.length;
+        const taskRep = pending.shift();
 
         this.state = {
-            review, pending, total, finished: 0
+            taskRep, pending, total, finished: 0
         };
 
     }
 
     public render() {
 
-        const review = this.state.review;
+        const taskRep = this.state.taskRep;
 
-        if (! review) {
+        if (! taskRep) {
             // we're done...
+            console.log("No tasks were given");
             return <div/>;
         }
 
-        const {id, text, created, color} = review;
+        const {id, action, created, color} = taskRep;
 
         const perc = Math.floor(Percentages.calculate(this.state.finished, this.state.total));
 
@@ -49,68 +58,153 @@ export class Reviewer extends React.Component<IProps, IState> {
 
         // again, hard, good, easy
 
+        const style: React.CSSProperties = {
+            display: 'flex',
+            flexDirection: 'column',
+            background: 'var(--white)'
+        };
+
+        if (Platforms.isMobile()) {
+            style.width = '100%';
+            style.height = '100%';
+        } else {
+            style.maxHeight = '1000px';
+            style.width = '800px';
+            style.maxWidth = '800px';
+        }
+
+        // const Main = () => {
+        //
+        //     if (typeof action === 'string') {
+        //         return <AnnotationPreview id={id}
+        //                                   text={action}
+        //                                   created={created}
+        //                                   meta={{color}}/>
+        //     } else {
+        //
+        //         const flashcardTaskAction: FlashcardTaskAction
+        //             = action as any as FlashcardTaskAction;
+        //         const front = flashcardTaskAction.front;
+        //         const back = flashcardTaskAction.back;
+        //         const answers = <div/>;
+        //
+        //         return <FlashcardCard front={front} back={back} answers={answers}/>
+        //     }
+        //
+        // };
+
+        const DoReadingCard = () => {
+
+            const readingTaskRep = taskRep as any as TaskRep<ReadingTaskAction>;
+
+            return <ReadingCard taskRep={readingTaskRep}
+                                onRating={(_, rating) => this.onRating(taskRep, rating)}/>
+
+        };
+
+        const DoFlashcardCard = () => {
+
+            const flashcardTaskRep = taskRep as any as TaskRep<FlashcardTaskAction>;
+
+            const flashcardTaskAction = flashcardTaskRep.action;
+            const front = flashcardTaskAction.front;
+            const back = flashcardTaskAction.back;
+
+            return <FlashcardCard taskRep={flashcardTaskRep}
+                                  front={front}
+                                  back={back}
+                                  onRating={(_, rating) => this.onRating(taskRep, rating)}/>
+        };
+
+        const Card = () => {
+
+            if (typeof action === 'string') {
+                return <DoReadingCard/>;
+
+            } else {
+                return <DoFlashcardCard/>;
+            }
+
+        };
+
         return (
 
-            <div>
+            <div style={style}
+                 className="ml-auto mr-auto h-100 border p-1">
 
-                <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        maxHeight: '1000px',
-                        maxWidth: '800px'
-                     }}
-                     className="ml-auto mr-auto h-100 border p-1">
+                <Row>
+                    <Row.Main>
 
-                    <div className="pt-1 pb-1">
+                        <b>Review</b>
 
-                        <Progress value={perc}>{createProgressText()}</Progress>
+                    </Row.Main>
 
-                    </div>
+                    <Row.Right>
 
-                    <div className="p-1"
-                         style={{
-                            flexGrow: 1,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            overflowY: 'auto'
-                         }}>
+                        <Button size="sm"
+                                color="light"
+                                className="text-muted mr-1"
+                                onClick={() => this.onSuspended(taskRep)}>
+                            <i className="fas fa-pause"/> suspend
+                        </Button>
 
-                        <div style={{
-                                flexGrow: 1
-                             }}>
+                        <Button size="sm"
+                                color="light"
+                                className="text-muted"
+                                onClick={() => this.props.onFinished(true)}>
 
-                            <AnnotationPreview id={id}
-                                               text={text}
-                                               created={created}
-                                               meta={{color}}/>
+                            <i className="far fa-times-circle"/>
 
-                        </div>
+                        </Button>
 
-                    </div>
+                    </Row.Right>
 
-                    <div className="text-center"
-                         style={{
-                             display: 'flex',
-                         }}>
+                </Row>
 
-                        <Button color="danger"
-                                className="m-1"
-                                style={{flexGrow: 1}}
-                                onClick={() => this.onAnswer(id, 0.0)}>Again</Button>
+                <div className="pt-1 pb-1">
 
-                        <Button color="secondary"
-                                className="m-1"
-                                style={{flexGrow: 1}}
-                                onClick={() => this.onAnswer(id, 0.5)}>Good</Button>
-
-                        <Button color="success"
-                                className="m-1"
-                                style={{flexGrow: 1}}
-                                onClick={() => this.onAnswer(id, 1.0)}>Easy</Button>
-
-                    </div>
+                    <Progress value={perc}>{createProgressText()}</Progress>
 
                 </div>
+
+
+                <Card/>
+
+                {/*<div className="p-1"*/}
+                {/*     style={{*/}
+                {/*        flexGrow: 1,*/}
+                {/*        display: 'flex',*/}
+                {/*        flexDirection: 'column',*/}
+                {/*        overflowY: 'auto'*/}
+                {/*     }}>*/}
+
+                {/*    <div style={{*/}
+                {/*            flexGrow: 1*/}
+                {/*         }}>*/}
+
+                {/*        <Main/>*/}
+
+                {/*    </div>*/}
+
+                {/*</div>*/}
+
+                {/*<div>*/}
+
+                {/*    <div className="text-sm text-grey700 mb-1 ml-1">*/}
+                {/*        <b>stage: </b> {taskRep.stage}*/}
+                {/*    </div>*/}
+
+                {/*    <div style={{*/}
+                {/*            display: 'flex',*/}
+                {/*        }}>*/}
+
+                {/*        <RatingButtons taskRep={taskRep}*/}
+                {/*                       stage={taskRep.stage}*/}
+                {/*                       onRating={this.onRating}/>*/}
+
+                {/*    </div>*/}
+
+                {/*</div>*/}
 
             </div>
 
@@ -118,19 +212,30 @@ export class Reviewer extends React.Component<IProps, IState> {
 
     }
 
-    private onAnswer(id: IDStr, answer: Answer) {
+    private onSuspended(taskRep: TaskRep<A>) {
+        this.props.onSuspended(taskRep);
+        this.doNext();
 
-        this.props.onAnswer(id, answer);
+    }
 
-        const review = this.state.pending.shift();
 
-        if (! review) {
+    private onRating(taskRep: TaskRep<A>, rating: Rating) {
+        this.props.onRating(taskRep, rating);
+        this.doNext();
+
+    }
+
+    private doNext() {
+
+        const taskRep = this.state.pending.shift();
+
+        if (! taskRep) {
             this.props.onFinished();
         }
 
         this.setState({
             ...this.state,
-            review,
+            taskRep,
             finished: this.state.finished + 1
         });
 
@@ -138,42 +243,49 @@ export class Reviewer extends React.Component<IProps, IState> {
 
 }
 
-export interface IProps {
+/**
+ * Called when we're finished all the tasks.
+ *
+ * @param cancelled true if the user explicitly cancelled the review.
+ */
+export type FinishedCallback = (cancelled?: boolean) => void;
 
-    readonly reviews: ReadonlyArray<Review>;
+
+/**
+ * Called when we're finished all the tasks.
+ *
+ * @param cancelled true if the user explicitly cancelled the review.
+ */
+export interface RatingCallback<A> {
+    (taskRep: TaskRep<A>, rating: Rating): void;
+}
+
+export interface IProps<A> {
+
+    readonly taskReps: ReadonlyArray<TaskRep<A>>;
 
     /**
      * Callback for when we receive answers and their values.
      */
-    readonly onAnswer: (id: IDStr, answer: Answer) => void;
+    readonly onRating: RatingCallback<A>;
 
-    readonly onFinished: () => void;
+    readonly onSuspended: (taskRep: TaskRep<A>) => void;
+
+    readonly onFinished: FinishedCallback;
 
 }
 
-export interface IState {
+export interface IState<A> {
 
     /**
      * The review we're working with or undefined when there are no more.
      */
-    readonly review?: Review | undefined;
+    readonly taskRep?: TaskRep<A> | undefined;
 
-    readonly pending: Review[];
+    readonly pending: TaskRep<A>[];
 
     readonly finished: number;
 
     readonly total: number;
-
-}
-
-export interface Review {
-
-    readonly id: IDStr;
-
-    readonly text: string;
-
-    readonly created: ISODateTimeString;
-
-    readonly color: HighlightColor;
 
 }

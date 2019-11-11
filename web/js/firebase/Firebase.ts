@@ -75,12 +75,22 @@ export class Firebase {
 
     }
 
+    public static async currentUserID(): Promise<UserIDStr | undefined> {
 
+        const user = await this.currentUser();
 
+        if  (user) {
+            return user.uid;
+        }
+
+        return undefined;
+    }
 
 }
 
-export type UserID = string;
+export type UserIDStr = string;
+
+export type UserID = UserIDStr;
 
 /**
  * Function who's sole purpose is unsubscribing to snapshots.

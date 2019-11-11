@@ -8,6 +8,9 @@ import {FilteredTags} from '../FilteredTags';
 import InputGroup from 'reactstrap/lib/InputGroup';
 import Input from 'reactstrap/lib/Input';
 import {SimpleTooltipEx} from '../../../../web/js/ui/tooltip/SimpleTooltipEx';
+import {Button} from "reactstrap";
+import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
+import {DocSidebarButton} from "./DocSidebarButton";
 
 const log = Logger.create();
 
@@ -56,6 +59,7 @@ export class DocRepoFilterBar extends React.Component<IProps, IState> {
 
                             <ToggleButton id="toggle-flagged"
                                           label="flagged"
+                                          iconClassName="fas fa-flag"
                                           initialValue={false}
                                           onChange={value => this.props.onToggleFlaggedOnly(value)}/>
 
@@ -78,6 +82,7 @@ export class DocRepoFilterBar extends React.Component<IProps, IState> {
 
                             <ToggleButton id="toggle-archived"
                                           label="archived"
+                                          iconClassName="fas fa-check"
                                           initialValue={false}
                                           onChange={value => this.props.onToggleFilterArchived(value)}/>
 
@@ -103,7 +108,6 @@ export class DocRepoFilterBar extends React.Component<IProps, IState> {
 
                     <div className="header-filter-box">
 
-
                         <SimpleTooltipEx text={`
                                             Filter the document list by the title of the document.
                                          `}>
@@ -124,6 +128,14 @@ export class DocRepoFilterBar extends React.Component<IProps, IState> {
 
                 </div>
 
+                {/*<div className="header-filter-box mr-1"*/}
+                {/*     style={{whiteSpace: 'nowrap', marginTop: 'auto', marginBottom: 'auto'}}>*/}
+
+                {/*    <DocSidebarButton selected={this.props.docSidebarVisible}*/}
+                {/*                      onChange={() => this.props.onDocSidebarVisible(! this.props.docSidebarVisible)}/>*/}
+
+                {/*</div>*/}
+
                 <Right/>
 
             </div>
@@ -137,6 +149,8 @@ export class DocRepoFilterBar extends React.Component<IProps, IState> {
 }
 
 export interface IProps {
+
+    readonly docSidebarVisible: boolean;
 
     /**
      * Called when the flagged toggle is enabled/disabled
@@ -163,6 +177,8 @@ export interface IProps {
      * A function to refresh the table when new results have been selected.
      */
     readonly refresher: () => void;
+
+    readonly onDocSidebarVisible: (visible: boolean) => void;
 
     /**
      * A provider that can be updated with the filtered tags that are currently

@@ -68,7 +68,6 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
 
     }
 
-
     private createColumnCheckbox() {
 
         return {
@@ -613,7 +612,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                     handleSelect(event);
                 },
 
-                onClick: (event: MouseEvent, handleOriginal?: () => void) => {
+                onMouseDown: (event: MouseEvent, handleOriginal?: () => void) => {
                     handleSelect(event);
                 },
 
@@ -642,6 +641,8 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                     defaultPageSize={50}
                     noDataText="No documents available."
                     className="-striped -highlight"
+                    style={{height: '100%'}}
+                    showPageSizeOptions={false}
                     defaultSorted={[
                         {
                             id: "progress",

@@ -65,13 +65,15 @@ export class RepoAnnotations {
 
         let text: string | undefined;
 
-        if ((<any> sourceAnnotation).text) {
-            const sourceText: Text = (<any> sourceAnnotation).text;
+        const anySourceAnnotation = <any> sourceAnnotation;
+
+        if (anySourceAnnotation.text) {
+            const sourceText: Text = anySourceAnnotation.revisedText || anySourceAnnotation.text;
             text = Texts.toPlainText(sourceText);
         }
 
-        if ((<any> sourceAnnotation).content) {
-            const sourceText: Text = (<any> sourceAnnotation).content;
+        if (anySourceAnnotation.content) {
+            const sourceText: Text = anySourceAnnotation.content;
             text = Texts.toPlainText(sourceText);
         }
 
@@ -90,7 +92,7 @@ export class RepoAnnotations {
         if (type === AnnotationType.TEXT_HIGHLIGHT) {
             const textHighlight = <TextHighlight> sourceAnnotation;
             meta = {
-                color: HighlightColors.toDefaultColor(textHighlight.color)
+                color: HighlightColors.withDefaultColor(textHighlight.color)
             };
         }
 
@@ -100,7 +102,7 @@ export class RepoAnnotations {
 
             const areaHighlight = <AreaHighlight> sourceAnnotation;
             meta = {
-                color: HighlightColors.toDefaultColor(areaHighlight.color)
+                color: HighlightColors.withDefaultColor(areaHighlight.color)
             };
 
             const docFileResolver = DocFileResolvers.createForPersistenceLayer(persistenceLayerProvider);
@@ -117,7 +119,8 @@ export class RepoAnnotations {
             tags: docInfo.tags || {},
             meta,
             docInfo,
-            img
+            img,
+            original: sourceAnnotation
         };
 
     }

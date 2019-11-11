@@ -1,5 +1,7 @@
 import {FilteredTags} from '../FilteredTags';
 import {HighlightColor} from "polar-shared/src/metadata/IBaseHighlight";
+import {AnnotationType} from "polar-shared/src/metadata/AnnotationType";
+import {SetArrays} from "polar-shared/src/util/SetArrays";
 
 /**
  * Keeps track of the filters so that we can just call a function updating
@@ -63,9 +65,18 @@ export class AnnotationRepoFiltersHandler {
             modified = true;
         }
 
-        if (filters.color !== undefined) {
-            this.filters.color = filters.color;
+        if (filters.colors !== undefined &&
+            ! SetArrays.equal(this.filters.colors, filters.colors)) {
+            this.filters.colors = filters.colors;
             modified = true;
+        }
+
+        if (filters.annotationTypes !== undefined &&
+            ! SetArrays.equal(this.filters.annotationTypes, filters.annotationTypes)) {
+
+            this.filters.annotationTypes = filters.annotationTypes;
+            modified = true;
+
         }
 
         if (modified) {
@@ -95,11 +106,13 @@ export interface MutableAnnotationRepoFilters {
      */
     archived?: boolean;
 
-    color?: HighlightColor;
+    colors: ReadonlyArray<HighlightColor>;
 
     text: string;
 
     filteredTags: FilteredTags;
+
+    annotationTypes: ReadonlyArray<AnnotationType>;
 
 }
 
@@ -120,6 +133,10 @@ export class DefaultAnnotationRepoFilters implements MutableAnnotationRepoFilter
     public readonly flagged: boolean = false;
 
     public readonly text: string = "";
+
+    public readonly annotationTypes: ReadonlyArray<AnnotationType> = [];
+
+    public readonly colors: ReadonlyArray<AnnotationType> = [];
 
 }
 

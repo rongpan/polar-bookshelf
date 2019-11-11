@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {TreeView, TRoot} from './TreeView';
 import {TagDescriptor} from '../../tags/TagNode';
-import {Tag, Tags} from 'polar-shared/src/tags/Tags';
+import {Tag} from 'polar-shared/src/tags/Tags';
 import {TagFilter} from './TagFilter';
 import {NullCollapse} from '../null_collapse/NullCollapse';
 import {TagNodes, TagType} from "../../tags/TagNodes";
@@ -104,6 +104,7 @@ export class TagTree extends React.Component<IProps, IState> {
         tags.push({
             label: path,
             id: path,
+            members: [],
             count: 0
         });
 

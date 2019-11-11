@@ -1,9 +1,10 @@
 import * as React from 'react';
 import {Button, Popover, PopoverBody} from 'reactstrap';
 import {NULL_FUNCTION} from 'polar-shared/src/util/Functions';
-import {IDs} from "../../../../../web/js/util/IDs";
-import {ColorButton} from '../../../../../web/js/ui/colors/ColorButton';
-import {ColorSelectorBox} from "../../../../../web/js/ui/colors/ColorSelectorBox";
+import {IDs} from "../../../../../../../web/js/util/IDs";
+import {ColorSelectorBox, ColorStr} from "../../../../../../../web/js/ui/colors/ColorSelectorBox";
+import {DropdownChevron} from "../../../../../../../web/js/ui/util/DropdownChevron";
+import {Buttons} from "../Buttons";
 
 export class HighlightColorFilterButton extends React.PureComponent<IProps, IState> {
 
@@ -13,6 +14,8 @@ export class HighlightColorFilterButton extends React.PureComponent<IProps, ISta
         super(props, context);
 
         this.deactivate = this.deactivate.bind(this);
+        this.activate = this.activate.bind(this);
+        this.onSelected = this.onSelected.bind(this);
 
         this.state = {
             open: false
@@ -39,36 +42,30 @@ export class HighlightColorFilterButton extends React.PureComponent<IProps, ISta
     public render() {
 
         const {id, props} = this;
+        const {selected} = props;
 
         const onSelected = props.onSelected || NULL_FUNCTION;
+
+        const active = selected !== undefined && selected.length > 0;
+        const buttonProps = Buttons.activeProps(active);
 
         return (
 
             <div className={this.props.className || ''}
                  style={this.props.style}>
 
-                {/*<ColorButton color={'yellow'}*/}
-                {/*             size={this.props.size}*/}
-                {/*             id={id}*/}
-                {/*             onSelected={() => this.activate()}/>*/}
-
-                <Button color="light"
+                <Button color={buttonProps.color}
+                        outline={buttonProps.outline}
                         id={id}
+                        size="sm"
+                        style={{
+                            whiteSpace: 'nowrap'
+                        }}
                         onClick={() => this.activate()}>
 
-                    <i className="fas fa-swatchbook"/>
+                    <i className="fas fa-swatchbook"/> <span className="d-none-mobile">Colors</span> <DropdownChevron/>
 
                 </Button>
-
-                {/*</Button>*/}
-
-                {/*<Button color="light"*/}
-                {/*        className="p-0"*/}
-                {/*        size={this.props.size}*/}
-                {/*        id={id}*/}
-                {/*        onSelected={() => this.activate()}>*/}
-                {/*    <i className="fas fa-swatchbook"/>*/}
-                {/*</Button>*/}
 
                 <Popover placement="bottom"
                          trigger="legacy"
@@ -83,10 +80,8 @@ export class HighlightColorFilterButton extends React.PureComponent<IProps, ISta
 
                         {/*FIXME: reset button and multi-colors*/}
 
-                        <ColorSelectorBox onSelected={(color) => {
-                            this.deactivate();
-                            onSelected(color);
-                        }}/>
+                        <ColorSelectorBox selected={this.props.selected}
+                                          onSelected={(color) => this.onSelected(color)}/>
 
                     </PopoverBody>
 
@@ -94,6 +89,22 @@ export class HighlightColorFilterButton extends React.PureComponent<IProps, ISta
 
             </div>
         );
+
+    }
+
+    private onSelected(color: ColorStr) {
+
+        const onSelected = this.props.onSelected || NULL_FUNCTION;
+
+        this.deactivate();
+
+        const selected = this.props.selected || [];
+
+        const newSelected = selected.includes(color) ?
+            selected.filter(current => current != color) :
+            [...selected, color];
+
+        onSelected(newSelected);
 
     }
 
@@ -107,7 +118,9 @@ interface IProps {
 
     readonly size?: string;
 
-    readonly onSelected?: (color: string) => void;
+    readonly onSelected?: (selected: ReadonlyArray<ColorStr>) => void;
+
+    readonly selected?: ReadonlyArray<ColorStr>;
 
 }
 

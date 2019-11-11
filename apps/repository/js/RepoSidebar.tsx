@@ -13,8 +13,6 @@ import {SimpleTab} from "../../../web/js/ui/simple_tab/SimpleTab";
 import {Platforms} from "../../../web/js/util/Platforms";
 import {NullCollapse} from "../../../web/js/ui/null_collapse/NullCollapse";
 
-const log = Logger.create();
-
 const Styles: IStyleMap = {
 
     sidebar: {
@@ -26,8 +24,8 @@ const Styles: IStyleMap = {
         zIndex: 99999,
         height: 'calc(100%)',
         width: '200px',
-        paddingLeft: '1px',
-        paddingTop: '1px'
+        // paddingLeft: '1px',
+        // paddingTop: '1px'
     },
 
     subheader: {
@@ -41,6 +39,7 @@ const Styles: IStyleMap = {
 
 /**
  * Simple header for the repository which supports arbitrary children.
+ * @Deprecated
  */
 export class RepoSidebar extends React.Component<IProps, IState> {
 
@@ -110,9 +109,10 @@ export class RepoSidebar extends React.Component<IProps, IState> {
 
                     <div className="ml-4">
                         <SimpleTabs>
-                            <SimpleTab target={{pathname: "/", hash: "#"}} text="Document Repository"/>
-                            <SimpleTab target={{pathname: "/", hash: "#annotations"}} text="Annotations"/>
-                            <SimpleTab target={{pathname: "/groups"}} text="Groups"/>
+                            {/*<SimpleTab target={{pathname: "/", hash: "#"}} text="Document Repository"/>*/}
+                            {/*<SimpleTab target={{pathname: "/", hash: "#annotations"}} text="Annotations"/>*/}
+                            {/*<SimpleTab target={{pathname: "/", hash: "#stats"}} text="Statistics"/>*/}
+                            {/*<SimpleTab target={{pathname: "/groups"}} text="Groups"/>*/}
                         </SimpleTabs>
                     </div>
 
@@ -141,7 +141,7 @@ export class RepoSidebar extends React.Component<IProps, IState> {
                          data-expanded={this.state.expanded}
                          onKeyUp={event => this.onKeyUp(event)}>
 
-                    <div className="subheader p-1" style={Styles.subheader}>
+                    <div className="subheader" style={Styles.subheader}>
 
                         <NavButtons/>
 
