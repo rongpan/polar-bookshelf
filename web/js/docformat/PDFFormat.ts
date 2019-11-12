@@ -11,6 +11,18 @@ export class PDFFormat extends DocFormat {
         super();
     }
 
+    public init() {
+
+        if (window.PDFViewerApplication &&
+            window.PDFViewerApplication.preferences &&
+            window.PDFViewerApplication.preferences.set) {
+
+            window.PDFViewerApplication.preferences.set('textLayerMode', 2);
+
+        }
+
+    }
+
     /**
      * Get the current doc fingerprint or null if it hasn't been loaded yet.
      */
