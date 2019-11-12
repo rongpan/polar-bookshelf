@@ -28,6 +28,10 @@ export abstract class AbstractContainerLifecycleListener implements ContainerLif
 
         let element = this.container.element;
 
+        // FIXME: I think this is what we need to change. I think we need to look at
+        // when the data-loaded on the .page is changed... not sure about the
+        // thumbnail though.
+
         element.addEventListener('DOMNodeInserted', this.listener, false);
 
     }
