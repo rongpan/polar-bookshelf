@@ -1,5 +1,8 @@
 const PREFIX = 'feature:';
 
+/**
+ * Toggle features based on settings specific for each user.
+ */
 export class FeatureToggles {
 
     /**
