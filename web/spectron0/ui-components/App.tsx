@@ -4,7 +4,6 @@ import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
 import {Group} from "../../js/datastore/sharing/db/Groups";
 import {ISODateTimeStrings} from "polar-shared/src/metadata/ISODateTimeStrings";
 import {
-    Task,
     TaskRep,
     TasksCalculator
 } from "polar-spaced-repetition/src/spaced_repetition/scheduler/S2Plus/TasksCalculator";
@@ -22,6 +21,7 @@ import {FlashcardTaskActions} from "../../../apps/repository/js/reviewer/cards/F
 import {FlashcardCard} from "../../../apps/repository/js/reviewer/cards/FlashcardCard";
 import {Preconditions} from "polar-shared/src/Preconditions";
 import {HotKeys} from "react-hotkeys";
+import { Task } from 'polar-spaced-repetition-api/src/scheduler/S2Plus/S2Plus';
 
 const styles = {
     swatch: {
@@ -251,7 +251,7 @@ export class App<P> extends React.Component<{}, IAppState> {
         const taskReps = createFlashcardTaskReps();
 
         const keyMap = {
-            FIND: 'backspace'
+            FIND: 'shift+f' // this is kind of ugly vs F but not too bad.
         };
 
         // FIXME: I think this all requires the most recent version of react... and I thinkw e have to update this
@@ -260,12 +260,26 @@ export class App<P> extends React.Component<{}, IAppState> {
         // FIXME: the single key bindings like 'f' don't seem to work properly but other than that this seems super
         // easy to setup and work with .
 
-        const doFind = () => {
-            console.log("FIXME within find... ");
-        };
 
-        const handlers = {
-            FIND: doFind
+
+        const MyComponent = () => {
+
+            const doFind = React.useCallback(() => {
+                console.log("FIXME within find... ");
+            }, []);
+
+            const handlers = {
+                FIND: doFind
+            };
+
+            return <HotKeys handlers={handlers}>
+                <div>
+                    This is some text.
+                </div>
+
+                <input type="text"></input>
+            </HotKeys>
+
         };
 
         return (
@@ -279,14 +293,9 @@ export class App<P> extends React.Component<{}, IAppState> {
                 {/*<StartReviewButton onClick={NULL_FUNCTION}/>*/}
 
                 <HotKeys keyMap={keyMap}>
-
-                    <HotKeys handlers={handlers}>
-                        <div>
-                            This is some text.
-                        </div>
-
-                        <input type="text"></input>
-                    </HotKeys>
+                    <div style={{width: '100%', height: '100%', backgroundColor: 'red'}}>
+                        <MyComponent/>
+                    </div>
                 </HotKeys>
 
                 {/*<LightModal>*/}
