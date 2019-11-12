@@ -20,7 +20,7 @@ import {FlashcardTaskAction} from "../../../apps/repository/js/reviewer/cards/Fl
 import {FlashcardTaskActions} from "../../../apps/repository/js/reviewer/cards/FlashcardTaskActions";
 import {FlashcardCard} from "../../../apps/repository/js/reviewer/cards/FlashcardCard";
 import {Preconditions} from "polar-shared/src/Preconditions";
-import {getApplicationKeyMap, HotKeys} from "react-hotkeys";
+import {getApplicationKeyMap, HotKeys, KeyMap} from "react-hotkeys";
 import { Task } from 'polar-spaced-repetition-api/src/scheduler/S2Plus/S2Plus';
 
 const styles = {
@@ -250,19 +250,21 @@ export class App<P> extends React.Component<{}, IAppState> {
         // const taskReps = createReadingTaskReps();
         const taskReps = createFlashcardTaskReps();
 
-        const keyMap = {
+        const keyMap: KeyMap = {
             FIND: {
                 name: 'find',
                 group: 'main',
                 description: "Find documents by text",
+                action: 'keypress',
+                sequence: 'shift+f',
                 sequences: ['shift+f'] // this is kind of ugly vs F but not too bad.
             },
-            HELP: {
-                name: 'help',
-                group: 'main',
-                description: 'show the list of key bindings',
-                sequences: ['control+?'] // this is kind of ugly vs F but not too bad.
-            }
+            // HELP: {
+            //     name: 'help',
+            //     group: 'main',
+            //     description: 'show the list of key bindings',
+            //     sequences: ['control+?'] // this is kind of ugly vs F but not too bad.
+            // }
         };
 
         // FIXME: I think this all requires the most recent version of react... and I thinkw e have to update this
@@ -310,6 +312,8 @@ export class App<P> extends React.Component<{}, IAppState> {
                 </div>
             );
         };
+
+        // TODO:
 
         const MyComponent = () => {
 

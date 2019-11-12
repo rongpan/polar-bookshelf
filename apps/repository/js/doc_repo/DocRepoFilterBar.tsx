@@ -11,6 +11,7 @@ import {SimpleTooltipEx} from '../../../../web/js/ui/tooltip/SimpleTooltipEx';
 import {Button} from "reactstrap";
 import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
 import {DocSidebarButton} from "./DocSidebarButton";
+import {DocRepoTextFilter} from "./filter_bar/DocRepoTextFilter";
 
 const log = Logger.create();
 
@@ -110,21 +111,7 @@ export class DocRepoFilterBar extends React.Component<IProps, IState> {
 
                     <div className="header-filter-box">
 
-                        <SimpleTooltipEx text={`
-                                            Filter the document list by the title of the document.
-                                         `}>
-
-                            <InputGroup size="md">
-
-                                <Input id="filter_title"
-                                       type="text"
-                                       placeholder="Filter by title"
-                                       onChange={(value) => this.props.onFilterByTitle(value.target.value)}/>
-
-                            </InputGroup>
-
-
-                        </SimpleTooltipEx>
+                        <DocRepoTextFilter onFilterByTitle={this.props.onFilterByTitle}/>
 
                     </div>
 

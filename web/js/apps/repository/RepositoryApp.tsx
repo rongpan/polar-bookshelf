@@ -64,13 +64,9 @@ import {GroupHighlightScreen} from "../../../../apps/repository/js/group/highlig
 import {PrefetchedUserGroupsBackgroundListener} from "../../datastore/sharing/db/PrefetchedUserGroupsBackgroundListener";
 import {PlatformStyles} from "../../ui/PlatformStyles";
 import {Devices} from "../../util/Devices";
-import {HotKeys} from "react-hotkeys";
+import {ExtendedKeyMapOptions, HotKeys, KeyMap} from "react-hotkeys";
 
 const log = Logger.create();
-
-const KEY_MAP = {
-    FIND: ["F"]
-};
 
 export class RepositoryApp {
 
@@ -154,14 +150,17 @@ export class RepositoryApp {
             });
 
         }
+        const keyMap = this.createKeyMap();
 
         const renderDocRepoScreen = () => {
             return (
                 <AuthRequired authStatus={authStatus}>
+                    <HotKeys keyMap={keyMap}>
                     <DocRepoScreen persistenceLayerManager={this.persistenceLayerManager}
                                         updatedDocInfoEventDispatcher={updatedDocInfoEventDispatcher}
                                         repoDocMetaManager={this.repoDocInfoManager}
                                         repoDocMetaLoader={this.repoDocInfoLoader}/>
+                    </HotKeys>
                 </AuthRequired>
             );
         };
@@ -302,71 +301,76 @@ export class RepositoryApp {
 
         ReactDOM.render(
 
-            <div style={{height: '100%'}}>
+            <HotKeys keyMap={keyMap}
+                 style={{height: '100%'}}>
+                <div style={{height: '100%'}}>
 
-            {/*<PrioritizedSplashes persistenceLayerManager={this.persistenceLayerManager}/>*/}
+                    {/*<PrioritizedSplashes persistenceLayerManager={this.persistenceLayerManager}/>*/}
 
-                <Splashes persistenceLayerManager={this.persistenceLayerManager}/>
+                    <Splashes persistenceLayerManager={this.persistenceLayerManager}/>
 
-                <SyncBar progress={syncBarProgress}/>
+                    <SyncBar progress={syncBarProgress}/>
 
-                <RepositoryTour/>
-                <HotKeys keyMap={KEY_MAP}>
+                    <RepositoryTour/>
+                    {/*<HotKeys keyMap={keyMap}>*/}
 
-                    <BrowserRouter>
+                        <BrowserRouter>
 
-                        <Switch location={ReactRouters.createLocationWithPathnameHash()}>
+                            <Switch location={ReactRouters.createLocationWithPathnameHash()}>
 
-                            <Route exact path='/#annotations' render={renderAnnotationRepoScreen} />
+                                <Route exact path='/#annotations' render={renderAnnotationRepoScreen} />
 
-                            <Route exact path='/#whats-new' render={renderWhatsNewScreen} />
+                                <Route exact path='/#whats-new' render={renderWhatsNewScreen} />
 
-                            <Route exact path='/#(logout|overview|login|configured|invite|premium)?' render={renderDocRepoScreen}/>
+                                <Route exact path='/#(logout|overview|login|configured|invite|premium)?' render={renderDocRepoScreen}/>
 
-                            <Route exact path='/#community' render={renderCommunityScreen}/>
+                                <Route exact path='/#community' render={renderCommunityScreen}/>
 
-                            <Route exact path='/#stats' render={renderStatsScreen}/>
+                                <Route exact path='/#stats' render={renderStatsScreen}/>
 
-                            <Route exact path='/#logs' render={renderLogsScreen}/>
+                                <Route exact path='/#logs' render={renderLogsScreen}/>
 
-                            <Route exact path='/#editors-picks' render={editorsPicksScreen}/>
+                                <Route exact path='/#editors-picks' render={editorsPicksScreen}/>
 
-                            <Route exact path='/#plans' render={premiumScreen}/>
+                                <Route exact path='/#plans' render={premiumScreen}/>
 
-                            <Route exact path='/#support' render={supportScreen}/>
+                                <Route exact path='/#support' render={supportScreen}/>
 
-                            <Route exact path='/#premium' render={premiumScreen}/>
+                                <Route exact path='/#premium' render={premiumScreen}/>
 
-                            <Route path='/group/:group/highlights' render={renderGroupHighlightsScreen}/>
-                            <Route path='/group/:group/docs' render={renderGroupScreen}/>
+                                <Route path='/group/:group/highlights' render={renderGroupHighlightsScreen}/>
+                                <Route path='/group/:group/docs' render={renderGroupScreen}/>
 
-                            <Route path='/group/:group/highlight/:id' render={renderGroupHighlightScreen}/>
+                                <Route path='/group/:group/highlight/:id' render={renderGroupHighlightScreen}/>
 
-                            <Route path='/group/:group' render={renderGroupHighlightsScreen}/>
+                                <Route path='/group/:group' render={renderGroupHighlightsScreen}/>
 
-                            <Route exact path='/groups' render={renderGroupsScreen}/>
+                                <Route exact path='/groups' render={renderGroupsScreen}/>
 
-                            <Route exact path='/groups/create' render={renderCreateGroupScreen}/>
+                                <Route exact path='/groups/create' render={renderCreateGroupScreen}/>
 
-                            <Route exact path='/' render={renderDefaultScreenByDevice}/>
+                                <Route exact path='/' render={renderDefaultScreenByDevice}/>
 
-                        </Switch>
+                            </Switch>
 
-                    </BrowserRouter>
+                        </BrowserRouter>
 
+                    {/*</HotKeys>*/}
+
+                    {/*Used for file uploads.  This has to be on the page and can't be*/}
+                    {/*selectively hidden by components.*/}
+                    <Input type="file"
+                           id="file-upload"
+                           name="file-upload"
+                           accept=".pdf, .PDF"
+                           multiple
+                           onChange={() => this.onFileUpload()}
+                           style={{display: 'none'}}/>
+
+                </div>
                 </HotKeys>
+                ,
 
-                {/*Used for file uploads.  This has to be on the page and can't be*/}
-                {/*selectively hidden by components.*/}
-                <Input type="file"
-                       id="file-upload"
-                       name="file-upload"
-                       accept=".pdf, .PDF"
-                       multiple
-                       onChange={() => this.onFileUpload()}
-                       style={{display: 'none'}}/>
-
-            </div>,
 
             rootElement
 
@@ -388,6 +392,29 @@ export class RepositoryApp {
         }
 
         AppInstance.notifyStarted('RepositoryApp');
+
+    }
+
+    private createKeyMap(): KeyMap {
+
+        const find: ExtendedKeyMapOptions = {
+            name: 'find',
+            group: 'main',
+            description: "Find documents by text",
+            action: 'keypress',
+            sequence: 'f',
+            sequences: ['f'] // this is kind of ugly vs F but not too bad.
+        };
+
+        return {
+            FIND: find,
+            // HELP: {
+            //     name: 'help',
+            //     group: 'main',
+            //     description: 'show the list of key bindings',
+            //     sequences: ['control+?'] // this is kind of ugly vs F but not too bad.
+            // }
+        };
 
     }
 
