@@ -20,7 +20,7 @@ import {FlashcardTaskAction} from "../../../apps/repository/js/reviewer/cards/Fl
 import {FlashcardTaskActions} from "../../../apps/repository/js/reviewer/cards/FlashcardTaskActions";
 import {FlashcardCard} from "../../../apps/repository/js/reviewer/cards/FlashcardCard";
 import {Preconditions} from "polar-shared/src/Preconditions";
-import {getApplicationKeyMap, HotKeys, KeyMap} from "react-hotkeys";
+import {getApplicationKeyMap, GlobalHotKeys, HotKeys, KeyMap} from "react-hotkeys";
 import { Task } from 'polar-spaced-repetition-api/src/scheduler/S2Plus/S2Plus';
 
 const styles = {
@@ -325,13 +325,14 @@ export class App<P> extends React.Component<{}, IAppState> {
                 FIND: doFind
             };
 
-            return <HotKeys handlers={handlers}>
+            return <div>
+                <GlobalHotKeys keyMap={keyMap} handlers={handlers}/>
                 <div>
                     This is some text.
                 </div>
 
                 <input type="text"></input>
-            </HotKeys>
+            </div>
 
         };
 
@@ -345,11 +346,10 @@ export class App<P> extends React.Component<{}, IAppState> {
 
                 {/*<StartReviewButton onClick={NULL_FUNCTION}/>*/}
 
-                <HotKeys keyMap={keyMap}>
-                    <div style={{width: '100%', height: '100%', backgroundColor: 'red'}}>
-                        <MyComponent/>
-                    </div>
-                </HotKeys>
+                {/*<GlobalHotKeys keyMap={keyMap}/>*/}
+                <div style={{width: '100%', height: '100%', backgroundColor: 'red'}}>
+                    <MyComponent/>
+                </div>
 
                 {/*<LightModal>*/}
                 {/*    <Reviewer taskReps={taskReps}*/}
