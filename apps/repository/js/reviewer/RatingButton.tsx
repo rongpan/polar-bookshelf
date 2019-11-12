@@ -41,23 +41,27 @@ export class RatingButton<A> extends React.Component<IProps<A>, IState> {
 
             if (this.props.keyBinding) {
 
-                return <GlobalKeyBinding name="rate"
-                                         group="reviews"
-                                         description={"Rate this item as " + this.props.rating}
-                                         sequence={this.props.keyBinding}
-                                         handler={handler}/>
+                return (
+                    <GlobalKeyBinding name="rate"
+                                      group="reviews"
+                                      description={"Rate this item as " + this.props.rating}
+                                      sequence={this.props.keyBinding}
+                                      handler={handler}/>
+                );
 
             } else {
-                return [];
+                return null;
             }
 
         };
 
         return [
-            <Button color={color}
-                       className="m-1"
-                       style={{flexGrow: 1}}
-                       onClick={handler}>{text}</Button>
+            <Button key='button'
+                    color={color}
+                    className="m-1"
+                    style={{flexGrow: 1}}
+                    onClick={handler}>{text}</Button>,
+            <KeyBinding key='binding'/>
         ];
 
     }
