@@ -8,10 +8,16 @@ import {SpacedRep, SpacedReps} from "polar-firebase/src/firebase/om/SpacedReps";
 import {Firestore} from "../../../../web/js/firebase/Firestore";
 import {FirestoreLike} from "polar-firebase/src/firebase/Collections";
 import {LightModal} from "../../../../web/js/ui/LightModal";
-import {Answer, Rating, RepetitionMode} from "polar-spaced-repetition-api/src/scheduler/S2Plus/S2Plus";
 import {
-    ReadingTaskAction, Task,
-    TaskRep,
+    Answer,
+    MutableStageCounts,
+    Rating,
+    RepetitionMode, StageCountsCalculator,
+    TaskRep
+} from "polar-spaced-repetition-api/src/scheduler/S2Plus/S2Plus";
+import {
+    CalculatedTaskReps,
+    ReadingTaskAction,
     TasksCalculator
 } from "polar-spaced-repetition/src/spaced_repetition/scheduler/S2Plus/TasksCalculator";
 import {Logger} from "polar-shared/src/logger/Logger";
@@ -23,6 +29,9 @@ import {PersistentPrefs} from "../../../../web/js/util/prefs/Prefs";
 import {DatastoreCapabilities} from "../../../../web/js/datastore/Datastore";
 import {Dialogs} from "../../../../web/js/ui/dialogs/Dialogs";
 import {Preconditions} from "polar-shared/src/Preconditions";
+import {SpacedRepStat, SpacedRepStats} from "polar-firebase/src/firebase/om/SpacedRepStats";
+import {FirestoreCollections} from "./FirestoreCollections";
+import {RendererAnalytics} from "../../../../web/js/ga/RendererAnalytics";
 
 const log = Logger.create();
 
@@ -39,18 +48,6 @@ export class Reviewers {
 
     }
 
-    private static async configureFirestore() {
-
-        if (SpacedReps.firestoreProvider) {
-            return;
-        }
-
-        // TODO: dependency injection would rock here.
-
-        const firestore = await Firestore.getInstance();
-        SpacedReps.firestoreProvider = () => firestore as any as FirestoreLike;
-
-    }
 
     private static async notifyPreview(prefs: PersistentPrefs) {
         const latch = new Latch();
@@ -92,16 +89,22 @@ export class Reviewers {
 
         Preconditions.assertPresent(mode, 'mode');
 
+        const uid = await Firebase.currentUserID();
+
+        if (! uid) {
+            throw new Error("Not authenticated");
+        }
+
         if (! datastoreCapabilities.networkLayers.has('web')) {
             this.displayWebRequiredError();
             return;
         }
 
-        await this.configureFirestore();
+        await FirestoreCollections.configure();
 
         await this.notifyPreview(prefs);
 
-        const createTaskReps = async (): Promise<ReadonlyArray<TaskRep<any>>> => {
+        const calculateTaskReps = async (): Promise<CalculatedTaskReps<any>> => {
             switch (mode) {
                 case "flashcard":
                     return await ReviewerTasks.createFlashcardTasks(repoDocAnnotations, limit);
@@ -111,20 +114,30 @@ export class Reviewers {
             }
         };
 
-        const tasks = await createTaskReps();
 
-        if (tasks.length === 0) {
+        const calculatedTaskReps = await calculateTaskReps();
+        const {taskReps} = calculatedTaskReps;
+
+        const doWriteQueueStageCounts = async () => {
+
+            const spacedRepStats: SpacedRepStat = {
+                type: 'queue',
+                mode,
+                ...calculatedTaskReps.stageCounts
+            };
+
+            await SpacedRepStats.write(uid, spacedRepStats);
+
+        };
+
+        await doWriteQueueStageCounts();
+
+        if (taskReps.length === 0) {
             this.displayNoTasksMessage();
             return;
         }
 
-        console.log("Found N tasks: " + tasks.length);
-
-        const uid = await Firebase.currentUserID();
-
-        if (! uid) {
-            throw new Error("Not authenticated");
-        }
+        console.log("Found N tasks: " + taskReps.length);
 
         let injected: InjectedComponent | undefined;
 
@@ -132,20 +145,63 @@ export class Reviewers {
             injected!.destroy();
         };
 
+        const completedStageCounts = StageCountsCalculator.createMutable();
+
+        const incrCompletedStageCounts = (taskRep: TaskRep<any>) => {
+
+            switch (taskRep.stage) {
+                case "new":
+                    ++completedStageCounts.nrNew;
+                    break;
+                case "learning":
+                    ++completedStageCounts.nrLearning;
+                    break;
+                case "review":
+                    ++completedStageCounts.nrReview;
+                    break;
+                case "lapsed":
+                    ++completedStageCounts.nrLapsed;
+                    break;
+            }
+
+        };
+
+        const doWriteCompletedStageCounts = async () => {
+
+            const spacedRepStats: SpacedRepStat = {
+                type: 'completed',
+                mode,
+                ...completedStageCounts
+            };
+
+            await SpacedRepStats.write(uid, spacedRepStats);
+
+        };
+
+
         const onFinished = () => {
+
+            doWriteCompletedStageCounts()
+                .catch(err => log.error("Unable to write completed stage counts: ", err));
+
             doClose();
+
         };
 
         const onSuspended = (taskRep: TaskRep<ReadingTaskAction>) => {
 
-            const spacedRep = Dictionaries.onlyDefinedProperties({uid, ...taskRep, suspended: true});
+            const convertedSpacedRep = SpacedReps.convertFromTaskRep(uid, taskRep);
+            const spacedRep: SpacedRep = {
+                ...convertedSpacedRep,
+                suspended: true
+            };
 
             SpacedReps.set(taskRep.id, spacedRep)
                  .catch(err => log.error("Could not save state: ", err));
 
         };
 
-        const onRating = (taskRep: TaskRep<ReadingTaskAction>, rating: Rating) => {
+        const onRating = (taskRep: TaskRep<any>, rating: Rating) => {
 
             console.log("Saving rating... ");
 
@@ -153,15 +209,20 @@ export class Reviewers {
 
             const spacedRep: SpacedRep = Dictionaries.onlyDefinedProperties({uid, ...next});
 
+            incrCompletedStageCounts(taskRep);
+
             SpacedReps.set(next.id, spacedRep)
                 .then(() => console.log("Saving rating... done", JSON.stringify(spacedRep, null, '  ')))
                 .catch(err => log.error("Could not save state: ", err));
 
         };
 
+        // emit stats that the reviewer was run...
+        RendererAnalytics.event({category: 'reviewer', action: 'created-' + mode});
+
         injected = ReactInjector.inject(
             <LightModal>
-                <Reviewer taskReps={tasks}
+                <Reviewer taskReps={taskReps}
                           onRating={onRating}
                           onSuspended={onSuspended}
                           onFinished={onFinished}/>
