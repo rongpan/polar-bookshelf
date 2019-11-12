@@ -20,7 +20,7 @@ import {FlashcardTaskAction} from "../../../apps/repository/js/reviewer/cards/Fl
 import {FlashcardTaskActions} from "../../../apps/repository/js/reviewer/cards/FlashcardTaskActions";
 import {FlashcardCard} from "../../../apps/repository/js/reviewer/cards/FlashcardCard";
 import {Preconditions} from "polar-shared/src/Preconditions";
-import {HotKeys} from "react-hotkeys";
+import {getApplicationKeyMap, HotKeys} from "react-hotkeys";
 import { Task } from 'polar-spaced-repetition-api/src/scheduler/S2Plus/S2Plus';
 
 const styles = {
@@ -251,7 +251,18 @@ export class App<P> extends React.Component<{}, IAppState> {
         const taskReps = createFlashcardTaskReps();
 
         const keyMap = {
-            FIND: 'shift+f' // this is kind of ugly vs F but not too bad.
+            FIND: {
+                name: 'find',
+                group: 'main',
+                description: "Find documents by text",
+                sequences: ['shift+f'] // this is kind of ugly vs F but not too bad.
+            },
+            HELP: {
+                name: 'help',
+                group: 'main',
+                description: 'show the list of key bindings',
+                sequences: ['control+?'] // this is kind of ugly vs F but not too bad.
+            }
         };
 
         // FIXME: I think this all requires the most recent version of react... and I thinkw e have to update this
@@ -260,7 +271,45 @@ export class App<P> extends React.Component<{}, IAppState> {
         // FIXME: the single key bindings like 'f' don't seem to work properly but other than that this seems super
         // easy to setup and work with .
 
+        const renderDialog = () => {
+            const keyMap = getApplicationKeyMap();
 
+            const styles = {
+                DIALOG:  {},
+                KEYMAP_TABLE_CELL:  {}
+            };
+
+            return (
+                <div style={styles.DIALOG}>
+                    <h2>
+                        Keyboard shortcuts
+                    </h2>
+
+                    <table>
+                        <tbody>
+                        { Object.keys(keyMap).map((actionName) => {
+                            const { sequences, name } = keyMap[actionName];
+                            //
+                            // memo.push(
+                            //     <tr key={name || actionName}>
+                            //         <td style={styles.KEYMAP_TABLE_CELL}>
+                            //             { name }
+                            //         </td>
+                            //         <td style={styles.KEYMAP_TABLE_CELL}>
+                            //             { sequences.map(({sequence}) => <span key={sequence}>{sequence}</span>) }
+                            //         </td>
+                            //     </tr>
+                            // );
+                            //
+                            // return memo;
+                            return <div>{name}</div>
+                        })
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            );
+        };
 
         const MyComponent = () => {
 
