@@ -76,13 +76,9 @@ export class TextHighlightComponent extends Component {
      */
     public render() {
 
-        // console.log("FIXME:455");
-
         this.destroy();
 
         log.debug("render()");
-
-        // console.log("FIXME:111");
 
         Dictionaries.forDict<IRect>(this.textHighlight!.rects, (id, highlightRect) => {
 
@@ -140,8 +136,6 @@ export class TextHighlightComponent extends Component {
             // it might become confusing to debug this issue.  A quick fix is to
             // just reverse the array before we render the elements.
             pageElement.insertBefore(highlightElement, pageElement.firstChild);
-
-            // console.log("FIXME:222");
 
         });
 
