@@ -14,13 +14,22 @@ export class RatingButtons<A> extends React.Component<IProps<A>, IState> {
 
         const Learning = () => {
             return <RatingButtonSet taskRep={this.props.taskRep}
-                                    ratings={['again', 'good', 'easy']}
+                                    ratings={[
+                                        {value: 'again', keyBinding: '1'},
+                                        {value: 'good', keyBinding: '2'},
+                                        {value: 'easy', keyBinding: '3'}
+                                    ]}
                                     onRating={this.props.onRating}/>;
         };
 
         const Review = () => {
             return <RatingButtonSet taskRep={this.props.taskRep}
-                                    ratings={['again', 'hard', 'good', 'easy']}
+                                    ratings={[
+                                        {value: 'again', keyBinding: '1'},
+                                        {value: 'hard', keyBinding: '2'},
+                                        {value: 'good', keyBinding: '3'},
+                                        {value: 'easy', keyBinding: '4'}
+                                    ]}
                                     onRating={this.props.onRating}/>;
         };
 

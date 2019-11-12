@@ -4,6 +4,7 @@ import {TaskRep} from "polar-spaced-repetition/src/spaced_repetition/scheduler/S
 import {RatingCallback} from "./Reviewer";
 import {Rating} from "polar-spaced-repetition-api/src/scheduler/S2Plus/S2Plus";
 import {Strings} from "polar-shared/src/util/Strings";
+import {GlobalKeyBinding, GlobalKeyBindingStr} from "../../../../web/js/ui/key_bindings/GlobalKeyBinding";
 
 export class RatingButton<A> extends React.Component<IProps<A>, IState> {
 
@@ -34,10 +35,30 @@ export class RatingButton<A> extends React.Component<IProps<A>, IState> {
 
         const text = Strings.upperFirst(this.props.rating);
 
-        return <Button color={color}
+        const handler = () => this.props.onRating(taskRep, 'again');
+
+        const KeyBinding = () => {
+
+            if (this.props.keyBinding) {
+
+                return <GlobalKeyBinding name="rate"
+                                         group="reviews"
+                                         description={"Rate this item as " + this.props.rating}
+                                         sequence={this.props.keyBinding}
+                                         handler={handler}/>
+
+            } else {
+                return [];
+            }
+
+        };
+
+        return [
+            <Button color={color}
                        className="m-1"
                        style={{flexGrow: 1}}
-                       onClick={() => this.props.onRating(taskRep, 'again')}>{text}</Button>;
+                       onClick={handler}>{text}</Button>
+        ];
 
     }
 
@@ -48,6 +69,7 @@ export interface IProps<A> {
     readonly taskRep: TaskRep<A>;
     readonly rating: Rating;
     readonly onRating: RatingCallback<A>;
+    readonly keyBinding?: GlobalKeyBindingStr;
 
 }
 
