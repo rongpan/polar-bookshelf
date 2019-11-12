@@ -24,6 +24,7 @@ export class SpacedRepQueueChart extends React.Component<IProps, IState> {
 
     public componentDidMount(): void {
 
+        // FIXME: this will break if the component is unmounted...
         ReviewerStatistics.statistics(this.props.mode, this.props.type)
             .then(data => this.setState({data}))
             .catch(err => log.error("Could not fetch queue stats: ", err));
