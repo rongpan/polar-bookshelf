@@ -242,7 +242,8 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
     }
 
     public selectRow(selectedIdx: number,
-                     event: MouseEvent, checkbox: boolean = false) {
+                     event: MouseEvent,
+                     type: SelectRowType) {
 
         if (typeof selectedIdx === 'string') {
             selectedIdx = parseInt(selectedIdx);
@@ -250,7 +251,7 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
         let selected: number[] = [selectedIdx];
 
-        if (event.getModifierState("Shift")) {
+        if (event.getModifierState("Shift") || type === 'context-menu') {
 
             // select a range
 
@@ -268,7 +269,7 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
         }
 
-        const selectIndividual = (event.getModifierState("Control") || event.getModifierState("Meta")) || checkbox;
+        const selectIndividual = (event.getModifierState("Control") || event.getModifierState("Meta")) || type === 'checkbox';
 
         if (selectIndividual) {
 
@@ -435,7 +436,7 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
                                                   onDocSetTitle={(repoDocInfo, title) => this.onDocSetTitle(repoDocInfo, title)}
                                                   onDocTagged={(repoDocInfo, tags) => this.onDocTagged(repoDocInfo, tags)}
                                                   onMultiDeleted={() => this.onMultiDeleted()}
-                                                  selectRow={(selectedIdx, event1, checkbox) => this.selectRow(selectedIdx, event1, checkbox)}
+                                                  selectRow={(selectedIdx, event1, type) => this.selectRow(selectedIdx, event1, type)}
                                                   onSelected={selected => this.onSelected(selected)}
                                                   onReactTable={reactTable => this.reactTable = reactTable}
                                                   onDragStart={event => this.onDragStart(event)}
@@ -636,6 +637,8 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
     }
 
 }
+
+export type SelectRowType = 'checkbox' | 'context-menu' | 'mouse-down';
 
 interface IProps {
 

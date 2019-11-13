@@ -20,7 +20,7 @@ export class DocContextMenu extends React.Component<IProps, IState> {
     constructor(props: IProps, context: any) {
         super(props, context);
 
-        this.id = 'doc-context-menu2-' + sequence++;
+        this.id = this.props.id || ('doc-context-menu2-' + sequence++);
 
         this.contextMenuHandlers = prepareContextMenuHandlers({id: this.id});
 

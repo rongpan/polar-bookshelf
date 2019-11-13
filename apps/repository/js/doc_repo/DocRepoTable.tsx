@@ -25,6 +25,9 @@ import {RelatedTags} from '../../../../web/js/tags/related/RelatedTags';
 import {AccountUpgradeBar} from "../../../../web/js/ui/account_upgrade/AccountUpgradeBar";
 import {Platforms} from "../../../../web/js/util/Platforms";
 import {Numbers} from "polar-shared/src/util/Numbers";
+import {ContextMenuWrapper} from "@burtonator/react-context-menu-wrapper";
+import {DocDropdownItems} from "../DocDropdownItems";
+import {SelectRowType} from "./DocRepoScreen";
 
 const log = Logger.create();
 
@@ -133,8 +136,11 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                 // improve performance
 
                 const viewIndex = row.viewIndex as number;
+                const repoDocInfo: RepoDocInfo = row.original;
 
                 return (<div style={{lineHeight: '1em'}}>
+
+
 
                     <Input checked={this.props.selected.includes(viewIndex)}
                            style={{
@@ -148,7 +154,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                            }}
                            className="m-auto"
                            onChange={NULL_FUNCTION}
-                           onClick={(event) => this.props.selectRow(viewIndex, event.nativeEvent, true)}
+                           onClick={(event) => this.props.selectRow(viewIndex, event.nativeEvent, 'checkbox')}
                            type="checkbox"/>
 
                     {/*<i className="far fa-square"></i>*/}
@@ -181,6 +187,17 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                             <div>{row.value}</div>
 
                         </DocContextMenu>
+                        {/*<ContextMenuWrapper id={'context-menu-' + row.index}>*/}
+
+                        {/*    <div className="border shadow rounded pt-2 pb-2"*/}
+                        {/*         style={{backgroundColor: 'var(--white)'}}>*/}
+
+                        {/*        <DocDropdownItems toggle={false} {...this.contextMenuProps} repoDocInfo={repoDocInfo}/>*/}
+
+                        {/*    </div>*/}
+
+                        {/*</ContextMenuWrapper>*/}
+                        {/*<div>{row.value}</div>*/}
 
                     </div>
 
@@ -255,6 +272,8 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
 
     private createColumnSite() {
 
+        // FIXME: there is no context menu here...
+
         return {
             Header: 'Site',
             accessor: 'site',
@@ -282,18 +301,6 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
 
                 const aSTR = toSTR(a);
                 const bSTR = toSTR(b);
-
-                // if (aSTR === bSTR) {
-                //     return 0;
-                // }
-                //
-                // if (aSTR === "") {
-                //     return Number.MIN_VALUE;
-                // }
-                //
-                // if (bSTR === "") {
-                //     return Number.MAX_VALUE;
-                // }
 
                 return aSTR.localeCompare(bSTR);
 
@@ -381,16 +388,20 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                 const repoDocInfo: RepoDocInfo = row.original;
 
                 return (
+                    //
+                    // <DocContextMenu {...this.contextMenuProps}
+                    //                 id={'context-menu-' + row.index}
+                    //                 repoDocInfo={repoDocInfo}>
+                    //
+                    //     <progress className="mt-auto mb-auto" max="100" value={ row.value } style={{
+                    //         width: '100%'
+                    //     }} />
+                    //
+                    // </DocContextMenu>
 
-                    <DocContextMenu {...this.contextMenuProps}
-                                    id={'context-menu-' + row.index}
-                                    repoDocInfo={repoDocInfo}>
-
-                        <progress className="mt-auto mb-auto" max="100" value={ row.value } style={{
-                            width: '100%'
-                        }} />
-
-                    </DocContextMenu>
+                    <progress className="mt-auto mb-auto" max="100" value={ row.value } style={{
+                    width: '100%'
+                }} />
 
                 );
             }
@@ -399,6 +410,8 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
     }
 
     private createColumnAnnotations() {
+
+        // FIXME: no context menu here...
 
         return {
             id: 'nrAnnotations',
@@ -435,32 +448,32 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
 
                 return (<div className="doc-buttons" style={{display: 'flex'}}>
 
-                    <DocButton>
+                    {/*<DocButton>*/}
 
-                        {/*WARNING: making this a function breaks the layout...*/}
+                    {/*    /!*WARNING: making this a function breaks the layout...*!/*/}
 
-                        <TagInput availableTags={this.props.tagsProvider()}
-                                  existingTags={existingTags}
-                                  relatedTags={this.props.relatedTags}
-                                  onChange={(tags) => this.props.onDocTagged(repoDocInfo, tags)}/>
+                    {/*    <TagInput availableTags={this.props.tagsProvider()}*/}
+                    {/*              existingTags={existingTags}*/}
+                    {/*              relatedTags={this.props.relatedTags}*/}
+                    {/*              onChange={(tags) => this.props.onDocTagged(repoDocInfo, tags)}/>*/}
 
-                    </DocButton>
+                    {/*</DocButton>*/}
 
-                    <FlagDocButton active={repoDocInfo.flagged}
-                                   onClick={() => this.doHandleToggleField(repoDocInfo, 'flagged')}/>
+                    {/*<FlagDocButton active={repoDocInfo.flagged}*/}
+                    {/*               onClick={() => this.doHandleToggleField(repoDocInfo, 'flagged')}/>*/}
 
-                    <ArchiveDocButton active={repoDocInfo.archived}
-                                      onClick={() => this.doHandleToggleField(repoDocInfo, 'archived')}/>
+                    {/*<ArchiveDocButton active={repoDocInfo.archived}*/}
+                    {/*                  onClick={() => this.doHandleToggleField(repoDocInfo, 'archived')}/>*/}
 
-                    <DocButton>
+                    {/*<DocButton>*/}
 
-                        <DocDropdown id={'doc-dropdown-' + row.index}
-                                     repoDocInfo={repoDocInfo}
-                                     onDelete={this.props.onDocDeleteRequested}
-                                     onSetTitle={this.props.onDocSetTitle}
-                                     onDocumentLoadRequested={this.contextMenuProps.onDocumentLoadRequested}/>
+                    {/*    <DocDropdown id={'doc-dropdown-' + row.index}*/}
+                    {/*                 repoDocInfo={repoDocInfo}*/}
+                    {/*                 onDelete={this.props.onDocDeleteRequested}*/}
+                    {/*                 onSetTitle={this.props.onDocSetTitle}*/}
+                    {/*                 onDocumentLoadRequested={this.contextMenuProps.onDocumentLoadRequested}/>*/}
 
-                    </DocButton>
+                    {/*</DocButton>*/}
 
                 </div>);
 
@@ -591,9 +604,9 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
 
         } else {
 
-            const handleSelect = (event: MouseEvent) => {
+            const handleSelect = (event: MouseEvent, type: SelectRowType) => {
                 if (rowInfo) {
-                    this.props.selectRow(rowInfo.viewIndex as number, event);
+                    this.props.selectRow(rowInfo.viewIndex as number, event, type);
                 }
             };
 
@@ -609,11 +622,11 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                 },
 
                 onContextMenu: (event: MouseEvent) => {
-                    handleSelect(event);
+                    handleSelect(event, 'context-menu');
                 },
 
                 onMouseDown: (event: MouseEvent, handleOriginal?: () => void) => {
-                    handleSelect(event);
+                    handleSelect(event, 'mouse-down');
                 },
 
             };
@@ -780,7 +793,7 @@ interface IProps {
     readonly onDocDeleteRequested: (...repoDocInfos: RepoDocInfo[]) => void;
     readonly onDocTagged: (repoDocInfo: RepoDocInfo, tags: ReadonlyArray<Tag>) => void;
     readonly onDocSetTitle: (repoDocInfo: RepoDocInfo, title: string) => void;
-    readonly selectRow: (selectedIdx: number, event: MouseEvent, checkbox?: boolean) => void;
+    readonly selectRow: (selectedIdx: number, event: MouseEvent, type: SelectRowType) => void;
     readonly onSelected: (selected: ReadonlyArray<number>) => void;
     readonly onReactTable: (reactTable: Instance) => void;
     readonly refresh: () => void;

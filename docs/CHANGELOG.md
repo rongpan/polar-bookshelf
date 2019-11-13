@@ -1,4 +1,9 @@
 
+- Fixed colors in the UI for more compatible dark mode.
+
+- upgrade react
+- upgrade react-table
+- upgrade react-select
 
 - major refactor of how text selection works using the new modern text layer code in pdf.js which has 
   been a major complaint since 1.0.  Excited to finally have this fixed!
