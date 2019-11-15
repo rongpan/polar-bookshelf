@@ -35,10 +35,13 @@ export class DocContextMenu extends React.Component<IProps, IState> {
 
         return (
 
-            <div>
+            <div >
 
-                <div {...this.contextMenuHandlers}>
+                <div {...this.contextMenuHandlers}
+                      style={this.props.style || {}}>
+
                     {this.props.children}
+
                 </div>
 
                 <ContextMenuWrapper id={this.id}>
@@ -67,6 +70,7 @@ interface IProps {
     readonly onDelete: (repoDocInfo: RepoDocInfo) => void;
     readonly onSetTitle: (repoDocInfo: RepoDocInfo, title: string) => void;
     readonly onDocumentLoadRequested: (repoDocInfo: RepoDocInfo) => void;
+    readonly style?: React.CSSProperties;
 }
 
 interface IState {

@@ -30,6 +30,12 @@ const log = Logger.create();
 
 // TODO: go back to ExtendedReactTable
 
+class Styles {
+    public static CELL: React.CSSProperties = {
+        padding: '10px',
+        lineHeight: '1em'
+    };
+}
 
 export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
 
@@ -62,9 +68,9 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
         this.createColumnsForDesktop = this.createColumnsForDesktop.bind(this);
 
 
-        this.createCellProps = this.createCellProps.bind(this);
-        this.createCellPropsForMobile = this.createCellPropsForMobile.bind(this);
-        this.createCellPropsForDesktop = this.createCellPropsForDesktop.bind(this);
+        this.createTDProps = this.createTDProps.bind(this);
+        this.createTDPropsForMobile = this.createTDPropsForMobile.bind(this);
+        this.createTDPropsForDesktop = this.createTDPropsForDesktop.bind(this);
 
     }
 
@@ -134,12 +140,10 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
 
                 const viewIndex = row.viewIndex as number;
 
-                return (<div style={{lineHeight: '1em'}}>
+                return (<div>
 
                     <Input checked={this.props.selected.includes(viewIndex)}
                            style={{
-                               marginLeft: 'auto',
-                               marginRight: 'auto',
                                margin: 'auto',
                                position: 'relative',
                                top: '2px',
@@ -175,6 +179,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                     <div id={id}>
 
                         <DocContextMenu {...this.contextMenuProps}
+                                        style={Styles.CELL}
                                         id={'context-menu-' + row.index}
                                         repoDocInfo={repoDocInfo}>
 
@@ -209,6 +214,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                 return (
 
                     <DocContextMenu {...this.contextMenuProps}
+                                    style={Styles.CELL}
                                     id={'context-menu-' + row.index}
                                     repoDocInfo={repoDocInfo}>
 
@@ -240,6 +246,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                 return (
 
                     <DocContextMenu {...this.contextMenuProps}
+                                    style={Styles.CELL}
                                     id={'context-menu-' + row.index}
                                     repoDocInfo={repoDocInfo}>
 
@@ -298,6 +305,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                 return aSTR.localeCompare(bSTR);
 
             },
+            // FIXME: needs a context menu
         };
 
     }
@@ -353,6 +361,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                 return (
 
                     <DocContextMenu {...this.contextMenuProps}
+                                    style={Styles.CELL}
                                     id={'context-menu-' + row.index}
                                     repoDocInfo={repoDocInfo}>
                         <div>{formatted}</div>
@@ -383,6 +392,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                 return (
 
                     <DocContextMenu {...this.contextMenuProps}
+                                    style={Styles.CELL}
                                     id={'context-menu-' + row.index}
                                     repoDocInfo={repoDocInfo}>
 
@@ -412,6 +422,8 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
             className: "d-none-mobile",
         };
 
+        // FIXME: no context menu
+
     }
 
     private createColumnButtons() {
@@ -433,7 +445,11 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                 const existingTags: Tag[]
                     = Object.values(Optional.of(repoDocInfo.docInfo.tags).getOrElse({}));
 
-                return (<div className="doc-buttons" style={{display: 'flex'}}>
+                return (<div className="doc-buttons"
+                             style={{
+                                 display: 'flex',
+                                 ...Styles.CELL
+                             }}>
 
                     <DocButton>
 
@@ -511,17 +527,37 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
 
     }
 
-    private createCellProps(rowInfo?: RowInfo, column?: Column) {
+    private createTDProps(rowInfo?: RowInfo, column?: Column) {
 
-        if (Platforms.isMobile()) {
-            return this.createCellPropsForMobile(rowInfo, column);
-        } else {
-            return this.createCellPropsForDesktop(rowInfo, column);
-       }
+        const createPlatformProps = () => {
+
+            if (Platforms.isMobile()) {
+                return this.createTDPropsForMobile(rowInfo, column);
+            } else {
+                return this.createTDPropsForDesktop(rowInfo, column);
+            }
+
+        };
+
+        const props = this.createTDPropsForAllPlatforms();
+
+        const platformProps = createPlatformProps();
+
+        return {...props, ...platformProps};
 
     }
 
-    private createCellPropsForMobile(rowInfo?: RowInfo, column?: Column) {
+    private createTDPropsForAllPlatforms() {
+        return {
+            style: {
+                // needed so that we can use our own padding for cells so that context menus
+                // don't have an unreachable gap
+                padding: 0
+            }
+        }
+    }
+
+    private createTDPropsForMobile(rowInfo?: RowInfo, column?: Column) {
 
         const DEFAULT_BEHAVIOR_COLUMNS = [
             'doc-checkbox'
@@ -562,7 +598,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
 
     }
 
-    private createCellPropsForDesktop(rowInfo?: RowInfo, column?: Column) {
+    private createTDPropsForDesktop(rowInfo?: RowInfo, column?: Column) {
 
         const DEFAULT_BEHAVIOR_COLUMNS = [
             'tag-input',
@@ -683,7 +719,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                         };
                     }}
                     getTdProps={(state: any, rowInfo?: RowInfo, column?: Column, instance?: any) => {
-                        return this.createCellProps(rowInfo, column);
+                        return this.createTDProps(rowInfo, column);
                     }}
 
                 />

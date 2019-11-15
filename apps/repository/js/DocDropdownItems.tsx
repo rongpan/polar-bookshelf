@@ -160,6 +160,10 @@ export class DocDropdownItems extends React.Component<IProps, IState> {
 interface IProps {
     readonly id: string;
     readonly repoDocInfo: RepoDocInfo;
+
+    /**
+     * True if this is part of a real dropdown, false otherwise.
+     */
     readonly toggle: boolean;
     readonly onDelete: (repoDocInfo: RepoDocInfo) => void;
     readonly onSetTitle: (repoDocInfo: RepoDocInfo, title: string) => void;
