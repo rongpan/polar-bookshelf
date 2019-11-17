@@ -12,14 +12,16 @@ import PopoverBody from 'reactstrap/lib/PopoverBody';
 import {Toaster} from '../../../web/js/ui/toaster/Toaster';
 import {IDs} from '../../../web/js/util/IDs';
 import {NULL_FUNCTION} from 'polar-shared/src/util/Functions';
-import {Blackout} from '../../../web/js/ui/blackout/Blackout';
 import {Tag} from 'polar-shared/src/tags/Tags';
+import {PremiumFeature} from "../../../web/js/ui/premium_feature/PremiumFeature";
+import {BlackoutBox} from "../../../web/js/ui/util/BlackoutBox";
 
 const log = Logger.create();
 
 const Styles: IStyleMap = {
 
     popover: {
+        backgroundColor: 'var(--white)',
         width: '500px !important',
         maxWidth: '9999px !important'
     },
@@ -29,7 +31,6 @@ const Styles: IStyleMap = {
     },
 
     relatedTags: {
-        marginTop: '5px',
         display: 'flex',
     },
 
@@ -40,7 +41,7 @@ const Styles: IStyleMap = {
 
     relatedTag: {
         display: 'inline-block',
-        backgroundColor: '#e5e5e5',
+        backgroundColor: 'var(--grey100)',
         color: 'hsl(0,0%,20%)',
         fontSize: '12px',
         padding: '3px',
@@ -77,15 +78,11 @@ export class TagInput extends React.Component<IProps, IState> {
     private activate() {
 
         const pendingTags = this.props.existingTags || [];
-
-        Blackout.enable();
-
         this.setState({open: true, pendingTags});
 
     }
 
     private deactivate() {
-        Blackout.disable();
         this.setState({open: false});
     }
 
@@ -124,11 +121,12 @@ export class TagInput extends React.Component<IProps, IState> {
         const RelatedTagsWidget = () => {
 
             if (relatedTags.length === 0) {
-                return <div></div>;
+                return null;
             }
 
             return <div style={Styles.relatedTags}>
-                <div className="mr-1" style={Styles.relatedTagsLabel}>
+                <div className="mr-1"
+                     style={Styles.relatedTagsLabel}>
                     <strong>Related tags: </strong>
                 </div>
                 <RelatedTagsItems/>
@@ -151,61 +149,69 @@ export class TagInput extends React.Component<IProps, IState> {
                          delay={0}
                          toggle={() => this.deactivate()}
                          className="tag-input-popover shadow">
-                    {/*<PopoverHeader>Popover Title</PopoverHeader>*/}
 
-                    {/*style={{borderWidth: '1px', backgroundColor: true ? "#b94a48" : "#aaa"}}*/}
-                    <PopoverBody style={Styles.popover} className="shadow">
+                    <PopoverBody style={Styles.popover}
+                                 className="shadow rounded">
 
                         {/*TODO unify this with TagInputWidget*/}
 
-                        <div className="pt-1 pb-1">
-                            <strong>Assign tags to document:</strong>
-                        </div>
+                        <BlackoutBox>
 
-                        <CreatableSelect
-                            isMulti
-                            isClearable
-                            autoFocus
-                            onKeyDown={event => this.onKeyDown(event)}
-                            className="basic-multi-select"
-                            classNamePrefix="select"
-                            onChange={(selectedOptions) => this.handleChange(selectedOptions as TagOption[])}
-                            value={pendingTags}
-                            defaultValue={pendingTags}
-                            placeholder="Create or select tags ..."
-                            options={availableTagOptions}
-                            ref={ref => this.select = ref}>
+                            <div className="bg-white">
 
-                        </CreatableSelect>
+                                <div className="pt-1 pb-1">
+                                    <strong>Assign tags to document:</strong>
+                                </div>
 
-                        <div>
+                                <CreatableSelect
+                                    isMulti
+                                    isClearable
+                                    autoFocus
+                                    onKeyDown={event => this.onKeyDown(event)}
+                                    className="basic-multi-select"
+                                    classNamePrefix="select"
+                                    onChange={(selectedOptions) => this.handleChange(selectedOptions as TagOption[])}
+                                    value={pendingTags}
+                                    defaultValue={pendingTags}
+                                    placeholder="Create or select tags ..."
+                                    options={availableTagOptions}
+                                    ref={ref => this.select = ref}>
 
-                            <RelatedTagsWidget/>
+                                </CreatableSelect>
 
-                        </div>
+                                <div className="pt-1">
 
-                        <div className="mt-1">
+                                    <PremiumFeature required='bronze' size='sm' feature="related tags">
+                                        <RelatedTagsWidget/>
+                                    </PremiumFeature>
 
-                            <div style={{display: 'flex'}}>
+                                </div>
 
-                                <div className="ml-auto"/>
+                                <div className="mt-1">
 
-                                <Button color="secondary"
-                                        size="sm"
-                                        onClick={() => this.onCancel()}>
-                                    Cancel
-                                </Button>
+                                    <div style={{display: 'flex'}}>
 
-                                <div className="ml-1"/>
+                                        <div className="ml-auto"/>
 
-                                <Button color="primary"
-                                        size="sm"
-                                        onClick={() => this.onDone()}>
-                                    Done
-                                </Button>
+                                        <Button color="secondary"
+                                                size="sm"
+                                                onClick={() => this.onCancel()}>
+                                            Cancel
+                                        </Button>
+
+                                        <div className="ml-1"/>
+
+                                        <Button color="primary"
+                                                size="sm"
+                                                onClick={() => this.onDone()}>
+                                            Done
+                                        </Button>
+                                    </div>
+                                </div>
+
                             </div>
-                        </div>
 
+                        </BlackoutBox>
                     </PopoverBody>
                 </Popover>
 
@@ -233,13 +239,11 @@ export class TagInput extends React.Component<IProps, IState> {
 
     private onCancel() {
         this.setState({...this.state, open: false});
-        Blackout.disable();
     }
 
     private onDone() {
 
         this.setState({...this.state, open: false});
-        Blackout.disable();
 
         const onChange = this.props.onChange || NULL_FUNCTION;
 
@@ -263,7 +267,7 @@ export class TagInput extends React.Component<IProps, IState> {
 
     }
 
-    private handleChange(selectedOptions: TagOption[]) {
+    private handleChange(selectedOptions: ReadonlyArray<TagOption>) {
 
         const tags = TagOptions.toTags(selectedOptions);
 

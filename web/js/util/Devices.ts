@@ -17,6 +17,14 @@ export class Devices {
 
     }
 
+    public static isPhone(): boolean {
+        return this.get() === 'phone';
+    }
+
+    public static isDesktop(): boolean {
+        return this.get() === 'desktop';
+    }
+
 }
 
 export type Device = 'phone' | 'tablet' | 'desktop';

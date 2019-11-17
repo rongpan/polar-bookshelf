@@ -4,11 +4,15 @@ import {FileImportController} from './FileImportController';
 import {IEventDispatcher, SimpleReactor} from '../../reactor/SimpleReactor';
 import {IDocInfo} from 'polar-shared/src/metadata/IDocInfo';
 import {AppInstance} from '../../electron/framework/AppInstance';
-import {PersistenceLayerManager, PersistenceLayerTypes} from '../../datastore/PersistenceLayerManager';
-import {BrowserRouter, Route, Switch} from 'react-router-dom';
+import {
+    PersistenceLayerManager,
+    PersistenceLayerTypes
+} from '../../datastore/PersistenceLayerManager';
+import {BrowserRouter, HashRouter, Route, Switch} from 'react-router-dom';
 import {SyncBar, SyncBarProgress} from '../../ui/sync_bar/SyncBar';
 import {DocRepoAnkiSyncController} from '../../controller/DocRepoAnkiSyncController';
-import AnnotationRepoScreen from '../../../../apps/repository/js/annotation_repo/AnnotationRepoScreen';
+import AnnotationRepoScreen
+    from '../../../../apps/repository/js/annotation_repo/AnnotationRepoScreen';
 import {PersistenceLayer} from '../../datastore/PersistenceLayer';
 import {Logger} from 'polar-shared/src/logger/Logger';
 import {UpdatesController} from '../../auto_updates/UpdatesController';
@@ -16,15 +20,18 @@ import {PersistenceLayerEvent} from '../../datastore/PersistenceLayerEvent';
 import {RepoDocMetaManager} from '../../../../apps/repository/js/RepoDocMetaManager';
 import {CloudService} from '../../../../apps/repository/js/cloud/CloudService';
 import {RepoDocMetaLoader} from '../../../../apps/repository/js/RepoDocMetaLoader';
-import WhatsNewScreen from '../../../../apps/repository/js/whats_new/WhatsNewScreen';
-import CommunityScreen from '../../../../apps/repository/js/community/CommunityScreen';
+import WhatsNewScreen
+    from '../../../../apps/repository/js/whats_new/WhatsNewScreen';
+import CommunityScreen
+    from '../../../../apps/repository/js/community/CommunityScreen';
 import StatsScreen from '../../../../apps/repository/js/stats/StatsScreen';
 import LogsScreen from '../../../../apps/repository/js/logs/LogsScreen';
 import {ToasterService} from '../../ui/toaster/ToasterService';
 import {ProgressService} from '../../ui/progress_bar/ProgressService';
 import {ProgressTracker} from 'polar-shared/src/util/ProgressTracker';
 import {RepoDocMetas} from '../../../../apps/repository/js/RepoDocMetas';
-import EditorsPicksScreen from '../../../../apps/repository/js/editors_picks/EditorsPicksScreen';
+import EditorsPicksScreen
+    from '../../../../apps/repository/js/editors_picks/EditorsPicksScreen';
 import {RendererAnalytics} from '../../ga/RendererAnalytics';
 import {Version} from '../../util/Version';
 import {LoadExampleDocs} from './onboarding/LoadExampleDocs';
@@ -37,13 +44,15 @@ import {AppRuntime} from '../../AppRuntime';
 import {AuthHandlers} from './auth_handler/AuthHandler';
 import Input from 'reactstrap/lib/Input';
 import {Splashes} from '../../../../apps/repository/js/splash2/Splashes';
+import {MobileDisclaimers} from './MobileDisclaimers';
 import {MachineDatastores} from '../../telemetry/MachineDatastores';
 import {MailingList} from './auth_handler/MailingList';
 import {UniqueMachines} from '../../telemetry/UniqueMachines';
 import {PremiumScreen} from '../../../../apps/repository/js/splash/splashes/premium/PremiumScreen';
 import {Accounts} from '../../accounts/Accounts';
 import {SupportScreen} from '../../../../apps/repository/js/support/SupportScreen';
-import DocRepoScreen from '../../../../apps/repository/js/doc_repo/DocRepoScreen';
+import DocRepoScreen
+    from '../../../../apps/repository/js/doc_repo/DocRepoScreen';
 import {CreateGroupScreen} from "../../../../apps/repository/js/groups/create/CreateGroupScreen";
 import {GroupsScreen} from "../../../../apps/repository/js/groups/GroupsScreen";
 import {GroupScreen} from "../../../../apps/repository/js/group/GroupScreen";
@@ -55,7 +64,8 @@ import {GroupHighlightScreen} from "../../../../apps/repository/js/group/highlig
 import {PrefetchedUserGroupsBackgroundListener} from "../../datastore/sharing/db/PrefetchedUserGroupsBackgroundListener";
 import {PlatformStyles} from "../../ui/PlatformStyles";
 import {Devices} from "../../util/Devices";
-import {ExtendedKeyMapOptions, KeyMap} from "react-hotkeys";
+import {PDFModernTextLayers} from "polar-pdf/src/pdf/PDFModernTextLayers";
+import {AccountProvider} from "../../accounts/AccountProvider";
 
 const log = Logger.create();
 
@@ -79,6 +89,8 @@ export class RepositoryApp {
 
         AppOrigin.configure();
 
+        PDFModernTextLayers.configure();
+
         const updatedDocInfoEventDispatcher: IEventDispatcher<IDocInfo> = new SimpleReactor();
 
         const syncBarProgress: IEventDispatcher<SyncBarProgress> = new SimpleReactor();
@@ -89,6 +101,7 @@ export class RepositoryApp {
 
         const userInfo = await authHandler.userInfo();
         const account = await Accounts.get();
+        await AccountProvider.init();
 
         const platform = Platforms.get();
 
@@ -141,7 +154,6 @@ export class RepositoryApp {
             });
 
         }
-        const keyMap = this.createKeyMap();
 
         const renderDocRepoScreen = () => {
             return (
@@ -292,7 +304,7 @@ export class RepositoryApp {
 
             <div style={{height: '100%'}}>
 
-                {/*<PrioritizedSplashes persistenceLayerManager={this.persistenceLayerManager}/>*/}
+            {/*<PrioritizedSplashes persistenceLayerManager={this.persistenceLayerManager}/>*/}
 
                 <Splashes persistenceLayerManager={this.persistenceLayerManager}/>
 
@@ -300,46 +312,46 @@ export class RepositoryApp {
 
                 <RepositoryTour/>
 
-                    <BrowserRouter>
+                <BrowserRouter>
 
-                        <Switch location={ReactRouters.createLocationWithPathnameHash()}>
+                    <Switch location={ReactRouters.createLocationWithPathnameHash()}>
 
-                            <Route exact path='/#annotations' render={renderAnnotationRepoScreen} />
+                        <Route exact path='/#annotations' render={renderAnnotationRepoScreen} />
 
-                            <Route exact path='/#whats-new' render={renderWhatsNewScreen} />
+                        <Route exact path='/#whats-new' render={renderWhatsNewScreen} />
 
-                            <Route exact path='/#(logout|overview|login|configured|invite|premium)?' render={renderDocRepoScreen}/>
+                        <Route exact path='/#(logout|overview|login|configured|invite|premium)?' render={renderDocRepoScreen}/>
 
-                            <Route exact path='/#community' render={renderCommunityScreen}/>
+                        <Route exact path='/#community' render={renderCommunityScreen}/>
 
-                            <Route exact path='/#stats' render={renderStatsScreen}/>
+                        <Route exact path='/#stats' render={renderStatsScreen}/>
 
-                            <Route exact path='/#logs' render={renderLogsScreen}/>
+                        <Route exact path='/#logs' render={renderLogsScreen}/>
 
-                            <Route exact path='/#editors-picks' render={editorsPicksScreen}/>
+                        <Route exact path='/#editors-picks' render={editorsPicksScreen}/>
 
-                            <Route exact path='/#plans' render={premiumScreen}/>
+                        <Route exact path='/#plans' render={premiumScreen}/>
 
-                            <Route exact path='/#support' render={supportScreen}/>
+                        <Route exact path='/#support' render={supportScreen}/>
 
-                            <Route exact path='/#premium' render={premiumScreen}/>
+                        <Route exact path='/#premium' render={premiumScreen}/>
 
-                            <Route path='/group/:group/highlights' render={renderGroupHighlightsScreen}/>
-                            <Route path='/group/:group/docs' render={renderGroupScreen}/>
+                        <Route path='/group/:group/highlights' render={renderGroupHighlightsScreen}/>
+                        <Route path='/group/:group/docs' render={renderGroupScreen}/>
 
-                            <Route path='/group/:group/highlight/:id' render={renderGroupHighlightScreen}/>
+                        <Route path='/group/:group/highlight/:id' render={renderGroupHighlightScreen}/>
 
-                            <Route path='/group/:group' render={renderGroupHighlightsScreen}/>
+                        <Route path='/group/:group' render={renderGroupHighlightsScreen}/>
 
-                            <Route exact path='/groups' render={renderGroupsScreen}/>
+                        <Route exact path='/groups' render={renderGroupsScreen}/>
 
-                            <Route exact path='/groups/create' render={renderCreateGroupScreen}/>
+                        <Route exact path='/groups/create' render={renderCreateGroupScreen}/>
 
-                            <Route exact path='/' render={renderDefaultScreenByDevice}/>
+                        <Route exact path='/' render={renderDefaultScreenByDevice}/>
 
-                        </Switch>
+                    </Switch>
 
-                    </BrowserRouter>
+                </BrowserRouter>
 
                 {/*Used for file uploads.  This has to be on the page and can't be*/}
                 {/*selectively hidden by components.*/}
@@ -351,9 +363,7 @@ export class RepositoryApp {
                        onChange={() => this.onFileUpload()}
                        style={{display: 'none'}}/>
 
-            </div>
-            ,
-
+            </div>,
 
             rootElement
 
@@ -375,29 +385,6 @@ export class RepositoryApp {
         }
 
         AppInstance.notifyStarted('RepositoryApp');
-
-    }
-
-    private createKeyMap(): KeyMap {
-
-        const find: ExtendedKeyMapOptions = {
-            name: 'find',
-            group: 'main',
-            description: "Find documents by text",
-            action: 'keypress',
-            sequence: 'f',
-            sequences: ['f'] // this is kind of ugly vs F but not too bad.
-        };
-
-        return {
-            FIND: find,
-            // HELP: {
-            //     name: 'help',
-            //     group: 'main',
-            //     description: 'show the list of key bindings',
-            //     sequences: ['control+?'] // this is kind of ugly vs F but not too bad.
-            // }
-        };
 
     }
 

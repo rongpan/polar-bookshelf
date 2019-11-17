@@ -1,3 +1,26 @@
+
+- ability to remove items from folders...
+
+- multi-selection for deletes implemented
+
+- deleting multiple items via context menu now works.
+
+- The document repository view is now much faster and context menus no longer have a 'gap'
+  which wouldn't trigger the menu. 
+
+- bronze now officially required for reading stats and recommended tags
+
+- reworked 
+
+- the context menus now have icons 
+
+- major refactor of how text selection works using the new modern text layer code in pdf.js which has 
+  been a major complaint since 1.0.  Excited to finally have this fixed!
+  
+- now using larger buttons
+
+- show the front + back of cards when we 'show answer'
+
 # 1.50.10
 
 - Statistics now shown for flashcards when the user is using spaced repetition 

@@ -1,7 +1,3 @@
-/**
- * Handles listening for account changes for the user and telling them
- * of changes to their plan over time.
- */
 import {Firebase} from '../firebase/Firebase';
 import {Firestore} from '../firebase/Firestore';
 import {Dialogs} from '../ui/dialogs/Dialogs';
@@ -13,6 +9,10 @@ const log = Logger.create();
 
 const COLLECTION_NAME = "account";
 
+/**
+ * Handles listening for account changes for the user and telling them
+ * of changes to their plan over time.
+ */
 export class Accounts {
 
     public static async ref() {
@@ -56,12 +56,13 @@ export class Accounts {
     /**
      * Callback for when we have new data for the account.
      */
-    public static async onSnapshot(handler: (account: Account) => void) {
+    public static async onSnapshot(handler: (account: Account | undefined) => void) {
 
         const ref = await this.ref();
 
         if (! ref) {
-            return undefined;
+            handler(undefined);
+            return;
         }
 
         return ref.onSnapshot(snapshot => {
@@ -123,6 +124,7 @@ export class Accounts {
                     Dialogs.confirm({
                         title: "Your plan has changed and we need to reload.",
                         subtitle: "This will just take a moment we promise.",
+                        type: 'warning',
                         onConfirm,
                         noCancel: true
                     });

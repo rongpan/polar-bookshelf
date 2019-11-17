@@ -1,5 +1,6 @@
 import {CurrentDocState, DocFormat} from './DocFormat';
 import {Optional} from 'polar-shared/src/util/ts/Optional';
+import {PDFModernTextLayers} from "polar-pdf/src/pdf/PDFModernTextLayers";
 
 declare var window: any;
 
@@ -13,13 +14,7 @@ export class PDFFormat extends DocFormat {
 
     public init() {
 
-        if (window.PDFViewerApplication &&
-            window.PDFViewerApplication.preferences &&
-            window.PDFViewerApplication.preferences.set) {
-
-            window.PDFViewerApplication.preferences.set('textLayerMode', 2);
-
-        }
+        PDFModernTextLayers.configure();
 
     }
 

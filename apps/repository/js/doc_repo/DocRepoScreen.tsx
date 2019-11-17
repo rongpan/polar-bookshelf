@@ -4,9 +4,8 @@ import {RepoDocMetaLoader} from '../RepoDocMetaLoader';
 import {RepoDocInfo} from '../RepoDocInfo';
 import {RepoDocMetaManager} from '../RepoDocMetaManager';
 import {Optional} from 'polar-shared/src/util/ts/Optional';
-import {Tag, TagStr} from 'polar-shared/src/tags/Tags';
+import {Tag, Tags, TagStr} from 'polar-shared/src/tags/Tags';
 import {isPresent} from 'polar-shared/src/Preconditions';
-import {Tags} from 'polar-shared/src/tags/Tags';
 import {RendererAnalytics} from '../../../../web/js/ga/RendererAnalytics';
 import {MessageBanner} from '../MessageBanner';
 import {DocRepoTableDropdown} from './DocRepoTableDropdown';
@@ -90,6 +89,8 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
         this.onDragStart = this.onDragStart.bind(this);
         this.onDragEnd = this.onDragEnd.bind(this);
+
+        this.onRemoveFromFolder = this.onRemoveFromFolder.bind(this);
 
         this.state = {
             data: [],
@@ -196,9 +197,22 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
     }
 
+    private onRemoveFromFolder(folder: Tag, repoDocInfos: ReadonlyArray<RepoDocInfo>) {
+
+        for (const repoDocInfo of repoDocInfos) {
+            const existingTags = Object.values(repoDocInfo.tags || {});
+            const newTags = Tags.difference(existingTags, [folder]);
+
+            this.onDocTagged(repoDocInfo, newTags)
+                .catch(err => log.error(err));
+
+        }
+
+    }
+
     private onMultiDeleted() {
         const repoDocInfos = this.getSelected();
-        this.onDocDeleteRequested(...repoDocInfos);
+        this.onDocDeleteRequested(repoDocInfos);
     }
 
     private clearSelected() {
@@ -242,10 +256,15 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
     }
 
     public selectRow(selectedIdx: number,
-                     event: MouseEvent, checkbox: boolean = false) {
+                     event: MouseEvent,
+                     type: SelectRowType) {
 
         if (typeof selectedIdx === 'string') {
             selectedIdx = parseInt(selectedIdx);
+        }
+
+        if (type === 'context' && this.state.selected.includes(selectedIdx)) {
+            return;
         }
 
         let selected: number[] = [selectedIdx];
@@ -268,10 +287,7 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
         }
 
-        const selectIndividual = (event.getModifierState("Control") || event.getModifierState("Meta")) || checkbox;
-
-        if (selectIndividual) {
-
+        const handleToggleSingleRow = () => {
             // one at a time
 
             selected = [...this.state.selected];
@@ -281,7 +297,16 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
             } else {
                 selected = [...selected, selectedIdx];
             }
+        };
 
+        const toggleSingleRow =
+            (event.getModifierState("Control")
+            || event.getModifierState("Meta"))
+            || ['checkbox', 'context'].includes(type)
+        ;
+
+        if (toggleSingleRow) {
+            handleToggleSingleRow();
         }
 
         this.setState({...this.state, selected});
@@ -435,11 +460,14 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
                                                   onDocSetTitle={(repoDocInfo, title) => this.onDocSetTitle(repoDocInfo, title)}
                                                   onDocTagged={(repoDocInfo, tags) => this.onDocTagged(repoDocInfo, tags)}
                                                   onMultiDeleted={() => this.onMultiDeleted()}
-                                                  selectRow={(selectedIdx, event1, checkbox) => this.selectRow(selectedIdx, event1, checkbox)}
+                                                  selectRow={(selectedIdx, event1, type) => this.selectRow(selectedIdx, event1, type)}
                                                   onSelected={selected => this.onSelected(selected)}
                                                   onReactTable={reactTable => this.reactTable = reactTable}
                                                   onDragStart={event => this.onDragStart(event)}
-                                                  onDragEnd={() => this.onDragEnd()}/>
+                                                  onDragEnd={() => this.onDragEnd()}
+                                                  filters={this.docRepoFilters.filters}
+                                                  getSelected={() => this.getSelected()}
+                                                  onRemoveFromFolder={(folder, repoDocInfos) => this.onRemoveFromFolder(folder, repoDocInfos)}/>
 
                                 }
                                 right={
@@ -493,13 +521,14 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
     }
 
-    private onDocDeleteRequested(...repoDocInfos: RepoDocInfo[]) {
+    private onDocDeleteRequested(repoDocInfos: ReadonlyArray<RepoDocInfo>) {
 
         Dialogs.confirm({
             title: "Are you sure you want to delete these document(s)?",
             subtitle: "This is a permanent operation and can't be undone.  All associated annotations will also be removed.",
             onCancel: NULL_FUNCTION,
-            onConfirm: () => this.onDocDeleted(...repoDocInfos),
+            type: 'danger',
+            onConfirm: () => this.onDocDeleted(repoDocInfos),
         });
 
     }
@@ -508,7 +537,7 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
         this.setState({...this.state, docSidebarVisible});
     }
 
-    private onDocDeleted(...repoDocInfos: RepoDocInfo[]) {
+    private onDocDeleted(repoDocInfos: ReadonlyArray<RepoDocInfo>) {
 
         const doDeletes = async () => {
 
@@ -657,4 +686,8 @@ interface IState {
     readonly docSidebarVisible: boolean;
 }
 
-
+/**
+ * The type of event that triggered the row selection.  Either a normal click, a context menu click (right click) or
+ * a checkbox for selecting multiple.
+ */
+export type SelectRowType = 'click' | 'context' | 'checkbox';

@@ -1,15 +1,14 @@
 import * as React from 'react';
-import DropdownToggle from 'reactstrap/lib/DropdownToggle';
-import DropdownMenu from 'reactstrap/lib/DropdownMenu';
+import {DropdownMenu, DropdownToggle, UncontrolledDropdown} from 'reactstrap';
 import {HelpDropdownItem} from './HelpDropdownItem';
 import DropdownItem from 'reactstrap/lib/DropdownItem';
-import {UncontrolledDropdown} from 'reactstrap';
 import {AppRuntime} from '../../../../web/js/AppRuntime';
 import {TrackedDropdownItem} from './TrackedDropdownItem';
 import {ipcRenderer} from 'electron';
 import {AppUpdates} from '../../../../web/js/updates/AppUpdates';
 import {DistConfig} from '../../../../web/js/dist_config/DistConfig';
 import {Platforms} from "../../../../web/js/util/Platforms";
+import {Devices} from "../../../../web/js/util/Devices";
 
 export class HelpDropdown extends React.PureComponent<IProps, IState> {
 
@@ -21,12 +20,14 @@ export class HelpDropdown extends React.PureComponent<IProps, IState> {
 
         const updatesEnabled = AppRuntime.isElectron() && AppUpdates.platformSupportsUpdates();
 
+        const isPhone = Devices.isPhone();
+
         return (
             <UncontrolledDropdown className="ml-1"
-                                  size="sm"
+                                  size="md"
                                   id="help-dropdown">
 
-                <DropdownToggle className="text-muted"
+                <DropdownToggle className="text-muted border"
                                 color="light"
                                 caret>
 
@@ -92,9 +93,10 @@ export class HelpDropdown extends React.PureComponent<IProps, IState> {
                                          hidden={!updatesEnabled}
                                          onClick={() => ipcRenderer.send('app-update:check-for-update')}/>
 
-                    <DropdownItem divider/>
+                    <DropdownItem divider hidden={isPhone}/>
 
                     <TrackedDropdownItem id="sidebar-item-logs"
+                                         hidden={isPhone}
                                          title="Logs"
                                          tooltip="Show logs on internal activity during background operations like cloud activity and sync."
                                          icon="fas fa-info-circle"

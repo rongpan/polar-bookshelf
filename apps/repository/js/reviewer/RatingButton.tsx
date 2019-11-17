@@ -58,6 +58,7 @@ export class RatingButton<A> extends React.Component<IProps<A>, IState> {
         return [
             <Button key='button'
                     color={color}
+                    size="md"
                     className="m-1"
                     style={{flexGrow: 1}}
                     onClick={handler}>{text}</Button>,
