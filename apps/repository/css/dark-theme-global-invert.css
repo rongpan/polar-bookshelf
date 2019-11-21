@@ -1,0 +1,23 @@
+/*html {*/
+/*    filter: invert(0.85);*/
+/*}*/
+
+/*img, progress {*/
+/*    filter: invert(1.0);*/
+/*}*/
+
+/*!*// TODO:*!*/
+
+/*!*// manually invert a few colors a-priori so that when they are*!*/
+/*!*// finally inverted they have the color we want*!*/
+
+/*!*// wrapper for images and progress so they have the right colors*!*/
+
+/*:root {*/
+
+/*    --primary-background-color: rgb(-38,-38,-38); !* inverted from  #FFFFFF *!*/
+/*    --primary-text-color: rgb(217,217,217); !* inverted from  #000000 *!*/
+/*    --selected-background-color: rgb(217,42,-19); !* inverted from  #00afec *!*/
+/*    --selected-text-color: rgb(-38,-38,-38); !* inverted from  #FFFFFF *!*/
+
+/*}*/
