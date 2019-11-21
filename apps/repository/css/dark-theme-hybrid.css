@@ -35,4 +35,9 @@
     --danger100: #FFBDBD;
     --danger000: #FFE3E3;
 
+    --light: rgb(-31,-32,-33); /* inverted from #f8f9fa */
+    --dark: rgb(165,159,153); /* inverted from #343a40 */
+    --white: rgb(-38,-38,-38); /* inverted from  #ffffff */
+
+
 }
