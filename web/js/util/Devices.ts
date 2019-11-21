@@ -1,4 +1,4 @@
-import {Platforms} from "./Platforms";
+import {Platforms} from "polar-shared/src/util/Platforms";
 
 export class Devices {
 
@@ -15,6 +15,14 @@ export class Devices {
             return 'tablet';
         }
 
+    }
+
+    public static isPhone(): boolean {
+        return this.get() === 'phone';
+    }
+
+    public static isDesktop(): boolean {
+        return this.get() === 'desktop';
     }
 
 }

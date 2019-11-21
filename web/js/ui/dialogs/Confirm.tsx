@@ -2,7 +2,7 @@ import React from 'react';
 import {Button} from 'reactstrap';
 import {DialogContainer} from './DialogContainer';
 import {NullCollapse} from '../null_collapse/NullCollapse';
-import {DialogConfirmProps} from "./Dialogs";
+import {ConfirmProps} from "./Dialogs";
 
 class Styles {
 
@@ -12,11 +12,9 @@ class Styles {
     };
 
     public static subtitle: React.CSSProperties = {
-        fontSize: "17px"
     };
 
     public static button: React.CSSProperties = {
-        fontSize: "14px",
         fontWeight: "bold"
     };
 
@@ -51,7 +49,8 @@ export class Confirm extends React.PureComponent<IProps, IState> {
 
             <DialogContainer open={true}>
 
-                <div onKeyDown={(event) => this.onKeyDown(event)}>
+                <div onKeyDown={(event) => this.onKeyDown(event)}
+                     style={{minWidth: '350px'}}>
 
                     <div className={"w-100 p-1 pl-2 pr-2 " + opts.titlebarClassName}
                          style={Styles.title}>
@@ -60,20 +59,20 @@ export class Confirm extends React.PureComponent<IProps, IState> {
 
                     </div>
 
-                    <div className="w-100 p-1 m-1 text-muted text-grey800 text-xl"
+                    <div className="w-100 p-1 m-1 text-grey900 text-xl"
                          style={Styles.subtitle}>
 
                         {this.props.subtitle}
 
                     </div>
 
-                    <div className="text-right m-1">
+                    <div className="text-right m-1 pb-1">
 
                         <NullCollapse open={! this.props.noCancel}>
 
                             <Button color="secondary"
                                     style={Styles.button}
-                                    size="sm"
+                                    size="lg"
                                     className="m-1"
                                     onClick={() => this.onCancel()}>Cancel</Button>
 
@@ -81,7 +80,7 @@ export class Confirm extends React.PureComponent<IProps, IState> {
 
                         <Button color={opts.buttonColor}
                                 style={Styles.button}
-                                size="sm"
+                                size="lg"
                                 className="m-1"
                                 onClick={() => this.onConfirm()}>Confirm</Button>
 
@@ -117,7 +116,7 @@ export class Confirm extends React.PureComponent<IProps, IState> {
 
 }
 
-export interface IProps extends DialogConfirmProps {
+export interface IProps extends ConfirmProps {
 
 }
 

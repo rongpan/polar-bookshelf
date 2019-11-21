@@ -11,7 +11,7 @@ import {AnnotationRepoFilterBar} from './filter_bar/AnnotationRepoFilterBar';
 import {UpdateFiltersCallback} from './AnnotationRepoFiltersHandler';
 import {Dock} from '../../../../web/js/ui/dock/Dock';
 import {NullCollapse} from "../../../../web/js/ui/null_collapse/NullCollapse";
-import {Platforms} from "../../../../web/js/util/Platforms";
+import {Platforms} from "polar-shared/src/util/Platforms";
 import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
 import {Devices} from "../../../../web/js/util/Devices";
 
@@ -99,7 +99,7 @@ export default class PreviewAndMainViewDock extends React.Component<IProps, ISta
             );
         }
 
-    }
+    };
 
     public static Phone = class extends PreviewAndMainViewDock {
 

@@ -35,7 +35,7 @@ export class PremiumButton extends React.Component<IProps, IState> {
         // true if we're BUYING a new plan...
         const buy = from === 'free';
 
-        const text = buy ? "Buy" : "Change";
+        const text = buy ? "Buy" : "Upgrade";
 
         const computePlan = () => {
 
@@ -77,6 +77,7 @@ export class PremiumButton extends React.Component<IProps, IState> {
             Dialogs.confirm({
                 title: `Are you sure you want to ${to}?`,
                 subtitle: 'Your billing will automatically be updated and account pro-rated.',
+                type: 'warning',
                 onConfirm
             });
 
@@ -89,7 +90,8 @@ export class PremiumButton extends React.Component<IProps, IState> {
 
                 <NullCollapse open={! currentPlan}>
 
-                    <Button color="secondary"
+                    <Button color="primary"
+                            size="lg"
                             onClick={() => handler()}>
 
                         {text}

@@ -8,7 +8,7 @@ import {IEventDispatcher} from '../../reactor/SimpleReactor';
 import {EventListener} from '../../reactor/EventListener';
 import {Logger} from 'polar-shared/src/logger/Logger';
 import Button from 'reactstrap/lib/Button';
-import {Platforms} from "../../util/Platforms";
+import {Platforms} from "polar-shared/src/util/Platforms";
 
 const log = Logger.create();
 
@@ -103,7 +103,7 @@ export class GDPRNotice extends React.Component<any, IState> {
 
                         <p>
                             We do not sell your private data.  Your private data is
-                            your and we're not interested in selling, monetizing, or
+                            yours and we're not interested in selling, monetizing, or
                             distributing it to 3rd parties except when necessary to
                             provide data storage services.
                         </p>

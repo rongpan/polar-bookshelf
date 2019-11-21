@@ -7,7 +7,7 @@ import {
     ReadingTaskAction,
     TaskRep
 } from "polar-spaced-repetition/src/spaced_repetition/scheduler/S2Plus/TasksCalculator";
-import {Platforms} from "../../../../web/js/util/Platforms";
+import {Platforms} from "polar-shared/src/util/Platforms";
 import {Row} from "../../../../web/js/ui/layout/Row";
 import {FlashcardCard} from "./cards/FlashcardCard";
 import {FlashcardTaskAction} from "./cards/FlashcardTaskAction";
@@ -141,14 +141,14 @@ export class Reviewer<A> extends React.Component<IProps<A>, IState<A>> {
 
                     <Row.Right>
 
-                        <Button size="sm"
+                        <Button size="md"
                                 color="light"
                                 className="text-muted mr-1"
                                 onClick={() => this.onSuspended(taskRep)}>
                             <i className="fas fa-pause"/> suspend
                         </Button>
 
-                        <Button size="sm"
+                        <Button size="md"
                                 color="light"
                                 className="text-muted"
                                 onClick={() => this.props.onFinished(true)}>

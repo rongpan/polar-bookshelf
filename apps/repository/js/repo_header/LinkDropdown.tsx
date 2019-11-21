@@ -1,11 +1,8 @@
 import * as React from 'react';
-import DropdownToggle from 'reactstrap/lib/DropdownToggle';
-import DropdownMenu from 'reactstrap/lib/DropdownMenu';
+import {DropdownMenu, DropdownToggle, UncontrolledDropdown, DropdownItem} from 'reactstrap';
 import {LinkDropdownItem} from './LinkDropdownItem';
 import {AppRuntime} from '../../../../web/js/AppRuntime';
-import {UncontrolledDropdown} from 'reactstrap';
-import DropdownItem from 'reactstrap/lib/DropdownItem';
-import {Platforms} from '../../../../web/js/util/Platforms';
+import {Platforms} from 'polar-shared/src/util/Platforms';
 
 export class LinkDropdown extends React.PureComponent<IProps, IState> {
 
@@ -18,15 +15,15 @@ export class LinkDropdown extends React.PureComponent<IProps, IState> {
         return (
 
             <UncontrolledDropdown className="ml-1"
-                                  size="sm"
+                                  size="md"
                                   hidden={this.props.hidden}
                                   id="links-dropdown">
 
-                <DropdownToggle className="text-muted"
+                <DropdownToggle className="text-muted border"
                                 color="light"
                                 caret>
 
-                    <i className="fas fa-link" style={{fontSize: '17px'}}></i>
+                    <i className="fas fa-link" style={{fontSize: '17px'}}/>
 
                 </DropdownToggle>
 

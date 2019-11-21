@@ -1,32 +1,40 @@
 import * as React from 'react';
-import DropdownToggle from 'reactstrap/lib/DropdownToggle';
-import DropdownMenu from 'reactstrap/lib/DropdownMenu';
+import {DropdownMenu, DropdownToggle, UncontrolledDropdown} from 'reactstrap';
 import {HelpDropdownItem} from './HelpDropdownItem';
 import DropdownItem from 'reactstrap/lib/DropdownItem';
-import {UncontrolledDropdown} from 'reactstrap';
 import {AppRuntime} from '../../../../web/js/AppRuntime';
 import {TrackedDropdownItem} from './TrackedDropdownItem';
 import {ipcRenderer} from 'electron';
 import {AppUpdates} from '../../../../web/js/updates/AppUpdates';
 import {DistConfig} from '../../../../web/js/dist_config/DistConfig';
-import {Platforms} from "../../../../web/js/util/Platforms";
+import {Platforms} from "polar-shared/src/util/Platforms";
+import {Devices} from "../../../../web/js/util/Devices";
+import {Version} from "polar-shared/src/util/Version";
+import {Dialogs} from "../../../../web/js/ui/dialogs/Dialogs";
+import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
+import {NullCollapse} from "../../../../web/js/ui/null_collapse/NullCollapse";
 
 export class HelpDropdown extends React.PureComponent<IProps, IState> {
 
     constructor(props: IProps, context: any) {
         super(props, context);
+
+        this.onAbout = this.onAbout.bind(this);
+
     }
 
     public render() {
 
         const updatesEnabled = AppRuntime.isElectron() && AppUpdates.platformSupportsUpdates();
 
+        const isPhone = Devices.isPhone();
+
         return (
             <UncontrolledDropdown className="ml-1"
-                                  size="sm"
+                                  size="md"
                                   id="help-dropdown">
 
-                <DropdownToggle className="text-muted"
+                <DropdownToggle className="text-muted border"
                                 color="light"
                                 caret>
 
@@ -37,6 +45,12 @@ export class HelpDropdown extends React.PureComponent<IProps, IState> {
                 <DropdownMenu className="shadow" right>
 
                     {/*<DropdownItem header>Extensions and Addons</DropdownItem>*/}
+
+                    <TrackedDropdownItem id="about-link"
+                                         title="About"
+                                         tooltip="About Polar"
+                                         onClick={() => this.onAbout()}
+                                         />
 
                     <HelpDropdownItem id="documentation-link"
                                       title="Documentation"
@@ -92,9 +106,10 @@ export class HelpDropdown extends React.PureComponent<IProps, IState> {
                                          hidden={!updatesEnabled}
                                          onClick={() => ipcRenderer.send('app-update:check-for-update')}/>
 
-                    <DropdownItem divider/>
+                    <DropdownItem divider hidden={isPhone}/>
 
                     <TrackedDropdownItem id="sidebar-item-logs"
+                                         hidden={isPhone}
                                          title="Logs"
                                          tooltip="Show logs on internal activity during background operations like cloud activity and sync."
                                          icon="fas fa-info-circle"
@@ -108,6 +123,24 @@ export class HelpDropdown extends React.PureComponent<IProps, IState> {
 
     }
 
+    private onAbout() {
+
+        const version = Version.get();
+
+        const body = <div>
+
+            <b>Version: </b> {version}
+
+        </div>;
+
+        Dialogs.alert({
+            title: 'About',
+            body,
+            type: 'success',
+            onConfirm: NULL_FUNCTION
+        })
+
+    }
 
 }
 

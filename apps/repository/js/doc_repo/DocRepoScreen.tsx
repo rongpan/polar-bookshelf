@@ -4,9 +4,8 @@ import {RepoDocMetaLoader} from '../RepoDocMetaLoader';
 import {RepoDocInfo} from '../RepoDocInfo';
 import {RepoDocMetaManager} from '../RepoDocMetaManager';
 import {Optional} from 'polar-shared/src/util/ts/Optional';
-import {Tag, TagStr} from 'polar-shared/src/tags/Tags';
+import {Tag, Tags, TagStr} from 'polar-shared/src/tags/Tags';
 import {isPresent} from 'polar-shared/src/Preconditions';
-import {Tags} from 'polar-shared/src/tags/Tags';
 import {RendererAnalytics} from '../../../../web/js/ga/RendererAnalytics';
 import {MessageBanner} from '../MessageBanner';
 import {DocRepoTableDropdown} from './DocRepoTableDropdown';
@@ -41,6 +40,7 @@ import {Numbers} from "polar-shared/src/util/Numbers";
 import {DraggingSelectedDocs} from "./SelectedDocs";
 import {TreeState} from "../../../../web/js/ui/tree/TreeState";
 import {DocSidebar} from "../../../../web/spectron0/ui-components/DocSidebar";
+import {SetArrays} from "polar-shared/src/util/SetArrays";
 
 const log = Logger.create();
 
@@ -87,9 +87,12 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
         this.onMultiDeleted = this.onMultiDeleted.bind(this);
 
         this.getSelected = this.getSelected.bind(this);
+        this.getRow = this.getRow.bind(this);
 
         this.onDragStart = this.onDragStart.bind(this);
         this.onDragEnd = this.onDragEnd.bind(this);
+
+        this.onRemoveFromFolder = this.onRemoveFromFolder.bind(this);
 
         this.state = {
             data: [],
@@ -196,9 +199,22 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
     }
 
+    private onRemoveFromFolder(folder: Tag, repoDocInfos: ReadonlyArray<RepoDocInfo>) {
+
+        for (const repoDocInfo of repoDocInfos) {
+            const existingTags = Object.values(repoDocInfo.tags || {});
+            const newTags = Tags.difference(existingTags, [folder]);
+
+            this.onDocTagged(repoDocInfo, newTags)
+                .catch(err => log.error(err));
+
+        }
+
+    }
+
     private onMultiDeleted() {
         const repoDocInfos = this.getSelected();
-        this.onDocDeleteRequested(...repoDocInfos);
+        this.onDocDeleteRequested(repoDocInfos);
     }
 
     private clearSelected() {
@@ -215,19 +231,9 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
             return [];
         }
 
-        interface TableItem {
-            readonly _original: RepoDocInfo;
-        }
-
-        interface IResolvedState {
-            readonly sortedData: ReadonlyArray<TableItem>;
-            readonly page: number;
-            readonly pageSize: number;
-        }
-
         const resolvedState: IResolvedState = this.reactTable!.getResolvedState();
 
-        const sortedData = resolvedState.sortedData;
+        const {sortedData} = resolvedState;
 
         const offset = (resolvedState.page) * resolvedState.pageSize;
 
@@ -241,16 +247,71 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
     }
 
+    private getRow(viewIndex: number): RepoDocInfo {
+        const resolvedState: IResolvedState = this.reactTable!.getResolvedState();
+        const {sortedData} = resolvedState;
+        const offset = (resolvedState.page) * resolvedState.pageSize;
+        const idx = offset + viewIndex;
+        return sortedData[idx]._original;
+    }
+
     public selectRow(selectedIdx: number,
-                     event: MouseEvent, checkbox: boolean = false) {
+                     event: MouseEvent,
+                     type: SelectRowType) {
 
-        if (typeof selectedIdx === 'string') {
-            selectedIdx = parseInt(selectedIdx);
-        }
+        selectedIdx = Numbers.toNumber(selectedIdx);
 
-        let selected: number[] = [selectedIdx];
+        // there are really only three strategies
+        //
+        // - one: select ONE item and unselect the previous item(s).  This is done when we have
+        //        a single click on an item.  It always selects it and never de-selects it.
+        //
+        // - add the new selectedIndex to the list of currently selected items.
+        //
+        //   - FIXME: really what this is is just select-one but we leave the
+        //     previous items in place and perform no mutation on them...
 
-        if (event.getModifierState("Shift")) {
+        // - toggle: used when the type is 'checkbox' because we're only toggling
+        //   the selection of that one item
+        //
+        // - none: do nothing.  this is used when the context menu is being used and no additional
+        //         items are being changed.
+
+        type SelectionStrategy = 'one' | 'range' | 'toggle' | 'none';
+
+        type SelectedRows = ReadonlyArray<number>;
+
+        const computeStrategy = (): SelectionStrategy => {
+
+            if (type === 'checkbox') {
+                return 'toggle';
+            }
+
+            if (type === 'click') {
+
+                if (event.getModifierState("Shift")) {
+                    return 'range';
+                }
+
+                if (event.getModifierState("Control") || event.getModifierState("Meta")) {
+                    return 'toggle';
+                }
+
+            }
+
+            if (type === 'context') {
+
+                if (this.state.selected.includes(selectedIdx)) {
+                    return 'none';
+                }
+
+            }
+
+            return 'one';
+
+        };
+
+        const doStrategyRange = (): SelectedRows => {
 
             // select a range
 
@@ -263,28 +324,50 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
                 max = Arrays.last(sorted)!;
             }
 
-            selected = [...Numbers.range(Math.min(min, selectedIdx),
-                                         Math.max(max, selectedIdx))];
+            const selected = [...Numbers.range(Math.min(min, selectedIdx),
+                    Math.max(max, selectedIdx))];
 
-        }
+            return selected;
 
-        const selectIndividual = (event.getModifierState("Control") || event.getModifierState("Meta")) || checkbox;
+        };
 
-        if (selectIndividual) {
-
-            // one at a time
-
-            selected = [...this.state.selected];
+        const doStrategyToggle = (): SelectedRows => {
+            const selected = [...this.state.selected];
 
             if (selected.includes(selectedIdx)) {
-                selected.splice(selected.indexOf(selectedIdx), 1);
+                return SetArrays.difference(selected, [selectedIdx]);
             } else {
-                selected = [...selected, selectedIdx];
+                return SetArrays.union(selected, [selectedIdx]);
             }
 
-        }
+        };
 
-        this.setState({...this.state, selected});
+        const doStrategyOne = (): SelectedRows => {
+            return [selectedIdx];
+        };
+
+        const doStrategy = (): SelectedRows | undefined => {
+
+            const strategy = computeStrategy();
+
+            switch (strategy) {
+                case "one":
+                    return doStrategyOne();
+                case "range":
+                    return doStrategyRange();
+                case "toggle":
+                    return doStrategyToggle();
+                case "none":
+                    return undefined;
+            }
+
+        };
+
+        const selected = doStrategy();
+
+        if (selected) {
+            this.setState({...this.state, selected});
+        }
 
     }
 
@@ -435,11 +518,15 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
                                                   onDocSetTitle={(repoDocInfo, title) => this.onDocSetTitle(repoDocInfo, title)}
                                                   onDocTagged={(repoDocInfo, tags) => this.onDocTagged(repoDocInfo, tags)}
                                                   onMultiDeleted={() => this.onMultiDeleted()}
-                                                  selectRow={(selectedIdx, event1, checkbox) => this.selectRow(selectedIdx, event1, checkbox)}
+                                                  selectRow={(selectedIdx, event1, type) => this.selectRow(selectedIdx, event1, type)}
                                                   onSelected={selected => this.onSelected(selected)}
                                                   onReactTable={reactTable => this.reactTable = reactTable}
                                                   onDragStart={event => this.onDragStart(event)}
-                                                  onDragEnd={() => this.onDragEnd()}/>
+                                                  onDragEnd={() => this.onDragEnd()}
+                                                  filters={this.docRepoFilters.filters}
+                                                  getSelected={() => this.getSelected()}
+                                                  getRow={(viewIndex) => this.getRow(viewIndex)}
+                                                  onRemoveFromFolder={(folder, repoDocInfos) => this.onRemoveFromFolder(folder, repoDocInfos)}/>
 
                                 }
                                 right={
@@ -493,13 +580,14 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
     }
 
-    private onDocDeleteRequested(...repoDocInfos: RepoDocInfo[]) {
+    private onDocDeleteRequested(repoDocInfos: ReadonlyArray<RepoDocInfo>) {
 
         Dialogs.confirm({
             title: "Are you sure you want to delete these document(s)?",
             subtitle: "This is a permanent operation and can't be undone.  All associated annotations will also be removed.",
             onCancel: NULL_FUNCTION,
-            onConfirm: () => this.onDocDeleted(...repoDocInfos),
+            type: 'danger',
+            onConfirm: () => this.onDocDeleted(repoDocInfos),
         });
 
     }
@@ -508,7 +596,7 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
         this.setState({...this.state, docSidebarVisible});
     }
 
-    private onDocDeleted(...repoDocInfos: RepoDocInfo[]) {
+    private onDocDeleted(repoDocInfos: ReadonlyArray<RepoDocInfo>) {
 
         const doDeletes = async () => {
 
@@ -657,4 +745,19 @@ interface IState {
     readonly docSidebarVisible: boolean;
 }
 
+/**
+ * The type of event that triggered the row selection.  Either a normal click, a context menu click (right click) or
+ * a checkbox for selecting multiple.
+ */
+export type SelectRowType = 'click' | 'context' | 'checkbox';
 
+
+interface TableItem {
+    readonly _original: RepoDocInfo;
+}
+
+interface IResolvedState {
+    readonly sortedData: ReadonlyArray<TableItem>;
+    readonly page: number;
+    readonly pageSize: number;
+}

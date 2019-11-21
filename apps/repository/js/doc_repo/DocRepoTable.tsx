@@ -16,36 +16,49 @@ import {DocButton} from '../ui/DocButton';
 import {FlagDocButton} from '../ui/FlagDocButton';
 import {ArchiveDocButton} from '../ui/ArchiveDocButton';
 import Input from 'reactstrap/lib/Input';
-import {DocContextMenu} from '../DocContextMenu';
+import {DocContextMenuProps} from '../DocContextMenu';
 import {Toaster} from '../../../../web/js/ui/toaster/Toaster';
 import {Either} from '../../../../web/js/util/Either';
 import {BackendFileRefs} from '../../../../web/js/datastore/BackendFileRefs';
 import {IDocInfo} from 'polar-shared/src/metadata/IDocInfo';
 import {RelatedTags} from '../../../../web/js/tags/related/RelatedTags';
 import {AccountUpgradeBar} from "../../../../web/js/ui/account_upgrade/AccountUpgradeBar";
-import {Platforms} from "../../../../web/js/util/Platforms";
+import {Platforms} from "polar-shared/src/util/Platforms";
 import {Numbers} from "polar-shared/src/util/Numbers";
+import {
+    ContextMenuHandlers,
+    ContextMenuWrapper,
+    prepareContextMenuHandlers
+} from '@burtonator/react-context-menu-wrapper';
+import {DocDropdownItems, OnRemoveFromFolderCallback} from "../DocDropdownItems";
+import {Filters} from "./DocRepoFilters";
+import {SelectRowType} from "./DocRepoScreen";
+import {TitleCell} from "./cells/TitleCell";
+import {CheckCell} from "./cells/CheckCell";
+import {DocButtonsCell} from "./cells/DocButtonsCell";
 
 const log = Logger.create();
 
 // TODO: go back to ExtendedReactTable
 
+const CONTEXT_MENU_ID = 'doc-table-context-menu';
 
 export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
 
-    private contextMenuProps: any;
+    private contextMenuProps: DocContextMenuProps;
 
     constructor(props: IProps, context: any) {
         super(props, context);
 
         this.contextMenuProps = {
+            getSelected: this.props.getSelected,
             onDelete: this.props.onDocDeleteRequested,
             onSetTitle: this.props.onDocSetTitle,
             onDocumentLoadRequested: (repoDocInfo: RepoDocInfo) => {
                 this.onDocumentLoadRequested(repoDocInfo);
-            }
+            },
+            onRemoveFromFolder: this.props.onRemoveFromFolder
         };
-
 
         this.createColumnCheckbox = this.createColumnCheckbox.bind(this);
         this.createColumnTitle = this.createColumnTitle.bind(this);
@@ -62,9 +75,13 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
         this.createColumnsForDesktop = this.createColumnsForDesktop.bind(this);
 
 
-        this.createCellProps = this.createCellProps.bind(this);
-        this.createCellPropsForMobile = this.createCellPropsForMobile.bind(this);
-        this.createCellPropsForDesktop = this.createCellPropsForDesktop.bind(this);
+        this.createTDProps = this.createTDProps.bind(this);
+        this.createTDPropsForMobile = this.createTDPropsForMobile.bind(this);
+        this.createTDPropsForDesktop = this.createTDPropsForDesktop.bind(this);
+
+        this.createContextMenuHandlers = this.createContextMenuHandlers.bind(this);
+
+        this.doHandleToggleField = this.doHandleToggleField.bind(this);
 
     }
 
@@ -134,26 +151,9 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
 
                 const viewIndex = row.viewIndex as number;
 
-                return (<div style={{lineHeight: '1em'}}>
-
-                    <Input checked={this.props.selected.includes(viewIndex)}
-                           style={{
-                               marginLeft: 'auto',
-                               marginRight: 'auto',
-                               margin: 'auto',
-                               position: 'relative',
-                               top: '2px',
-                               width: '16px',
-                               height: '16px',
-                           }}
-                           className="m-auto"
-                           onChange={NULL_FUNCTION}
-                           onClick={(event) => this.props.selectRow(viewIndex, event.nativeEvent, true)}
-                           type="checkbox"/>
-
-                    {/*<i className="far fa-square"></i>*/}
-
-                </div>);
+                return <CheckCell viewIndex={viewIndex}
+                                  selected={this.props.selected}
+                                  selectRow={this.props.selectRow}/>;
             }
         };
 
@@ -168,22 +168,9 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
             Cell: (row: any) => {
 
                 const id = 'doc-repo-row-title' + row.index;
-                const repoDocInfo: RepoDocInfo = row.original;
 
                 return (
-
-                    <div id={id}>
-
-                        <DocContextMenu {...this.contextMenuProps}
-                                        id={'context-menu-' + row.index}
-                                        repoDocInfo={repoDocInfo}>
-
-                            <div>{row.value}</div>
-
-                        </DocContextMenu>
-
-                    </div>
-
+                    <TitleCell id={id} title={row.value}/>
                 );
             }
 
@@ -204,17 +191,9 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
             className: 'doc-table-col-updated d-none-mobile',
             Cell: (row: any) => {
 
-                const repoDocInfo: RepoDocInfo = row.original;
-
                 return (
 
-                    <DocContextMenu {...this.contextMenuProps}
-                                    id={'context-menu-' + row.index}
-                                    repoDocInfo={repoDocInfo}>
-
-                        <DateTimeTableCell className="doc-col-last-updated" datetime={row.value}/>
-
-                    </DocContextMenu>
+                    <DateTimeTableCell className="doc-col-last-updated" datetime={row.value}/>
 
                 );
             }
@@ -235,18 +214,8 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
             className: 'doc-table-col-added d-none-mobile',
             Cell: (row: any) => {
 
-                const repoDocInfo: RepoDocInfo = row.original;
-
                 return (
-
-                    <DocContextMenu {...this.contextMenuProps}
-                                    id={'context-menu-' + row.index}
-                                    repoDocInfo={repoDocInfo}>
-
-                        <DateTimeTableCell className="doc-col-added" datetime={row.value}/>
-
-                    </DocContextMenu>
-
+                    <DateTimeTableCell className="doc-col-added" datetime={row.value}/>
                 );
             }
         };
@@ -348,15 +317,9 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                     .sort()
                     .join(", ");
 
-                const repoDocInfo: RepoDocInfo = row.original;
-
                 return (
 
-                    <DocContextMenu {...this.contextMenuProps}
-                                    id={'context-menu-' + row.index}
-                                    repoDocInfo={repoDocInfo}>
-                        <div>{formatted}</div>
-                    </DocContextMenu>
+                    <div>{formatted}</div>
 
                 );
 
@@ -378,20 +341,10 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
             className: 'doc-table-col-progress d-none-mobile',
             Cell: (row: any) => {
 
-                const repoDocInfo: RepoDocInfo = row.original;
-
                 return (
-
-                    <DocContextMenu {...this.contextMenuProps}
-                                    id={'context-menu-' + row.index}
-                                    repoDocInfo={repoDocInfo}>
-
-                        <progress className="mt-auto mb-auto" max="100" value={ row.value } style={{
-                            width: '100%'
-                        }} />
-
-                    </DocContextMenu>
-
+                    <progress className="mt-auto mb-auto" max="100" value={ row.value } style={{
+                        width: '100%'
+                    }} />
                 );
             }
         };
@@ -429,47 +382,21 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
             Cell: (row: any) => {
 
                 const repoDocInfo: RepoDocInfo = row.original;
+                const viewIndex = row.viewIndex;
 
-                const existingTags: Tag[]
-                    = Object.values(Optional.of(repoDocInfo.docInfo.tags).getOrElse({}));
-
-                return (<div className="doc-buttons" style={{display: 'flex'}}>
-
-                    <DocButton>
-
-                        {/*WARNING: making this a function breaks the layout...*/}
-
-                        <TagInput availableTags={this.props.tagsProvider()}
-                                  existingTags={existingTags}
-                                  relatedTags={this.props.relatedTags}
-                                  onChange={(tags) => this.props.onDocTagged(repoDocInfo, tags)}/>
-
-                    </DocButton>
-
-                    <FlagDocButton active={repoDocInfo.flagged}
-                                   onClick={() => this.doHandleToggleField(repoDocInfo, 'flagged')}/>
-
-                    <ArchiveDocButton active={repoDocInfo.archived}
-                                      onClick={() => this.doHandleToggleField(repoDocInfo, 'archived')}/>
-
-                    <DocButton>
-
-                        <DocDropdown id={'doc-dropdown-' + row.index}
-                                     repoDocInfo={repoDocInfo}
-                                     onDelete={this.props.onDocDeleteRequested}
-                                     onSetTitle={this.props.onDocSetTitle}
-                                     onDocumentLoadRequested={this.contextMenuProps.onDocumentLoadRequested}/>
-
-                    </DocButton>
-
-                </div>);
+                return <DocButtonsCell viewIndex={viewIndex}
+                                       flagged={repoDocInfo.flagged}
+                                       archived={repoDocInfo.archived}
+                                       doHandleToggleField={this.doHandleToggleField}
+                                       onDocumentLoadRequested={this.onDocumentLoadRequested}
+                                       {...this.props}/>
 
             }
         };
 
     }
 
-    private createColumns() {
+    private createColumns(contextMenuHandlers: ContextMenuHandlers) {
 
         if (Platforms.isMobile()) {
             return this.createColumnsForTablet();
@@ -511,17 +438,17 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
 
     }
 
-    private createCellProps(rowInfo?: RowInfo, column?: Column) {
+    private createTDProps(rowInfo: RowInfo, column: Column, contextMenuHandlers: ContextMenuHandlers) {
 
         if (Platforms.isMobile()) {
-            return this.createCellPropsForMobile(rowInfo, column);
+            return this.createTDPropsForMobile(rowInfo, column);
         } else {
-            return this.createCellPropsForDesktop(rowInfo, column);
+            return this.createTDPropsForDesktop(rowInfo, column, contextMenuHandlers);
        }
 
     }
 
-    private createCellPropsForMobile(rowInfo?: RowInfo, column?: Column) {
+    private createTDPropsForMobile(rowInfo?: RowInfo, column?: Column) {
 
         const DEFAULT_BEHAVIOR_COLUMNS = [
             'doc-checkbox'
@@ -562,7 +489,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
 
     }
 
-    private createCellPropsForDesktop(rowInfo?: RowInfo, column?: Column) {
+    private createTDPropsForDesktop(rowInfo: RowInfo, column: Column, contextMenuHandlers: ContextMenuHandlers) {
 
         const DEFAULT_BEHAVIOR_COLUMNS = [
             'tag-input',
@@ -591,30 +518,39 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
 
         } else {
 
-            const handleSelect = (event: MouseEvent) => {
+            const handleSelect = (event: MouseEvent, type: SelectRowType) => {
                 if (rowInfo) {
-                    this.props.selectRow(rowInfo.viewIndex as number, event);
+                    this.props.selectRow(rowInfo.viewIndex as number, event, type);
                 }
             };
 
             return {
 
-                onDoubleClick: (event: MouseEvent) => {
-
-                    if (rowInfo) {
-                        const repoDocInfo: RepoDocInfo = rowInfo.original;
-                        this.onDocumentLoadRequested(repoDocInfo);
+                onDoubleClick: () => {
+                    const selected = this.props.getSelected();
+                    if (selected.length === 1) {
+                        // only allow double click if one item is requested.  Double clicking on > 1 makes
+                        // no sense.
+                        this.onDocumentLoadRequested(selected[0]);
                     }
-
                 },
 
                 onContextMenu: (event: MouseEvent) => {
-                    handleSelect(event);
+                    handleSelect(event, 'context');
+                    contextMenuHandlers.onContextMenu(event);
                 },
 
-                onMouseDown: (event: MouseEvent, handleOriginal?: () => void) => {
-                    handleSelect(event);
+                onClick: (event: MouseEvent, handleOriginal?: () => void) => {
+                    handleSelect(event, 'click');
                 },
+
+                onTouchEnd: (event: TouchEvent) => {
+                    contextMenuHandlers.onTouchEnd(event);
+                },
+
+                onTouchStart: (event: TouchEvent) => {
+                    contextMenuHandlers.onTouchStart(event);
+                }
 
             };
 
@@ -622,9 +558,16 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
 
     }
 
+    private createContextMenuHandlers() {
+        const contextMenuHandlers = prepareContextMenuHandlers({id: CONTEXT_MENU_ID});
+        return contextMenuHandlers;
+    }
+
     public render() {
 
         const { data } = this.props;
+
+        const contextMenuHandlers = this.createContextMenuHandlers();
 
         return (
 
@@ -632,12 +575,26 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                  className="ml-1"
                  style={{height: '100%', overflow: 'auto'}}>
 
-                <AccountUpgradeBar/>
+                {/*TODO: removing now because it breaks scrollbars for new users.*/}
+                {/*<AccountUpgradeBar/>*/}
+
+                <ContextMenuWrapper id={CONTEXT_MENU_ID}>
+
+                    <div className="border shadow rounded pt-2 pb-2"
+                         style={{backgroundColor: 'var(--white)'}}>
+
+                        <DocDropdownItems toggle={false}
+                                          filters={this.props.filters}
+                                          {...this.contextMenuProps}/>
+
+                    </div>
+
+                </ContextMenuWrapper>
 
                 <ReactTable
                     data={[...data]}
                     ref={(reactTable: Instance) => this.props.onReactTable(reactTable)}
-                    columns={this.createColumns()}
+                    columns={this.createColumns(contextMenuHandlers)}
                     defaultPageSize={50}
                     noDataText="No documents available."
                     className="-striped -highlight"
@@ -649,6 +606,15 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                             desc: true
                         }
                     ]}
+                    getTheadProps={() => {
+                        return {
+                            style: {
+                                // needed to avoid the columns being placed wrong due to the scrollbar.
+                                paddingRight: '1em'
+                            }
+                        }
+                    }}
+
                     // sorted={[{
                     //     id: 'added',
                     //     desc: true
@@ -682,8 +648,13 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
 
                         };
                     }}
-                    getTdProps={(state: any, rowInfo?: RowInfo, column?: Column, instance?: any) => {
-                        return this.createCellProps(rowInfo, column);
+                    getTdProps={(state: any, rowInfo?: RowInfo, column?: Column) => {
+
+                        if (!rowInfo || ! column) {
+                            return {};
+                        }
+
+                        return this.createTDProps(rowInfo, column, contextMenuHandlers);
                     }}
 
                 />
@@ -776,16 +747,20 @@ interface IProps {
     readonly writeDocInfoTitle: (repoDocInfo: RepoDocInfo, title: string) => Promise<void>;
     readonly writeDocInfo: (docInfo: IDocInfo) => Promise<void>;
     readonly onMultiDeleted: () => void;
-    readonly onDocDeleted: (...repoDocInfos: RepoDocInfo[]) => void;
-    readonly onDocDeleteRequested: (...repoDocInfos: RepoDocInfo[]) => void;
+    readonly onDocDeleted: (repoDocInfos: RepoDocInfo[]) => void;
+    readonly onDocDeleteRequested: (repoDocInfos: ReadonlyArray<RepoDocInfo>) => void;
     readonly onDocTagged: (repoDocInfo: RepoDocInfo, tags: ReadonlyArray<Tag>) => void;
     readonly onDocSetTitle: (repoDocInfo: RepoDocInfo, title: string) => void;
-    readonly selectRow: (selectedIdx: number, event: MouseEvent, checkbox?: boolean) => void;
+    readonly selectRow: (selectedIdx: number, event: MouseEvent, type: SelectRowType) => void;
     readonly onSelected: (selected: ReadonlyArray<number>) => void;
     readonly onReactTable: (reactTable: Instance) => void;
     readonly refresh: () => void;
     readonly onDragStart?: (event: DragEvent) => void;
     readonly onDragEnd?: (event: DragEvent) => void;
+    readonly getSelected: () => ReadonlyArray<RepoDocInfo>;
+    readonly filters: Filters;
+    readonly onRemoveFromFolder: OnRemoveFromFolderCallback;
+    readonly getRow: (viewIndex: number) => RepoDocInfo;
 }
 
 interface IState {

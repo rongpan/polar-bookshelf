@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {TrackedDropdownItem} from './TrackedDropdownItem';
-import {FeatureToggles} from "../../../../web/js/ui/FeatureToggles";
+import {FeatureToggles} from "polar-shared/src/util/FeatureToggles";
 
 const ICON_ON = "fas fa-check text-primary";
 const ICON_OFF = "fas fa-minus";
@@ -13,7 +13,7 @@ export class SettingsFeatureToggleDropdown extends React.PureComponent<IProps, I
 
     public render() {
 
-        const marked = FeatureToggles.isEnabled(this.props.name);
+        const marked = FeatureToggles.get(this.props.name);
 
         const icon: string = marked ? ICON_ON : ICON_OFF
 

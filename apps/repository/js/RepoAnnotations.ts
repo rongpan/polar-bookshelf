@@ -2,9 +2,6 @@ import {TextHighlight} from '../../../web/js/metadata/TextHighlight';
 import {AreaHighlight} from '../../../web/js/metadata/AreaHighlight';
 import {RepoAnnotation, RepoHighlightInfo} from './RepoAnnotation';
 import {AnnotationType} from 'polar-shared/src/metadata/AnnotationType';
-import {Flashcard} from '../../../web/js/metadata/Flashcard';
-import {Text} from 'polar-shared/src/metadata/Text';
-import {Texts} from '../../../web/js/metadata/Texts';
 import {Images} from '../../../web/js/metadata/Images';
 import {Img} from '../../../web/js/metadata/Img';
 import {PersistenceLayerProvider} from '../../../web/js/datastore/PersistenceLayer';
@@ -17,11 +14,12 @@ import {IFlashcard} from "polar-shared/src/metadata/IFlashcard";
 import {ITextHighlight} from "polar-shared/src/metadata/ITextHighlight";
 import {IAreaHighlight} from "polar-shared/src/metadata/IAreaHighlight";
 import {HighlightColors} from "polar-shared/src/metadata/HighlightColor";
+import {Annotations} from "polar-shared/src/metadata/Annotations";
 
 export class RepoAnnotations {
 
     public static convert(persistenceLayerProvider: PersistenceLayerProvider,
-                          docMeta: IDocMeta): RepoAnnotation[] {
+                          docMeta: IDocMeta): ReadonlyArray<RepoAnnotation> {
 
         const result: RepoAnnotation[] = [];
         const docInfo = docMeta.docInfo;
@@ -63,29 +61,7 @@ export class RepoAnnotations {
         // code shared with DocAnnotations and we should refactor to
         // standardize.
 
-        let text: string | undefined;
-
-        const anySourceAnnotation = <any> sourceAnnotation;
-
-        if (anySourceAnnotation.text) {
-            const sourceText: Text = anySourceAnnotation.revisedText || anySourceAnnotation.text;
-            text = Texts.toPlainText(sourceText);
-        }
-
-        if (anySourceAnnotation.content) {
-            const sourceText: Text = anySourceAnnotation.content;
-            text = Texts.toPlainText(sourceText);
-        }
-
-        if (type === AnnotationType.FLASHCARD) {
-            const flashcard = <Flashcard> sourceAnnotation;
-            const textFields = Object.values(flashcard.fields);
-
-            if (textFields.length > 0) {
-                text = Texts.toPlainText(textFields[0]);
-            }
-
-        }
+        const text = Annotations.toText(type, sourceAnnotation);
 
         let meta: RepoHighlightInfo | undefined;
 
@@ -112,6 +88,7 @@ export class RepoAnnotations {
 
         return {
             id: sourceAnnotation.id,
+            guid: sourceAnnotation.guid,
             fingerprint: docInfo.fingerprint,
             text,
             type,

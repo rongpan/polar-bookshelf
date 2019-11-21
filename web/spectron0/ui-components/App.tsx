@@ -20,6 +20,13 @@ import {FlashcardTaskActions} from "../../../apps/repository/js/reviewer/cards/F
 import {FlashcardCard} from "../../../apps/repository/js/reviewer/cards/FlashcardCard";
 import {Preconditions} from "polar-shared/src/Preconditions";
 import {Task, TaskRep} from "polar-spaced-repetition-api/src/scheduler/S2Plus/S2Plus";
+import {Button} from "reactstrap";
+import {Dialogs} from "../../js/ui/dialogs/Dialogs";
+import {ContextMenuWrapper} from "@burtonator/react-context-menu-wrapper";
+import {DocDropdownItems} from "../../../apps/repository/js/DocDropdownItems";
+import {FolderContextMenu} from "../../../apps/repository/js/FolderContextMenu";
+import {FontAwesomeIcon} from "../../js/ui/fontawesome/FontAwesomeIcon";
+import {WhatsNewModal} from "../../../apps/repository/js/splash2/whats_new/WhatsNewModal";
 
 const styles = {
     swatch: {
@@ -107,9 +114,9 @@ export class App<P> extends React.Component<{}, IAppState> {
         // Dialogs.confirm({title: 'hello world',
         //                  subtitle: 'Some really bad stuff is happening right now which you should probably look into.',
         //                  onConfirm: NULL_FUNCTION,
-        //                  type: 'warning'});
-
-        // Dialogs.prompt({title: 'Give me something ',
+        //                  type: 'danger'});
+        //
+        // Dialogs.prompt({title: 'New folder: ',
         //                 onCancel: NULL_FUNCTION,
         //                 onDone: NULL_FUNCTION});
 
@@ -248,9 +255,60 @@ export class App<P> extends React.Component<{}, IAppState> {
         // const taskReps = createReadingTaskReps();
         const taskReps = createFlashcardTaskReps();
 
+        const MockTag = (props: any) => {
+            return <div className="bg-grey100 p-1 rounded mr-1"
+                        style={{
+                        display: 'inline-block'
+                   }}>
+                {props.children}
+
+                <span className="text-sm">
+                    <FontAwesomeIcon name="fas fa-close"/>
+                </span>
+
+            </div>
+        };
+
         return (
 
             <div>
+
+                <WhatsNewModal/>
+
+                {/*<FolderContextMenu toggle={false}*/}
+                {/*                   onCreateFolder={NULL_FUNCTION}>*/}
+                {/*    <div>*/}
+                {/*        Fake folder*/}
+                {/*    </div>*/}
+                {/*</FolderContextMenu>*/}
+
+                <div className="p-1">
+
+                    <div className="item">
+
+                        <div className="title text-xxl font-weight-bold text-grey900" style={{fontSize: '33px'}}>
+                            Something amazing has happened in science and the community is excited.
+                        </div>
+
+                        <div className="title text-lg text-grey800">
+                            <span className="text-primary">Martin Smith</span>, <span className="text-primary">Carson Weishaus</span>
+                        </div>
+
+                        <div className="title text-lg text-grey800 mt-1 mb-2"  style={{fontSize: '22px'}}>
+                            This is a longer overview or abstract of the current document we're reading.
+                        </div>
+
+                        <div className="metadata" style={{fontSize: '14px'}}>
+                            <MockTag>linux</MockTag> <MockTag>microsoft</MockTag>
+                        </div>
+
+                        <div className="metadata mt-1">
+                            <b>Added: </b> 1 month ago <b>Updated: </b> 1 day ago
+                        </div>
+
+                    </div>
+
+                </div>
 
                 {/*<AnnotationTypeSelector selected={[AnnotationType.FLASHCARD]} onSelected={selected => console.log('selected: ', selected)}/>*/}
 
@@ -258,12 +316,13 @@ export class App<P> extends React.Component<{}, IAppState> {
 
                 {/*<StartReviewButton onClick={NULL_FUNCTION}/>*/}
 
-                <LightModal>
-                    <Reviewer taskReps={taskReps}
-                              onRating={(id, answer) => console.log("got answer: ", id, answer)}
-                              onSuspended={NULL_FUNCTION}
-                              onFinished={() => console.log('finished')}/>
-                </LightModal>
+                {/*<div className="p-1">*/}
+
+                {/*    <Button size='sm' color="light" className="border">*/}
+                {/*        <i className="fas fa-gem"/> Upgrade to bronze to unlock related tags*/}
+                {/*    </Button>*/}
+
+                {/*</div>*/}
 
                 {/*<div style={{width: '500px', height: '700px', display: 'flex'}}*/}
                 {/*     className="border">*/}

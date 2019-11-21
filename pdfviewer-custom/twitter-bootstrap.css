@@ -287,6 +287,19 @@ button.dropdown-item:hover {
 
 }
 
+.muted-color * {
+    transition-property: none;
+}
+
+.muted-color-root:not(:hover) .muted-color * {
+    color: var(--grey100) !important;
+}
+
+.muted-color-root:not(:hover) .muted-color .muted-color-target-bg *,
+.muted-color-root:not(:hover) .muted-color * .muted-color-target-bg * {
+    color: var(--grey100) !important;
+    background-color: var(--grey100) !important;
+}
 
 
 

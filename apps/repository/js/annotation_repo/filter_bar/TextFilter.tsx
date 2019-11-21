@@ -2,7 +2,7 @@ import * as React from 'react';
 import InputGroup from 'reactstrap/lib/InputGroup';
 import Input from 'reactstrap/lib/Input';
 import {UpdateFiltersCallback} from '../AnnotationRepoFiltersHandler';
-import {Platforms} from "../../../../../web/js/util/Platforms";
+import {Platforms} from "polar-shared/src/util/Platforms";
 
 export class TextFilter extends React.PureComponent<IProps, IState> {
 
@@ -16,7 +16,7 @@ export class TextFilter extends React.PureComponent<IProps, IState> {
         const width = Platforms.isMobile() ? '150px' : '250px';
 
         return (
-            <InputGroup size="sm">
+            <InputGroup size="md">
 
                 <Input id="filter_title"
                        type="text"

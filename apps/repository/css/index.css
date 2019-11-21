@@ -6,7 +6,8 @@
 @import "../../../node_modules/font-awesome/css/font-awesome.min.css";
 
 html, body {
-    font-family: -apple-system, BlinkMacSystemFont, Roboto, "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    /* -apple-system, BlinkMacSystemFont,  */
+    font-family: Roboto, "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
     font-weight: 300;
     font-size: 14px;
 }
@@ -23,7 +24,7 @@ html, body {
 }
 
 .shadow {
-  box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+  box-shadow: 0 .5rem 1rem rgba(0,0,0,.5) !important;
 }
 
 #doc-table {

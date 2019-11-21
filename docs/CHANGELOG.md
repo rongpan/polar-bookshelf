@@ -1,3 +1,50 @@
+## Features
+
+- The sidebar now doesn't show the color for the buttons unless you hover over them.  The colors 
+  are also more muted to help not distract more when using the annotation sidebar. 
+
+- Flashcards stats in the mobile app
+
+- Ability to revise the text of a text highlight.
+
+- Big refactor of the context menu so that range selection and context menus work properly. 
+
+- Ability to remove items from folders via right click
+
+- Multi-selection for deletes implemented
+
+- Deleting multiple items via context menu now works
+
+- Bronze now officially required for reading stats and recommended tags
+
+- The context menus now have icons 
+
+- Major refactor of how text selection works using the new modern text layer code in pdf.js which has 
+  been a major complaint since 1.0.  Excited to finally have this fixed!
+
+## Fixes
+
+- Fixed bug where sometimes exceptions were swallowed
+
+- Updated Firebase to hopefully fix some bugs with latency and exceptions..
+
+- Fixed delete dialogs as they were using older code...
+
+- Merged branch for image optimization.
+
+- Fixed alignment of headers in the doc repo
+
+- Fixed bad bug with stats for spaced repetition queue not being computed accurately.
+
+- Improved performance of doc table when selecting items.
+
+- The document repository view is now much faster and context menus no longer have a 'gap'
+  which wouldn't trigger the menu. 
+  
+- Now using larger buttons in the UI 
+
+- Show the front + back of cards when we 'show answer'
+
 # 1.50.10
 
 - Statistics now shown for flashcards when the user is using spaced repetition 

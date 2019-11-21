@@ -7,6 +7,7 @@ import {IStyleMap} from '../../../web/js/react/IStyleMap';
 import {DocAnnotation} from './DocAnnotation';
 import {Dialogs} from '../ui/dialogs/Dialogs';
 import {NULL_FUNCTION} from 'polar-shared/src/util/Functions';
+import {DropdownIcon} from "../ui/standard_icons/DropdownIcon";
 
 const log = Logger.create();
 
@@ -60,7 +61,7 @@ export class AnnotationDropdown extends React.Component<IProps, IState> {
                                     className="doc-dropdown-button btn text-muted pl-1 pr-1"
                                     id={toggleID}>
 
-                        <i className="fas fa-ellipsis-h"></i>
+                        <DropdownIcon/>
 
                     </DropdownToggle>
 
@@ -100,11 +101,13 @@ export class AnnotationDropdown extends React.Component<IProps, IState> {
 
     private onDeleteSelected() {
 
-        Dialogs.confirm({title: "Are you sure you want to delete this annotation? ",
-                         subtitle: "This will also delete all associated comments and flashcards.",
-                         type: 'warning',
-                         onCancel: NULL_FUNCTION,
-                         onConfirm: () => this.onDelete()});
+        Dialogs.confirm({
+            title: "Are you sure you want to delete this annotation? ",
+            subtitle: "This will also delete all associated comments and flashcards.",
+            type: 'danger',
+            onCancel: NULL_FUNCTION,
+            onConfirm: () => this.onDelete()
+        });
 
     }
 

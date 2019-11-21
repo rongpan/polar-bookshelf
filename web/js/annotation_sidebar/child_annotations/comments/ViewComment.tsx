@@ -47,7 +47,7 @@ export class ViewComment extends React.Component<IProps, IState> {
 
             <div className="m-1 mb-2">
 
-                <div key={key} className="comment">
+                <div key={key} className="comment muted-color-root">
 
                     <div className="pb-1 pt-1">
 
@@ -69,7 +69,7 @@ export class ViewComment extends React.Component<IProps, IState> {
                             <DocAnnotationMoment created={comment.created}/>
                         </div>
 
-                        <div style={Styles.barChild} className="flexbar-right">
+                        <div style={Styles.barChild} className="flexbar-right muted-color">
 
                             <NullCollapse open={! comment.immutable}>
                                 {this.props.editButton}
