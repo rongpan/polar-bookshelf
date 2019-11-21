@@ -3,6 +3,10 @@
  TODO:
 
  - the 'success' buttons don't work as designed.
+ - this KIND of works because the colors are still slighly off...
+
+ - create a color pallet page showing all the main colors, buttons, and UI widgets...
+ -
 
  */
 
@@ -14,15 +18,19 @@ body {
     color: #000000;
 }
 
+.invert-parent {
+    /*  The invert parent, plus main filter must equal 1.0 */
+    filter: invert(0.20);
+}
+
 img, progress {
     filter: invert(1.0);
 }
 
-
 :root {
 
     --selected-background-color: rgb(217,184,128);
-    --selected-text-color: rgb(-38,-38,-38);
+    --selected-text-color: #000000;
     --success: rgb(177,50,148);
     --primary: rgb(217,94,-38); /* inverted from #007bff */
 
@@ -37,6 +45,18 @@ img, progress {
     --primary100: rgb(31,-10,-38); /* inverted from  #BAE3FF */
     --primary000: rgb(-13,-29,-38); /* inverted from  #E6F6FF */
 
+    --danger: rgb(120,214,195);
+
+    --danger900: rgb(120,214,195);
+    --danger800: rgb(79,213,191);
+    --danger700: rgb(46,208,187);
+    --danger600: rgb(10,200,181);
+    --danger500: rgb(-8,172,160);
+    --danger400: rgb(-22,139,139);
+    --danger300: rgb(-31,111,111);
+    --danger200: rgb(-38,62,62);
+    --danger100: rgb(-38,28,28);
+    --danger000: rgb(-38,-10,-10);
 }
 
 .btn-success {
@@ -46,4 +66,8 @@ img, progress {
 
 .text-primary {
     color: var(--primary) !important;
+}
+
+.text-danger {
+    color: var(--danger) !important;;
 }

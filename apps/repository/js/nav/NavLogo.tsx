@@ -56,7 +56,9 @@ export class NavLogo extends React.PureComponent<IProps, IState> {
             <div style={Styles.parent}>
                 <div style={Styles.child}>
                     <NavLink>
-                        <img src="/apps/repository/img/icon.svg" height="25" alt="Polar"/>
+                        <div className="invert-parent">
+                            <img src="/apps/repository/img/icon.svg" height="25" alt="Polar"/>
+                        </div>
                     </NavLink>
                 </div>
 

@@ -40,16 +40,16 @@
     /*--primary200: rgb(93,21,-33); !* inverted from  #7CC4FA *!*/
     /*--primary100: rgb(31,-10,-38); !* inverted from  #BAE3FF *!*/
     /*--primary000: rgb(-13,-29,-38); !* inverted from  #E6F6FF *!*/
-    /*--danger900: rgb(120,214,195); !* inverted from  #610316 *!*/
-    /*--danger800: rgb(79,213,191); !* inverted from  #8A041A *!*/
-    /*--danger700: rgb(46,208,187); !* inverted from  #AB091E *!*/
-    /*--danger600: rgb(10,200,181); !* inverted from  #CF1124 *!*/
-    /*--danger500: rgb(-8,172,160); !* inverted from  #E12D39 *!*/
-    /*--danger400: rgb(-22,139,139); !* inverted from  #EF4E4E *!*/
-    /*--danger300: rgb(-31,111,111); !* inverted from  #F86A6A *!*/
-    /*--danger200: rgb(-38,62,62); !* inverted from  #FF9B9B *!*/
-    /*--danger100: rgb(-38,28,28); !* inverted from  #FFBDBD *!*/
-    /*--danger000: rgb(-38,-10,-10); !* inverted from  #FFE3E3 *!*/
+    --danger900: rgb(120,214,195); /* inverted from  #610316 */
+    --danger800: rgb(79,213,191); /* inverted from  #8A041A */
+    --danger700: rgb(46,208,187); /* inverted from  #AB091E */
+    --danger600: rgb(10,200,181); /* inverted from  #CF1124 */
+    --danger500: rgb(-8,172,160); /* inverted from  #E12D39 */
+    --danger400: rgb(-22,139,139); /* inverted from  #EF4E4E */
+    --danger300: rgb(-31,111,111); /* inverted from  #F86A6A */
+    --danger200: rgb(-38,62,62); /* inverted from  #FF9B9B */
+    --danger100: rgb(-38,28,28); /* inverted from  #FFBDBD */
+    --danger000: rgb(-38,-10,-10); /* inverted from  #FFE3E3 */
     --primary-background-color: rgb(-38,-38,-38); /* inverted from  #FFFFFF */
     --primary-text-color: rgb(217,217,217); /* inverted from  #000000 */
     --selected-background-color: rgb(217,42,-19); /* inverted from  #00afec */
