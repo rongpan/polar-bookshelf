@@ -1,23 +1,27 @@
-/*html {*/
-/*    filter: invert(0.85);*/
-/*}*/
+html {
+    filter: invert(0.85);
+}
 
-/*img, progress {*/
-/*    filter: invert(1.0);*/
-/*}*/
+img, progress {
+    filter: invert(1.0);
+}
 
-/*!*// TODO:*!*/
 
-/*!*// manually invert a few colors a-priori so that when they are*!*/
-/*!*// finally inverted they have the color we want*!*/
+:root {
 
-/*!*// wrapper for images and progress so they have the right colors*!*/
+    --selected-background-color: rgb(217,184,128);
+    --selected-text-color: rgb(-38,-38,-38);
+    --success: rgb(177,50,148);
 
-/*:root {*/
+    --primary900: rgb(217,184,128); /* inverted from  #002159 */
+    --primary800: rgb(216,166,92); /* inverted from  #01337D */
+    --primary700: rgb(214,149,59); /* inverted from  #03449E */
+    --primary600: rgb(212,135,36); /* inverted from  #0552B5 */
+    --primary500: rgb(208,114,7); /* inverted from  #0967D2 */
+    --primary400: rgb(184,83,-18); /* inverted from  #2186EB */
+    --primary300: rgb(146,54,-26); /* inverted from  #47A3F3 */
+    --primary200: rgb(93,21,-33); /* inverted from  #7CC4FA */
+    --primary100: rgb(31,-10,-38); /* inverted from  #BAE3FF */
+    --primary000: rgb(-13,-29,-38); /* inverted from  #E6F6FF */
 
-/*    --primary-background-color: rgb(-38,-38,-38); !* inverted from  #FFFFFF *!*/
-/*    --primary-text-color: rgb(217,217,217); !* inverted from  #000000 *!*/
-/*    --selected-background-color: rgb(217,42,-19); !* inverted from  #00afec *!*/
-/*    --selected-text-color: rgb(-38,-38,-38); !* inverted from  #FFFFFF *!*/
-
-/*}*/
+}
