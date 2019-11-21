@@ -1,5 +1,17 @@
+
+/*
+ TODO:
+
+ - the 'success' buttons don't work as designed.
+
+ */
+
 html {
-    filter: invert(0.85);
+    filter: invert(0.80);
+}
+
+body {
+    color: #000000;
 }
 
 img, progress {
@@ -12,6 +24,7 @@ img, progress {
     --selected-background-color: rgb(217,184,128);
     --selected-text-color: rgb(-38,-38,-38);
     --success: rgb(177,50,148);
+    --primary: rgb(217,94,-38); /* inverted from #007bff */
 
     --primary900: rgb(217,184,128); /* inverted from  #002159 */
     --primary800: rgb(216,166,92); /* inverted from  #01337D */
@@ -24,4 +37,13 @@ img, progress {
     --primary100: rgb(31,-10,-38); /* inverted from  #BAE3FF */
     --primary000: rgb(-13,-29,-38); /* inverted from  #E6F6FF */
 
+}
+
+.btn-success {
+    background-color: var(--success) !important;;
+    border-color: var(--success) !important;;
+}
+
+.text-primary {
+    color: var(--primary) !important;
 }
