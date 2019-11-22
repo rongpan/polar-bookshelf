@@ -77,14 +77,6 @@ export class Premium extends React.Component<IProps, IState> {
 
         };
 
-        const AdditionalFeature = (props: any) => {
-
-            return (<div><i style={{color: '#FF851B'}} className="fas fa-check-circle"></i>
-                    &nbsp;{props.children}
-                </div>);
-
-        };
-
         const settingKey = this.props.settingKey || 'premium';
 
         return (

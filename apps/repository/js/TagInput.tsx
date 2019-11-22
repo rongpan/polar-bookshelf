@@ -42,6 +42,7 @@ const Styles: IStyleMap = {
     relatedTag: {
         display: 'inline-block',
         backgroundColor: 'var(--grey100)',
+        // FIXME: using a hard coded color...
         color: 'hsl(0,0%,20%)',
         fontSize: '12px',
         padding: '3px',

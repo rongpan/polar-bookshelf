@@ -20,6 +20,10 @@
     --white: rgb(54, 54, 54);
     --black: #ffffff;
 
+    --dark: #E1E1E1;
+    --light: #515151;
+    --secondary: #515151;
+
     --primary900: #002159;
     --primary800: #01337D;
     --primary700: #03449E;
@@ -54,7 +58,7 @@
     --grey900: #F7F7F7;
 
     --primary-background-color: rgb(54, 54, 54);
-    --primary-text-color: var(--grey700);
+    --primary-text-color: #CFCFCF;
     --selected-background-color: var(--primary);
     --selected-text-color: var(--primary-text-color);
 
@@ -62,16 +66,33 @@
 
 body {
     color: var(--primary-text-color) !important;
-    scrollbar-color: var(--primary-background-color);
 }
 
 button {
     color: var(--primary-text-color) !important;
 }
 
+table {
+    color: var(--primary-text-color) !important;
+}
+
+/*::-webkit-scrollbar {*/
+/*    filter: invert(0.85);*/
+/*    !*background-color: var(--primary-background-color) !important;*!*/
+/*    !*background-color: var(--primary-background-color) !important;*!*/
+/*}*/
 /* FORCE MAPPINGS for main classes
 primary, secondary, success, info, warning, danger
 */
+
+.select__control {
+    background-color: var(--grey100) !important;
+    color: var(--primary-text-color) !important
+}
+
+.dropdown-menu {
+    background-color: var(--primary-background-color) !important;
+}
 
 .btn-primary {
     background-color: var(--primary) !important;;
