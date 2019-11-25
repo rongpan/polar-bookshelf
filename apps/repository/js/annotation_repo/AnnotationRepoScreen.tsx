@@ -7,7 +7,6 @@ import {IEventDispatcher} from '../../../../web/js/reactor/SimpleReactor';
 import {PersistenceLayerManager} from '../../../../web/js/datastore/PersistenceLayerManager';
 import {RepoHeader} from '../repo_header/RepoHeader';
 import {MessageBanner} from '../MessageBanner';
-import {RepoAnnotation} from '../RepoAnnotation';
 import {FixedNav} from '../FixedNav';
 import PreviewAndMainViewDock from './PreviewAndMainViewDock';
 import {Dock} from '../../../../web/js/ui/dock/Dock';
@@ -29,6 +28,7 @@ import {AnnotationTypeSelector} from "./filter_bar/controls/annotation_type/Anno
 import {StartReviewDropdown} from "./filter_bar/StartReviewDropdown";
 import {RepetitionMode} from "polar-spaced-repetition-api/src/scheduler/S2Plus/S2Plus";
 import {RepoFooter} from "../repo_footer/RepoFooter";
+import {IDocAnnotation} from "../../../../web/js/annotation_sidebar/DocAnnotation";
 
 export default class AnnotationRepoScreen extends ReleasingReactComponent<IProps, IState> {
 
@@ -76,7 +76,7 @@ export default class AnnotationRepoScreen extends ReleasingReactComponent<IProps
 
         const onUpdated: UpdatedCallback = repoAnnotations => {
 
-            const tags = this.props.repoDocMetaManager.repoAnnotationIndex.toTagDescriptors();
+            const tags = this.props.repoDocMetaManager.repoDocAnnotationIndex.toTagDescriptors();
 
             const state = {...this.state, data: repoAnnotations, tags};
 
@@ -84,8 +84,8 @@ export default class AnnotationRepoScreen extends ReleasingReactComponent<IProps
 
         };
 
-        const repoAnnotationsProvider: () => ReadonlyArray<RepoAnnotation> =
-            () => this.props.repoDocMetaManager!.repoAnnotationIndex.values();
+        const repoAnnotationsProvider: () => ReadonlyArray<IDocAnnotation> =
+            () => this.props.repoDocMetaManager!.repoDocAnnotationIndex.values();
 
         const filterEngine = new AnnotationRepoFilterEngine(repoAnnotationsProvider, onUpdated);
 
@@ -242,9 +242,9 @@ export interface IProps {
 
 export interface IState {
 
-    readonly repoAnnotation?: RepoAnnotation;
+    readonly repoAnnotation?: IDocAnnotation;
 
-    readonly data: ReadonlyArray<RepoAnnotation>;
+    readonly data: ReadonlyArray<IDocAnnotation>;
 
 
 

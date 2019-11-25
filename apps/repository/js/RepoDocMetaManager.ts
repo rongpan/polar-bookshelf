@@ -2,28 +2,27 @@ import {Logger} from 'polar-shared/src/logger/Logger';
 import {DocInfo} from '../../../web/js/metadata/DocInfo';
 import {IDocInfo} from 'polar-shared/src/metadata/IDocInfo';
 import {RepoDocInfo} from './RepoDocInfo';
-import {Tags} from 'polar-shared/src/tags/Tags';
+import {Tag, Tags} from 'polar-shared/src/tags/Tags';
 import {Preconditions} from 'polar-shared/src/Preconditions';
 import {TagsDB} from './TagsDB';
 import {Optional} from 'polar-shared/src/util/ts/Optional';
 import {DocMetaFileRefs} from '../../../web/js/datastore/DocMetaRef';
 import {PersistenceLayer} from '../../../web/js/datastore/PersistenceLayer';
 import {IProvider} from 'polar-shared/src/util/Providers';
-import {RepoAnnotation} from './RepoAnnotation';
 import {RepoDocMeta} from './RepoDocMeta';
 import {RelatedTags} from '../../../web/js/tags/related/RelatedTags';
 import {SetArrays} from 'polar-shared/src/util/SetArrays';
-import {Tag} from 'polar-shared/src/tags/Tags';
 import {DataObjectIndex} from './DataObjectIndex';
-import {RepoAnnotations} from "./RepoAnnotations";
+import {RepoDocAnnotations} from "./RepoDocAnnotations";
 import {RepoDocInfos} from "./RepoDocInfos";
+import {IDocAnnotation} from "../../../web/js/annotation_sidebar/DocAnnotation";
 
 const log = Logger.create();
 
-export class RepoAnnotationDataObjectIndex extends DataObjectIndex<RepoAnnotation> {
+export class RepoDocAnnotationDataObjectIndex extends DataObjectIndex<IDocAnnotation> {
 
     constructor() {
-        super((repoAnnotation?: RepoAnnotation) => RepoAnnotations.toTags(repoAnnotation) );
+        super((repoAnnotation?: IDocAnnotation) => RepoDocAnnotations.toTags(repoAnnotation) );
     }
 
 }
@@ -44,7 +43,7 @@ export class RepoDocMetaManager {
 
     public readonly repoDocInfoIndex: RepoDocInfoDataObjectIndex = new RepoDocInfoDataObjectIndex();
 
-    public readonly repoAnnotationIndex: RepoAnnotationDataObjectIndex = new RepoAnnotationDataObjectIndex();
+    public readonly repoDocAnnotationIndex: RepoDocAnnotationDataObjectIndex = new RepoDocAnnotationDataObjectIndex();
 
     public readonly tagsDB = new TagsDB();
 
@@ -73,25 +72,25 @@ export class RepoDocMetaManager {
 
                 const deleteOrphaned = () => {
 
-                    const currentAnnotationsIDs = Object.values(this.repoAnnotationIndex)
+                    const currentAnnotationsIDs = Object.values(this.repoDocAnnotationIndex)
                         .filter(current => current.fingerprint === repoDocMeta.repoDocInfo.fingerprint)
                         .map(current => current.id);
 
-                    const newAnnotationIDs = repoDocMeta.repoAnnotations
+                    const newAnnotationIDs = repoDocMeta.repoDocAnnotations
                         .map(current => current.id);
 
                     const deleteIDs = SetArrays.difference(currentAnnotationsIDs, newAnnotationIDs);
 
                     for (const deleteID of deleteIDs) {
-                        this.repoAnnotationIndex.remove(deleteID);
+                        this.repoDocAnnotationIndex.remove(deleteID);
                     }
 
                 };
 
                 const updateExisting = () => {
 
-                    for (const repoAnnotation of repoDocMeta.repoAnnotations) {
-                        this.repoAnnotationIndex.add(repoAnnotation.id, repoAnnotation);
+                    for (const repoDocAnnotation of repoDocMeta.repoDocAnnotations) {
+                        this.repoDocAnnotationIndex.add(repoDocAnnotation.id, repoDocAnnotation);
                     }
 
                 };
@@ -108,10 +107,10 @@ export class RepoDocMetaManager {
             const deleteOrphanedAnnotations = () => {
 
                 // now delete stale repo annotations.
-                for (const repoAnnotation of Object.values(this.repoAnnotationIndex)) {
+                for (const repoAnnotation of Object.values(this.repoDocAnnotationIndex)) {
 
                     if (repoAnnotation.fingerprint === fingerprint) {
-                        this.repoAnnotationIndex.remove(repoAnnotation.id);
+                        this.repoDocAnnotationIndex.remove(repoAnnotation.id);
                     }
                 }
 

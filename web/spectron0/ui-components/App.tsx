@@ -12,7 +12,7 @@ import {AnnotationType} from 'polar-shared/src/metadata/AnnotationType';
 import {Lorems} from "polar-shared/src/util/Lorems";
 import {Flashcards} from "../../js/metadata/Flashcards";
 import {Refs} from "polar-shared/src/metadata/Refs";
-import {RepoAnnotations} from "../../../apps/repository/js/RepoAnnotations";
+import {RepoDocAnnotations} from "../../../apps/repository/js/RepoDocAnnotations";
 import {DocInfos} from "../../js/metadata/DocInfos";
 import {ReviewerTasks} from "../../../apps/repository/js/reviewer/ReviewerTasks";
 import {FlashcardTaskAction} from "../../../apps/repository/js/reviewer/cards/FlashcardTaskAction";
@@ -27,6 +27,8 @@ import {DocDropdownItems} from "../../../apps/repository/js/DocDropdownItems";
 import {FolderContextMenu} from "../../../apps/repository/js/FolderContextMenu";
 import {FontAwesomeIcon} from "../../js/ui/fontawesome/FontAwesomeIcon";
 import {WhatsNewModal} from "../../../apps/repository/js/splash2/whats_new/WhatsNewModal";
+import {DocSidebar} from "./DocSidebar";
+import {EditableText} from "./EditableText";
 
 const styles = {
     swatch: {
@@ -159,7 +161,7 @@ export class App<P> extends React.Component<{}, IAppState> {
         const keyBindingHandler = (event: React.KeyboardEvent) => {
 
             if (event.key === 'F') {
-                console.log("YUP!")
+                console.log("YUP!");
             }
 
         };
@@ -210,50 +212,50 @@ export class App<P> extends React.Component<{}, IAppState> {
         //     return ReviewerTasks.createFlashcardTasks(repoAnnotations, 10);
         //
         // };
-
-        const createFlashcardTaskReps = (): ReadonlyArray<TaskRep<FlashcardTaskAction>> => {
-            const ref = Refs.create('1234', 'text-highlight');
-
-            const createFrontAndBackAction = () => {
-                const flashcard = Flashcards.createFrontBack('What is the capital of California? ', 'Sacramento', ref);
-                const flashcardTaskActions = FlashcardTaskActions.create(flashcard);
-                return flashcardTaskActions[0];
-            };
-
-            const createClozeAction = () => {
-                const flashcard = Flashcards.createCloze('The capital of california is {{c1::Sacramento}}.', ref);
-                const flashcardTaskActions = FlashcardTaskActions.create(flashcard);
-                return flashcardTaskActions[0];
-            };
-
-            const clozeAction = createClozeAction();
-
-            Preconditions.assertPresent(clozeAction, 'clozeAction');
-
-            const tasks: ReadonlyArray<Task<FlashcardTaskAction>> = [
-                {
-                    id: "10102",
-                    action: clozeAction,
-                    created: ISODateTimeStrings.create(),
-                    color: 'red',
-                    mode: 'flashcard'
-                },
-                {
-                    id: "10102",
-                    action: createFrontAndBackAction(),
-                    created: ISODateTimeStrings.create(),
-                    color: 'red',
-                    mode: 'flashcard'
-                }
-            ];
-
-            return tasks.map(task => TasksCalculator.createInitialLearningState(task));
-
-        };
+        //
+        // const createFlashcardTaskReps = (): ReadonlyArray<TaskRep<FlashcardTaskAction>> => {
+        //     const ref = Refs.create('1234', 'text-highlight');
+        //
+        //     const createFrontAndBackAction = () => {
+        //         const flashcard = Flashcards.createFrontBack('What is the capital of California? ', 'Sacramento', ref);
+        //         const flashcardTaskActions = FlashcardTaskActions.create(flashcard, docAnnotation);
+        //         return flashcardTaskActions[0];
+        //     };
+        //
+        //     const createClozeAction = () => {
+        //         const flashcard = Flashcards.createCloze('The capital of california is {{c1::Sacramento}}.', ref);
+        //         const flashcardTaskActions = FlashcardTaskActions.create(flashcard, docAnnotation);
+        //         return flashcardTaskActions[0];
+        //     };
+        //
+        //     const clozeAction = createClozeAction();
+        //
+        //     Preconditions.assertPresent(clozeAction, 'clozeAction');
+        //
+        //     const tasks: ReadonlyArray<Task<FlashcardTaskAction>> = [
+        //         {
+        //             id: "10102",
+        //             action: clozeAction,
+        //             created: ISODateTimeStrings.create(),
+        //             color: 'red',
+        //             mode: 'flashcard'
+        //         },
+        //         {
+        //             id: "10102",
+        //             action: createFrontAndBackAction(),
+        //             created: ISODateTimeStrings.create(),
+        //             color: 'red',
+        //             mode: 'flashcard'
+        //         }
+        //     ];
+        //
+        //     return tasks.map(task => TasksCalculator.createInitialLearningState(task));
+        //
+        // };
 
 
         // const taskReps = createReadingTaskReps();
-        const taskReps = createFlashcardTaskReps();
+        // const taskReps = createFlashcardTaskReps();
 
         const MockTag = (props: any) => {
             return <div className="bg-grey100 p-1 rounded mr-1"
@@ -266,14 +268,14 @@ export class App<P> extends React.Component<{}, IAppState> {
                     <FontAwesomeIcon name="fas fa-close"/>
                 </span>
 
-            </div>
+            </div>;
         };
 
         return (
 
             <div>
 
-                <WhatsNewModal/>
+                {/*<WhatsNewModal/>*/}
 
                 {/*<FolderContextMenu toggle={false}*/}
                 {/*                   onCreateFolder={NULL_FUNCTION}>*/}
@@ -282,33 +284,33 @@ export class App<P> extends React.Component<{}, IAppState> {
                 {/*    </div>*/}
                 {/*</FolderContextMenu>*/}
 
-                <div className="p-1">
+                {/*<div className="p-1">*/}
 
-                    <div className="item">
+                {/*    <div className="item">*/}
 
-                        <div className="title text-xxl font-weight-bold text-grey900" style={{fontSize: '33px'}}>
-                            Something amazing has happened in science and the community is excited.
-                        </div>
+                {/*        <div className="title text-xxl font-weight-bold text-grey900" style={{fontSize: '33px'}}>*/}
+                {/*            Something amazing has happened in science and the community is excited.*/}
+                {/*        </div>*/}
 
-                        <div className="title text-lg text-grey800">
-                            <span className="text-primary">Martin Smith</span>, <span className="text-primary">Carson Weishaus</span>
-                        </div>
+                {/*        <div className="title text-lg text-grey800">*/}
+                {/*            <span className="text-primary">Martin Smith</span>, <span className="text-primary">Carson Weishaus</span>*/}
+                {/*        </div>*/}
 
-                        <div className="title text-lg text-grey800 mt-1 mb-2"  style={{fontSize: '22px'}}>
-                            This is a longer overview or abstract of the current document we're reading.
-                        </div>
+                {/*        <div className="title text-lg text-grey800 mt-1 mb-2"  style={{fontSize: '22px'}}>*/}
+                {/*            This is a longer overview or abstract of the current document we're reading.*/}
+                {/*        </div>*/}
 
-                        <div className="metadata" style={{fontSize: '14px'}}>
-                            <MockTag>linux</MockTag> <MockTag>microsoft</MockTag>
-                        </div>
+                {/*        <div className="metadata" style={{fontSize: '14px'}}>*/}
+                {/*            <MockTag>linux</MockTag> <MockTag>microsoft</MockTag>*/}
+                {/*        </div>*/}
 
-                        <div className="metadata mt-1">
-                            <b>Added: </b> 1 month ago <b>Updated: </b> 1 day ago
-                        </div>
+                {/*        <div className="metadata mt-1">*/}
+                {/*            <b>Added: </b> 1 month ago <b>Updated: </b> 1 day ago*/}
+                {/*        </div>*/}
 
-                    </div>
+                {/*    </div>*/}
 
-                </div>
+                {/*</div>*/}
 
                 {/*<AnnotationTypeSelector selected={[AnnotationType.FLASHCARD]} onSelected={selected => console.log('selected: ', selected)}/>*/}
 
@@ -333,9 +335,25 @@ export class App<P> extends React.Component<{}, IAppState> {
 
                 {/*</div>*/}
 
-                {/*<div className="border border-dark m-1" style={{width: '450px'}}>*/}
-                {/*    <DocSidebar fingerprint="0x01" updated={ISODateTimeStrings.create()}/>*/}
-                {/*</div>*/}
+                <div className="border border-dark m-1" style={{width: '450px'}}>
+                    <DocSidebar meta={{
+                        fingerprint: "0x01",
+                        title: 'Bitcoin - A distributed currency system.',
+                        description: "Some stuff about bitcoin and what it does.",
+                        authors: [
+                            {
+                                displayName: "Alice Smith",
+                            }
+                        ],
+                        doi: '12345'
+                    }}/>
+                </div>
+
+                this should be editable:
+
+                <EditableText value="hello world" onCancel={NULL_FUNCTION} onDone={NULL_FUNCTION}/>
+
+
 
                 {/*<div className="border border-dark m-1" style={{width: '450px'}}>*/}
                 {/*    <DocSidebar fingerprint="0x01"*/}

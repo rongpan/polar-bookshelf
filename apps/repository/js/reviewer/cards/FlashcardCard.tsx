@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {Button} from "reactstrap";
 import {CardBody} from "./CardBody";
-import {AnnotationPreview} from "../../annotation_repo/AnnotationPreview";
 import {RatingButtons} from "../RatingButtons";
 import {FlashcardTaskAction} from "./FlashcardTaskAction";
 import {TaskRep} from "polar-spaced-repetition/src/spaced_repetition/scheduler/S2Plus/TasksCalculator";
@@ -19,7 +18,7 @@ export class FlashcardCard extends React.Component<IProps, IState> {
 
         this.state = {
             side: 'front'
-        }
+        };
 
     }
 
