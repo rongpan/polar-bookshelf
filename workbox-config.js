@@ -1,5 +1,6 @@
 const fs = require('fs');
 const libpath = require('path');
+const workbox = require("workbox");
 
 const globDirectory = 'dist/public';
 
@@ -142,6 +143,21 @@ const globPatterns = [
 console.log("Using static file globs: \n ", globPatterns.join("\n  "));
 console.log("====");
 
+// https://developers.google.com/web/tools/workbox/modules/workbox-strategies
+// https://developers.google.com/web/fundamentals/instant-and-offline/offline-cookbook/#cache-falling-back-to-network
+//
+// caching strategies:
+//
+// cacheFirst: cache, then falling back to network
+// networkFirst: network, then falling back to cache
+// networkOnly:
+// cacheOnly:
+
+// TODO: I think we want stale-while-revalidate so we cache , then attempt to update
+// the cache in the background.
+//
+// plan B , for now, is to just allow users to cache for 7 days and then we will roll out a new version eventually.
+
 module.exports = {
     globDirectory: 'dist/public',
     globPatterns,
@@ -149,10 +165,18 @@ module.exports = {
     globStrict: false,
     // stripPrefix: 'dist/public',
     maximumFileSizeToCacheInBytes: 15000000,
-    // runtimeCaching: [{
-    //     urlPattern: /this\\.is\\.a\\.regex/,
-    //     handler: 'networkFirst'
-    // }]
+    runtimeCaching: [{
+        urlPattern: /.*/,
+        handler: 'cacheFirst'
+    }],
+    plugins: [
+        new workbox_expiration.Plugin({
+            // Only cache requests for a week
+            maxAgeSeconds: 7 * 24 * 60 * 60,
+            // Only cache 10 requests.
+            maxEntries: 10,
+        }),
+    ],
     swDest: 'dist/public/service-worker.js',
     modifyURLPrefix: {
         // Remove a '/dist' prefix from the URLs:
