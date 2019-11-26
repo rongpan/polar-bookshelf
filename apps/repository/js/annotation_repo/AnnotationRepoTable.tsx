@@ -36,9 +36,15 @@ export default class AnnotationRepoTable extends ExtendedReactTable<IProps, ISta
 
         return (
 
-            <div id="doc-repo-table">
+            <div id="doc-repo-table"
+                 style={{
+                     height: '100%'
+                 }}>
 
-                <div id="doc-table">
+                <div id="doc-table"
+                     style={{
+                        height: '100%'
+                     }}>
 
                     <ReactTable
                         data={[...data]}
@@ -118,7 +124,9 @@ export default class AnnotationRepoTable extends ExtendedReactTable<IProps, ISta
                             ]}
 
                         defaultPageSize={50}
-                        style={{height: '100%'}}
+                        style={{
+                            height: '100%'
+                        }}
                         showPageSizeOptions={false}
                         noDataText="No annotations available."
                         className="-striped -highlight"

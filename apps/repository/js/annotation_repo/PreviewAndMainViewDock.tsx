@@ -57,7 +57,10 @@ export default class PreviewAndMainViewDock extends React.Component<IProps, ISta
                         height: '100%'
                     }}>
 
-                    <div style={{overflowY: 'auto'}}>
+                    <div style={{
+                            overflowY: 'auto',
+                            height: '100%'
+                         }}>
 
                         <AnnotationRepoTable persistenceLayerManager={this.props.persistenceLayerManager}
                                              updatedDocInfoEventDispatcher={this.props.updatedDocInfoEventDispatcher}
