@@ -60,7 +60,7 @@ export class Reviewer<A> extends React.Component<IProps<A>, IState<A>> {
         const style: React.CSSProperties = {
             display: 'flex',
             flexDirection: 'column',
-            background: 'var(--white)'
+            backgroundColor: 'var(--primary-background-color)',
         };
 
         if (Platforms.isMobile()) {
