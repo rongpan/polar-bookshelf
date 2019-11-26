@@ -3,16 +3,16 @@ const colors = ['primary', 'secondary', "success", "info", "warning", "danger", 
 for (const color of colors) {
     console.log(
 `.btn-${color} {
-    background-color: var(--${color}) !important;;
-    border-color: var(--${color}) !important;;
+    background-color: var(--${color});
+    border-color: var(--${color});
 }
 
 .bg-${color} {
-    background-color: var(--${color}) !important;
+    background-color: var(--${color});
 }
 
 .text-${color} {
-    color: var(--${color}) !important;
+    color: var(--${color});
 }
 
 `

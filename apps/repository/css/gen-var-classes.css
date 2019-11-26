@@ -1,98 +1,98 @@
 .btn-primary {
-    background-color: var(--primary) !important;;
-    border-color: var(--primary) !important;;
+    background-color: var(--primary);
+    border-color: var(--primary);
 }
 
 .bg-primary {
-    background-color: var(--primary) !important;
+    background-color: var(--primary);
 }
 
 .text-primary {
-    color: var(--primary) !important;
+    color: var(--primary);
 }
 
 
 .btn-secondary {
-    background-color: var(--secondary) !important;;
-    border-color: var(--secondary) !important;;
+    background-color: var(--secondary);
+    border-color: var(--secondary);
 }
 
 .bg-secondary {
-    background-color: var(--secondary) !important;
+    background-color: var(--secondary);
 }
 
 .text-secondary {
-    color: var(--secondary) !important;
+    color: var(--secondary);
 }
 
 
 .btn-success {
-    background-color: var(--success) !important;;
-    border-color: var(--success) !important;;
+    background-color: var(--success);
+    border-color: var(--success);
 }
 
 .bg-success {
-    background-color: var(--success) !important;
+    background-color: var(--success);
 }
 
 .text-success {
-    color: var(--success) !important;
+    color: var(--success);
 }
 
 
 .btn-info {
-    background-color: var(--info) !important;;
-    border-color: var(--info) !important;;
+    background-color: var(--info);
+    border-color: var(--info);
 }
 
 .bg-info {
-    background-color: var(--info) !important;
+    background-color: var(--info);
 }
 
 .text-info {
-    color: var(--info) !important;
+    color: var(--info);
 }
 
 
 .btn-warning {
-    background-color: var(--warning) !important;;
-    border-color: var(--warning) !important;;
+    background-color: var(--warning);
+    border-color: var(--warning);
 }
 
 .bg-warning {
-    background-color: var(--warning) !important;
+    background-color: var(--warning);
 }
 
 .text-warning {
-    color: var(--warning) !important;
+    color: var(--warning);
 }
 
 
 .btn-danger {
-    background-color: var(--danger) !important;;
-    border-color: var(--danger) !important;;
+    background-color: var(--danger);
+    border-color: var(--danger);
 }
 
 .bg-danger {
-    background-color: var(--danger) !important;
+    background-color: var(--danger);
 }
 
 .text-danger {
-    color: var(--danger) !important;
+    color: var(--danger);
 }
 
 
 .btn-light {
-    background-color: var(--light) !important;;
-    border-color: var(--light) !important;;
+    background-color: var(--light);
+    border-color: var(--light);
 }
 
 .bg-light {
-    background-color: var(--light) !important;
+    background-color: var(--light);
 }
 
 .text-light {
-    color: var(--light) !important;
+    color: var(--light);
 }
 
 
