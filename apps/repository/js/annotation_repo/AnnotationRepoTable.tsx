@@ -173,11 +173,9 @@ export default class AnnotationRepoTable extends ExtendedReactTable<IProps, ISta
                                 },
 
                                 style: {
-                                    // FIXME: this should be improved as it just doesn't look right in dark mode...
-                                    // borderWidth: '1px',
-                                    // borderStyle: 'solid',
-                                    // FIXME: using a hard coded color...
-                                    // borderBottomColor: rowInfo && rowInfo.viewIndex === this.state.selected ? 'var(--primary)' : 'inherit',
+                                    borderWidth: '1px',
+                                    borderStyle: 'solid',
+                                    borderColor: rowInfo && rowInfo.viewIndex === this.state.selected ? 'var(--primary)' : 'var(--primary-background-color)',
                                     // color: rowInfo && rowInfo.viewIndex === this.state.selected ? 'white' : 'black',
                                 }
 
