@@ -2,7 +2,6 @@ import * as React from 'react';
 import {DocRepoTableColumns} from '../doc_repo/DocRepoTableColumns';
 import {PersistenceLayerManager} from '../../../../web/js/datastore/PersistenceLayerManager';
 import {IDocInfo} from 'polar-shared/src/metadata/IDocInfo';
-import {RepoAnnotation} from '../RepoAnnotation';
 import {IStyleMap} from '../../../../web/js/react/IStyleMap';
 import {Logger} from 'polar-shared/src/logger/Logger';
 import {SynchronizingDocLoader} from '../util/SynchronizingDocLoader';
@@ -11,7 +10,8 @@ import {BackendFileRefs} from '../../../../web/js/datastore/BackendFileRefs';
 import {Img} from 'polar-shared/src/metadata/Img';
 import {ResponsiveImg} from '../../../../web/js/annotation_sidebar/ResponsiveImg';
 import {DocPropTable} from "./meta_view/DocPropTable";
-import {DocThumbnail} from "./meta_view/DocThumbnail";
+import {IDocAnnotation} from "../../../../web/js/annotation_sidebar/DocAnnotation";
+import {AnnotationControlBar} from "../../../../web/js/annotation_sidebar/AnnotationControlBar";
 
 const log = Logger.create();
 
@@ -32,7 +32,7 @@ const AnnotationImage = (props: AnnotationImageProps) => {
     return <ResponsiveImg id={props.id} img={props.img} defaultText=" "/>;
 };
 
-export class RepoAnnotationMetaView extends React.Component<IProps, IState> {
+export class  RepoAnnotationMetaView extends React.Component<IProps, IState> {
 
     private readonly synchronizingDocLoader: SynchronizingDocLoader;
 
@@ -82,6 +82,9 @@ export class RepoAnnotationMetaView extends React.Component<IProps, IState> {
 
                     <AnnotationImage id={repoAnnotation.id} img={repoAnnotation.img}/>
 
+                    {/*FIXME: I need to figure out how to get the 'doc' now*/}
+                    {/*<AnnotationControlBar doc={} annotation={}/>*/}
+
                 </div>
 
             );
@@ -114,7 +117,7 @@ export class RepoAnnotationMetaView extends React.Component<IProps, IState> {
 export interface IProps {
 
     readonly persistenceLayerManager: PersistenceLayerManager;
-    readonly repoAnnotation?: RepoAnnotation;
+    readonly repoAnnotation?: IDocAnnotation;
 }
 
 export interface IState {

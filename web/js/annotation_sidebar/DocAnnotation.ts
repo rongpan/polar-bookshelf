@@ -17,6 +17,7 @@ import {IAuthor} from "polar-shared/src/metadata/IAuthor";
 import {RepoAnnotation} from "../../../apps/repository/js/RepoAnnotation";
 import {IDStr, PlainTextStr} from "polar-shared/src/util/Strings";
 import {IDocInfo} from "polar-shared/src/metadata/IDocInfo";
+import {Tag} from "polar-shared/src/tags/Tags";
 
 export interface IDocAnnotation extends ObjectID, RepoAnnotation {
 
@@ -34,13 +35,13 @@ export interface IDocAnnotation extends ObjectID, RepoAnnotation {
     // the reference to a parent annotation if this is a child annotation.
     readonly ref?: Ref;
 
-    readonly img?: Img;
+    readonly img: Img | undefined;
 
     /**
      * The color for highlights.  When undefined there is no color (which would
      * work for comments, etc)
      */
-    readonly color?: HighlightColor;
+    readonly color: HighlightColor | undefined;
 
     readonly docMeta: IDocMeta;
 
@@ -51,6 +52,9 @@ export interface IDocAnnotation extends ObjectID, RepoAnnotation {
     readonly author?: IAuthor;
 
     readonly immutable: boolean;
+
+    readonly tags: Readonly<{[id: string]: Tag}> | undefined;
+
 }
 
 export interface DocAnnotation extends IDocAnnotation {
@@ -86,13 +90,13 @@ export class DefaultDocAnnotation implements DocAnnotation {
     // the reference to a parent annotation if this is a child annotation.
     public readonly ref?: Ref;
 
-    public readonly img?: Img;
+    public readonly img: Img | undefined;
 
     /**
      * The color for highlights.  When undefined there is no color (which would
      * work for comments, etc)
      */
-    public readonly color?: HighlightColor;
+    public readonly color: HighlightColor | undefined;
 
     public readonly docMeta: IDocMeta;
 
@@ -103,6 +107,8 @@ export class DefaultDocAnnotation implements DocAnnotation {
     public readonly author?: IAuthor;
 
     public readonly immutable: boolean;
+
+    public readonly tags: Readonly<{[id: string]: Tag}> | undefined;
 
     constructor(readonly index: DocAnnotationIndex,
                 public readonly obj: IDocAnnotation) {
@@ -129,6 +135,7 @@ export class DefaultDocAnnotation implements DocAnnotation {
         this.original = obj.original;
         this.author = obj.author;
         this.immutable = obj.immutable;
+        this.tags = obj.tags;
 
     }
 

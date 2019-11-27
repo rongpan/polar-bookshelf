@@ -37,12 +37,9 @@ export interface RepoAnnotation {
 
     readonly created: ISODateTimeString;
 
-    readonly tags?: Readonly<{[id: string]: Tag}>;
+    readonly tags: Readonly<{[id: string]: Tag}> | undefined;
 
-    /**
-     * Extended metadata specific to each annotation type.
-     */
-    readonly meta?: RepoHighlightInfo;
+    readonly color: HighlightColor | undefined;
 
     /**
      * The original DocInfo used to construct this RepoDocInfo.
@@ -52,7 +49,7 @@ export interface RepoAnnotation {
     // a pointer to this directly.
     readonly docInfo: IDocInfo;
 
-    readonly img?: Img;
+    readonly img: Img | undefined;
 
     readonly docMeta: IDocMeta;
 
@@ -64,6 +61,7 @@ export interface RepoAnnotation {
 
 /**
  * Additional metadata on a highlight.
+ * @Deprecated
  */
 export interface RepoHighlightInfo {
     color?: HighlightColor;

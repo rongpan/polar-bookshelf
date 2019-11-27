@@ -20,6 +20,8 @@ import {Providers} from "polar-shared/src/util/Providers";
 import {AnnotationTexts} from "polar-shared/src/metadata/AnnotationTexts";
 import {PlainTextStr} from "polar-shared/src/util/Strings";
 import {IFlashcard} from "polar-shared/src/metadata/IFlashcard";
+import {HighlightColors} from "polar-shared/src/metadata/HighlightColor";
+import {Tag} from "polar-shared/src/tags/Tags";
 
 export class DocAnnotations {
 
@@ -61,7 +63,10 @@ export class DocAnnotations {
 
         const iTextConverter = ITextConverters.create(AnnotationType.FLASHCARD, flashcard);
 
+        const init = this.createInit(docMeta);
+
         return {
+            ...init,
             oid: ObjectIDs.create(),
             id: flashcard.id,
             guid: flashcard.guid,
@@ -81,7 +86,9 @@ export class DocAnnotations {
             ref: flashcard.ref,
             original: flashcard,
             author: flashcard.author,
-            immutable: this.isImmutable(flashcard.author)
+            immutable: this.isImmutable(flashcard.author),
+            color: undefined,
+            img: undefined
         };
 
     }
@@ -92,7 +99,10 @@ export class DocAnnotations {
 
         const iTextConverter = ITextConverters.create(AnnotationType.COMMENT, comment);
 
+        const init = this.createInit(docMeta);
+
         return {
+            ...init,
             oid: ObjectIDs.create(),
             id: comment.id,
             guid: comment.guid,
@@ -111,7 +121,9 @@ export class DocAnnotations {
             ref: comment.ref,
             original: comment,
             author: comment.author,
-            immutable: this.isImmutable(comment.author)
+            immutable: this.isImmutable(comment.author),
+            color: undefined,
+            img: undefined
         };
 
     }
@@ -134,28 +146,34 @@ export class DocAnnotations {
 
         };
 
-        const img = Images.toImg(docFileResolver, areaHighlight.image);
+        const img = Providers.memoize(() => Images.toImg(docFileResolver, areaHighlight.image));
+
         const position = createPosition();
 
+        const init = this.createInit(docMeta);
+
         return {
+            ...init,
             oid: ObjectIDs.create(),
             id: areaHighlight.id,
             guid: areaHighlight.guid,
             fingerprint: docMeta.docInfo.fingerprint,
             docInfo: docMeta.docInfo,
             annotationType: AnnotationType.AREA_HIGHLIGHT,
-            img,
+            get img() {
+                return img();
+            },
             text: undefined,
             html: undefined,
             pageNum: pageMeta.pageInfo.num,
             position,
-            color: areaHighlight.color,
+            color: HighlightColors.withDefaultColor(areaHighlight.color),
             created: areaHighlight.created,
             docMeta,
             pageMeta,
             original: areaHighlight,
             author: areaHighlight.author,
-            immutable: this.isImmutable(areaHighlight.author)
+            immutable: this.isImmutable(areaHighlight.author),
         };
 
     }
@@ -166,7 +184,10 @@ export class DocAnnotations {
 
         const iTextConverter = ITextConverters.create(AnnotationType.TEXT_HIGHLIGHT, textHighlight);
 
+        const init = this.createInit(docMeta);
+
         return {
+            ...init,
             oid: ObjectIDs.create(),
             id: textHighlight.id,
             guid: textHighlight.guid,
@@ -178,13 +199,14 @@ export class DocAnnotations {
                 x: this.firstRect(textHighlight).map(current => current.left).getOrElse(0),
                 y: this.firstRect(textHighlight).map(current => current.top).getOrElse(0),
             },
-            color: textHighlight.color,
+            color: HighlightColors.withDefaultColor(textHighlight.color),
             created: textHighlight.created,
             docMeta,
             pageMeta,
             original: textHighlight,
             author: textHighlight.author,
-            immutable: this.isImmutable(textHighlight.author)
+            immutable: this.isImmutable(textHighlight.author),
+            img: undefined
         };
 
     }
@@ -218,6 +240,13 @@ export class DocAnnotations {
 
     }
 
+    private static createInit(docMeta: IDocMeta): DocAnnotationInit {
+
+        return {
+            tags: docMeta.docInfo.tags || {},
+        };
+
+    }
 
     private static firstRect(highlight: IBaseHighlight): Optional<IRect> {
         return Optional.of(highlight)
@@ -227,7 +256,15 @@ export class DocAnnotations {
 
 }
 
+/**
+ * Properties present in most annotations that will be used the same.
+ */
+interface DocAnnotationInit {
+    readonly tags: Readonly<{[id: string]: Tag}> | undefined;
+}
+
 class ITextConverters {
+
     public static create(annotationType: AnnotationType,
                          annotation: ITextHighlight | IAreaHighlight | IComment | IFlashcard): ITextConverter {
 
