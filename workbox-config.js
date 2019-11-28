@@ -158,6 +158,8 @@ console.log("====");
 //
 // plan B , for now, is to just allow users to cache for 7 days and then we will roll out a new version eventually.
 
+// FIXME: maybe I need to skip waiting so that the new version is installed?
+
 module.exports = {
     globDirectory: 'dist/public',
     globPatterns,
