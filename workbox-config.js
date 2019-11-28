@@ -167,21 +167,25 @@ module.exports = {
     maximumFileSizeToCacheInBytes: 15000000,
     runtimeCaching: [{
         urlPattern: /.*/,
-        handler: 'cacheFirst'
+        handler: 'CacheFirst'
     }],
-    plugins: [
-        new workbox_expiration.Plugin({
-            // Only cache requests for a week
-            maxAgeSeconds: 7 * 24 * 60 * 60,
-            // Only cache 10 requests.
-            maxEntries: 10,
-        }),
-    ],
+    // TODO: we can u
+    expiration: {
+        // Only cache requests for a week
+        maxAgeSeconds: 7 * 24 * 60 * 60,
+    }
+    // plugins: [
+    //     new workbox_expiration.Plugin({
+    //         // Only cache requests for a week
+    //         maxAgeSeconds: 7 * 24 * 60 * 60,
+    //     }),
+    // ],
     swDest: 'dist/public/service-worker.js',
     modifyURLPrefix: {
         // Remove a '/dist' prefix from the URLs:
         '/dist/public': ''
-    }
+    },
+    cleanupOutdatedCaches: true
 };
 
 
