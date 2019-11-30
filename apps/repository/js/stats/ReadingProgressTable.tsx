@@ -71,7 +71,7 @@ export default class ReadingProgressTable extends React.Component<IProps, IState
                             from={from}
                             to={to}
                             domain={domain}
-                            emptyColor="#eeeeee"
+                            emptyColor="var(--grey-500)"
                             colors={[
                                 "rgba(0,0,255,0.1)",
                                 "rgba(0,0,255,0.2)",
@@ -84,6 +84,8 @@ export default class ReadingProgressTable extends React.Component<IProps, IState
                                 "rgba(0,0,255,0.9)",
                                 "rgba(0,0,255,1.0)",
                             ]}
+                            dayBorderColor="var(--primary-background-color)"
+                            monthBorderColor="var(--primary-background-color)"
                             margin={{
                                 "top": 20,
                                 "right": 10,
@@ -91,10 +93,8 @@ export default class ReadingProgressTable extends React.Component<IProps, IState
                                 "left": 20
                             }}
                             yearSpacing={40}
-                            monthBorderColor="#ffffff"
                             monthLegendOffset={10}
                             dayBorderWidth={2}
-                            dayBorderColor="#ffffff"
                             //     legends={[
                             //         {
                             //             "anchor": "bottom",

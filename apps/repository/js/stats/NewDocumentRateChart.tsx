@@ -110,7 +110,7 @@ export default class NewDocumentRateChart extends React.Component<IProps, IState
                         // }}
                         labelSkipWidth={12}
                         labelSkipHeight={12}
-                        labelTextColor="inherit:darker(1.6)"
+                        labelTextColor="var(--primary-text-color)"
                         animate={true}
                         motionStiffness={90}
                         motionDamping={15}

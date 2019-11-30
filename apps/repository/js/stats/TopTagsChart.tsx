@@ -54,14 +54,14 @@ export default class TopTagsChart extends React.Component<IProps, IState> {
                         borderColor="inherit:darker(0.2)"
                         radialLabelsSkipAngle={10}
                         radialLabelsTextXOffset={6}
-                        radialLabelsTextColor="#333333"
+                        radialLabelsTextColor="var(--primary-text-color)"
                         radialLabelsLinkOffset={0}
                         radialLabelsLinkDiagonalLength={16}
                         radialLabelsLinkHorizontalLength={24}
                         radialLabelsLinkStrokeWidth={1}
                         radialLabelsLinkColor="inherit"
                         slicesLabelsSkipAngle={10}
-                        slicesLabelsTextColor="#333333"
+                        slicesLabelsTextColor="var(--primary-text-color)"
                         animate={true}
                         motionStiffness={90}
                         motionDamping={15}
