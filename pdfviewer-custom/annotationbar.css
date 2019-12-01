@@ -1,9 +1,9 @@
 
-.annotationbar * {
-    font-size: 14px;
+.annotationbar {
 }
 
-.annotationbar {
+.annotationbar * {
+    font-size: 14px;
 }
 
 .annotationbar-btn:hover,
