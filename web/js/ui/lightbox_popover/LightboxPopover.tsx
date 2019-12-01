@@ -1,6 +1,6 @@
 /* eslint react/no-multi-comp: 0, react/prop-types: 0 */
 import React from 'react';
-import {Button, Form, FormGroup, Input, Label, Popover, PopoverBody} from 'reactstrap';
+import {Popover} from 'reactstrap';
 import Popper from 'popper.js';
 import {Blackout} from '../blackout/Blackout';
 

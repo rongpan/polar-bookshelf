@@ -1,3 +1,19 @@
+
+## Features
+
+- usability: you can now see the folders a file is within in the document repository
+
+- usability: you can now export annotations from the annotations view.
+
+- usability: double click of comments or flashcards edits them.
+
+## Fixes
+
+- usability: Fixed an issue where if the user accidentally hit 'r' the document would rotate and people
+  couldn't figure out how to revert.
+
+# 1.60.11
+
 ## Features
 
 - The sidebar now doesn't show the color for the buttons unless you hover over them.  The colors 
