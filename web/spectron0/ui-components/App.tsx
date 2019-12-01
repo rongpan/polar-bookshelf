@@ -10,6 +10,7 @@ import {FontAwesomeIcon} from "../../js/ui/fontawesome/FontAwesomeIcon";
 import {DocSidebar} from "./DocSidebar";
 import {EditableText} from "./EditableText";
 import {Suggestions} from "../../js/ui/feedback/Suggestions";
+import {UIComponents} from "./UIComponents";
 
 const styles = {
     swatch: {
@@ -256,7 +257,9 @@ export class App<P> extends React.Component<{}, IAppState> {
 
             <div>
 
-                <Suggestions category={"foo"} title={"bar"}/>
+                <UIComponents/>
+
+                {/*<Suggestions category={"foo"} title={"bar"}/>*/}
 
                 {/*<WhatsNewModal/>*/}
 
@@ -318,23 +321,23 @@ export class App<P> extends React.Component<{}, IAppState> {
 
                 {/*</div>*/}
 
-                <div className="border border-dark m-1" style={{width: '450px'}}>
-                    <DocSidebar meta={{
-                        fingerprint: "0x01",
-                        title: 'Bitcoin - A distributed currency system.',
-                        description: "Some stuff about bitcoin and what it does.",
-                        authors: [
-                            {
-                                displayName: "Alice Smith",
-                            }
-                        ],
-                        doi: '12345'
-                    }}/>
-                </div>
+                {/*<div className="border border-dark m-1" style={{width: '450px'}}>*/}
+                {/*    <DocSidebar meta={{*/}
+                {/*        fingerprint: "0x01",*/}
+                {/*        title: 'Bitcoin - A distributed currency system.',*/}
+                {/*        description: "Some stuff about bitcoin and what it does.",*/}
+                {/*        authors: [*/}
+                {/*            {*/}
+                {/*                displayName: "Alice Smith",*/}
+                {/*            }*/}
+                {/*        ],*/}
+                {/*        doi: '12345'*/}
+                {/*    }}/>*/}
+                {/*</div>*/}
 
-                this should be editable:
+                {/*this should be editable:*/}
 
-                <EditableText value="hello world" onCancel={NULL_FUNCTION} onDone={NULL_FUNCTION}/>
+                {/*<EditableText value="hello world" onCancel={NULL_FUNCTION} onDone={NULL_FUNCTION}/>*/}
 
 
 
