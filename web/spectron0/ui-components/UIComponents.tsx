@@ -78,24 +78,24 @@ const ExampleForm = () => {
 
 const ExampleButtons = () => {
 
+    const colors = ['primary', 'secondary', 'success', 'info', "warning", "danger", "link", "light", undefined];
+
     return <div>
 
         <h1>Buttons</h1>
 
-        <div className={"children-margin"}>
+        <h2>Regular buttons</h2>
 
-            <Button color="primary">primary</Button>
-            <Button color="secondary">secondary</Button>
-            <Button color="success">success</Button>
-            <Button color="info">info</Button>
-            <Button color="warning">warning</Button>
-            <Button color="danger">danger</Button>
-            <Button color="link">link</Button>
-            <Button color="light">light</Button>
-
-            <Button>no color</Button>
-
+        <div className="children-margin">
+            {colors.map(color => <Button size="md" color={color}>{color || 'no color'}</Button>)}
         </div>
+
+        <h2>Outline</h2>
+
+        <div className="children-margin">
+            {colors.map(color => <Button size="md" color={color} outline>{color || 'no color'}</Button>)}
+        </div>
+
     </div>;
 
 };
