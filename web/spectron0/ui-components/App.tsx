@@ -3,32 +3,14 @@ import {Tags} from 'polar-shared/src/tags/Tags';
 import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
 import {Group} from "../../js/datastore/sharing/db/Groups";
 import {ISODateTimeStrings} from "polar-shared/src/metadata/ISODateTimeStrings";
-import {
-    TasksCalculator
-} from "polar-spaced-repetition/src/spaced_repetition/scheduler/S2Plus/TasksCalculator";
-import {Reviewer} from "../../../apps/repository/js/reviewer/Reviewer";
-import {LightModal} from "../../js/ui/LightModal";
-import {AnnotationType} from 'polar-shared/src/metadata/AnnotationType';
+import {TasksCalculator} from "polar-spaced-repetition/src/spaced_repetition/scheduler/S2Plus/TasksCalculator";
 import {Lorems} from "polar-shared/src/util/Lorems";
-import {Flashcards} from "../../js/metadata/Flashcards";
-import {Refs} from "polar-shared/src/metadata/Refs";
-import {RepoDocAnnotations} from "../../../apps/repository/js/RepoDocAnnotations";
-import {DocInfos} from "../../js/metadata/DocInfos";
-import {ReviewerTasks} from "../../../apps/repository/js/reviewer/ReviewerTasks";
-import {FlashcardTaskAction} from "../../../apps/repository/js/reviewer/cards/FlashcardTaskAction";
-import {FlashcardTaskActions} from "../../../apps/repository/js/reviewer/cards/FlashcardTaskActions";
-import {FlashcardCard} from "../../../apps/repository/js/reviewer/cards/FlashcardCard";
-import {Preconditions} from "polar-shared/src/Preconditions";
-import {Task, TaskRep} from "polar-spaced-repetition-api/src/scheduler/S2Plus/S2Plus";
-import {Button} from "reactstrap";
-import {Dialogs} from "../../js/ui/dialogs/Dialogs";
-import {ContextMenuWrapper} from "@burtonator/react-context-menu-wrapper";
-import {DocDropdownItems} from "../../../apps/repository/js/DocDropdownItems";
-import {FolderContextMenu} from "../../../apps/repository/js/FolderContextMenu";
+import {Task} from "polar-spaced-repetition-api/src/scheduler/S2Plus/S2Plus";
 import {FontAwesomeIcon} from "../../js/ui/fontawesome/FontAwesomeIcon";
-import {WhatsNewModal} from "../../../apps/repository/js/splash2/whats_new/WhatsNewModal";
-import {DocSidebar} from "./DocSidebar";
-import {EditableText} from "./EditableText";
+import {InputFilter} from "../../js/ui/input_filter/InputFilter";
+import {Tracer} from "./Tracer";
+import {Button} from "reactstrap";
+import {TimesIcon} from "../../js/ui/icons/FixedWidthIcons";
 
 const styles = {
     swatch: {
@@ -273,7 +255,21 @@ export class App<P> extends React.Component<{}, IAppState> {
 
         return (
 
-            <div>
+            <div className="p-1">
+
+                <Button className="mt-auto mb-auto text-secondary p-0 no-focus"
+                        style={{outline: 'none', boxShadow: 'none'}}
+                        onClick={() => console.log("FIXME clear")}
+                        color="clear">
+
+                    <TimesIcon/>
+
+                </Button>
+
+                <InputFilter placeholder="Filter by title"/>
+
+                {/*<Tracer id="1"/>*/}
+                {/*<Tracer id="2"/>*/}
 
                 {/*<WhatsNewModal/>*/}
 
@@ -335,23 +331,23 @@ export class App<P> extends React.Component<{}, IAppState> {
 
                 {/*</div>*/}
 
-                <div className="border border-dark m-1" style={{width: '450px'}}>
-                    <DocSidebar meta={{
-                        fingerprint: "0x01",
-                        title: 'Bitcoin - A distributed currency system.',
-                        description: "Some stuff about bitcoin and what it does.",
-                        authors: [
-                            {
-                                displayName: "Alice Smith",
-                            }
-                        ],
-                        doi: '12345'
-                    }}/>
-                </div>
+                {/*<div className="border border-dark m-1" style={{width: '450px'}}>*/}
+                {/*    <DocSidebar meta={{*/}
+                {/*        fingerprint: "0x01",*/}
+                {/*        title: 'Bitcoin - A distributed currency system.',*/}
+                {/*        description: "Some stuff about bitcoin and what it does.",*/}
+                {/*        authors: [*/}
+                {/*            {*/}
+                {/*                displayName: "Alice Smith",*/}
+                {/*            }*/}
+                {/*        ],*/}
+                {/*        doi: '12345'*/}
+                {/*    }}/>*/}
+                {/*</div>*/}
 
-                this should be editable:
+                {/*this should be editable:*/}
 
-                <EditableText value="hello world" onCancel={NULL_FUNCTION} onDone={NULL_FUNCTION}/>
+                {/*<EditableText value="hello world" onCancel={NULL_FUNCTION} onDone={NULL_FUNCTION}/>*/}
 
 
 

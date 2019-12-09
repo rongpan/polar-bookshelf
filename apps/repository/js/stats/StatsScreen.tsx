@@ -6,7 +6,10 @@ import TopTagsTable from './TopTagsTable';
 import {MessageBanner} from '../MessageBanner';
 import {FixedNav, FixedNavBody} from '../FixedNav';
 import {RepoHeader} from '../repo_header/RepoHeader';
-import {PersistenceLayerManager} from '../../../../web/js/datastore/PersistenceLayerManager';
+import {
+    PersistenceLayerController,
+    PersistenceLayerManager
+} from '../../../../web/js/datastore/PersistenceLayerManager';
 import ReadingProgressTable from './ReadingProgressTable';
 import {SpacedRepQueueChart} from "./SpacedRepQueueChart";
 import {ReviewerTasks} from "../reviewer/ReviewerTasks";
@@ -15,6 +18,7 @@ import {PremiumFeature} from "../../../../web/js/ui/premium_feature/PremiumFeatu
 import {Devices} from "../../../../web/js/util/Devices";
 import {IDocInfo} from "polar-shared/src/metadata/IDocInfo";
 import {RepoFooter} from "../repo_footer/RepoFooter";
+import {PersistenceLayerProvider} from "../../../../web/js/datastore/PersistenceLayer";
 
 const log = Logger.create();
 
@@ -70,11 +74,11 @@ const ReviewerStats = (props: ReviewerStats) => {
                 </div>
             </div>
 
-        </div>
+        </div>;
 
     }
 
-    return <div/>
+    return <div/>;
 
 };
 
@@ -113,12 +117,13 @@ export default class StatsScreen extends React.Component<IProps, IState> {
             .catch(err => log.error(err));
 
     }
+
     public render() {
 
         if (Devices.get() === 'phone') {
-            return <StatsScreen.Phone {...this.props}/>
+            return <StatsScreen.Phone {...this.props}/>;
         } else {
-            return <StatsScreen.Default {...this.props}/>
+            return <StatsScreen.Default {...this.props}/>;
         }
 
     }
@@ -134,7 +139,8 @@ export default class StatsScreen extends React.Component<IProps, IState> {
 
                 <header>
 
-                    <RepoHeader persistenceLayerManager={this.props.persistenceLayerManager}/>
+                    <RepoHeader persistenceLayerProvider={this.props.persistenceLayerProvider}
+                                persistenceLayerController={this.props.persistenceLayerController}/>
 
                     <MessageBanner/>
 
@@ -147,7 +153,7 @@ export default class StatsScreen extends React.Component<IProps, IState> {
                 </FixedNavBody>
 
                 <RepoFooter/>
-            </FixedNav>
+            </FixedNav>;
         }
     };
 
@@ -163,7 +169,8 @@ export default class StatsScreen extends React.Component<IProps, IState> {
 
                     <header>
 
-                        <RepoHeader persistenceLayerManager={this.props.persistenceLayerManager}/>
+                        <RepoHeader persistenceLayerProvider={this.props.persistenceLayerProvider}
+                                    persistenceLayerController={this.props.persistenceLayerController}/>
 
                         <MessageBanner/>
 
@@ -247,12 +254,13 @@ export default class StatsScreen extends React.Component<IProps, IState> {
             );
         }
 
-    }
+    };
 
 }
 
 export interface IProps {
-    readonly persistenceLayerManager: PersistenceLayerManager;
+    readonly persistenceLayerProvider: PersistenceLayerProvider;
+    readonly persistenceLayerController: PersistenceLayerController;
     readonly repoDocMetaManager: RepoDocMetaManager;
 }
 

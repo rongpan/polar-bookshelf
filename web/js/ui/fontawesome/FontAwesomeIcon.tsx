@@ -17,7 +17,7 @@ export class FontAwesomeIcon extends React.PureComponent<IProps, IState> {
         if (this.props.name) {
             return <i className={this.props.name} style={style}/>;
         } else {
-            return <span style={style}></span>
+            return <span style={style}></span>;
         }
 
 

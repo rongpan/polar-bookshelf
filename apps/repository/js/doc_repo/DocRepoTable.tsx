@@ -2,19 +2,12 @@ import * as React from 'react';
 import ReactTable, {Column, ColumnRenderProps, Instance, RowInfo} from "react-table";
 import {Logger} from 'polar-shared/src/logger/Logger';
 import {RepoDocInfo} from '../RepoDocInfo';
-import {TagInput} from '../TagInput';
-import {Optional} from 'polar-shared/src/util/ts/Optional';
 import {Tag, Tags} from 'polar-shared/src/tags/Tags';
 import {DateTimeTableCell} from '../DateTimeTableCell';
 import {RendererAnalytics} from '../../../../web/js/ga/RendererAnalytics';
-import {DocDropdown} from '../DocDropdown';
-import {DocRepoTableColumns} from './DocRepoTableColumns';
 import {SynchronizingDocLoader} from '../util/SynchronizingDocLoader';
 import ReleasingReactComponent from '../framework/ReleasingReactComponent';
 import {NULL_FUNCTION} from 'polar-shared/src/util/Functions';
-import {DocButton} from '../ui/DocButton';
-import {FlagDocButton} from '../ui/FlagDocButton';
-import {ArchiveDocButton} from '../ui/ArchiveDocButton';
 import Input from 'reactstrap/lib/Input';
 import {DocContextMenuProps} from '../DocContextMenu';
 import {Toaster} from '../../../../web/js/ui/toaster/Toaster';
@@ -22,7 +15,6 @@ import {Either} from '../../../../web/js/util/Either';
 import {BackendFileRefs} from '../../../../web/js/datastore/BackendFileRefs';
 import {IDocInfo} from 'polar-shared/src/metadata/IDocInfo';
 import {RelatedTags} from '../../../../web/js/tags/related/RelatedTags';
-import {AccountUpgradeBar} from "../../../../web/js/ui/account_upgrade/AccountUpgradeBar";
 import {Platforms} from "polar-shared/src/util/Platforms";
 import {Numbers} from "polar-shared/src/util/Numbers";
 import {
@@ -36,6 +28,9 @@ import {SelectRowType} from "./DocRepoScreen";
 import {TitleCell} from "./cells/TitleCell";
 import {CheckCell} from "./cells/CheckCell";
 import {DocButtonsCell} from "./cells/DocButtonsCell";
+import {ReactTableHolder} from "../../../../web/js/ui/ReactTables";
+import {RepoDocInfos} from "../RepoDocInfos";
+import {DocRepoTableColumnsMap} from "./DocRepoTableColumns";
 
 const log = Logger.create();
 
@@ -249,22 +244,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
 
                 };
 
-                const aSTR = toSTR(a);
-                const bSTR = toSTR(b);
-
-                // if (aSTR === bSTR) {
-                //     return 0;
-                // }
-                //
-                // if (aSTR === "") {
-                //     return Number.MIN_VALUE;
-                // }
-                //
-                // if (bSTR === "") {
-                //     return Number.MAX_VALUE;
-                // }
-
-                return aSTR.localeCompare(bSTR);
+                return toSTR(a).localeCompare(toSTR(b));
 
             },
         };
@@ -272,59 +252,65 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
     }
 
     private createColumnTags() {
+
+        const formatRecord = (repoDocInfo: RepoDocInfo): string => {
+
+            const tags: { [id: string]: Tag } = repoDocInfo.tags || {};
+
+            return Tags.onlyRegular(Object.values(tags))
+                .map(tag => tag.label)
+                .sort()
+                .join(", ");
+
+        };
+
+        const sortMethod = (a: RepoDocInfo, b: RepoDocInfo) => {
+            return RepoDocInfos.sort(a, b, formatRecord);
+        };
+
         return {
             id: 'tags',
             Header: 'Tags',
             headerClassName: "d-none-mobile",
             width: 250,
-            accessor: '',
             show: this.props.columns.tags.selected,
             className: 'doc-table-col-tags d-none-mobile',
-            sortMethod: (a: RepoDocInfo, b: RepoDocInfo) => {
-
-                const toSTR = (obj: any): string => {
-
-                    if (! obj) {
-                        return "";
-                    }
-
-                    if (typeof obj === 'string') {
-                        return obj;
-                    }
-
-                    return JSON.stringify(obj);
-
-                };
-
-                const cmp = toSTR(a.tags).localeCompare(toSTR(b.tags));
-
-                if (cmp !== 0) {
-                    return cmp;
-                }
-
-                // for ties use the date added...
-                return toSTR(a.added).localeCompare(toSTR(b.added));
-
-            },
-            Cell: (row: any) => {
-                // TODO: move to a PureComponent to
-                // improve performance
-
-                const tags: {[id: string]: Tag} = row.original.tags;
-
-                const formatted = Tags.onlyRegular(Object.values(tags))
-                    .map(tag => tag.label)
-                    .sort()
-                    .join(", ");
-
-                return (
-
-                    <div>{formatted}</div>
-
-                );
-
-            }
+            accessor: '',
+            sortMethod: (a: RepoDocInfo, b: RepoDocInfo) => sortMethod(a, b),
+            Cell: (value: ReactTableHolder<RepoDocInfo>) => formatRecord(value.original)
         };
+
+    }
+
+    private createColumnFolders() {
+
+        const formatRecord = (repoDocInfo: RepoDocInfo): string => {
+
+            const tags: { [id: string]: Tag } = repoDocInfo.tags || {};
+
+            return Tags.onlyFolderTags(Object.values(tags))
+                .map(tag => tag.label)
+                .sort()
+                .join(", ");
+
+        };
+
+        const sortMethod = (a: RepoDocInfo, b: RepoDocInfo) => {
+            return RepoDocInfos.sort(a, b, formatRecord);
+        };
+
+        return {
+            id: 'folders',
+            Header: 'Folders',
+            headerClassName: "d-none-mobile",
+            width: 250,
+            show: this.props.columns.folders?.selected || false,
+            className: 'doc-table-col-folders d-none-mobile',
+            accessor: '',
+            sortMethod: (a: RepoDocInfo, b: RepoDocInfo) => sortMethod(a, b),
+            Cell: (value: ReactTableHolder<RepoDocInfo>) => formatRecord(value.original)
+        };
+
     }
 
     private createColumnProgress() {
@@ -389,7 +375,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                                        archived={repoDocInfo.archived}
                                        doHandleToggleField={this.doHandleToggleField}
                                        onDocumentLoadRequested={this.onDocumentLoadRequested}
-                                       {...this.props}/>
+                                       {...this.props}/>;
 
             }
         };
@@ -411,13 +397,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
         return [
             this.createColumnCheckbox(),
             this.createColumnTitle(),
-            // this.createColumnUpdated(),
-            // this.createColumnAdded(),
-            // this.createColumnSite(),
-            // this.createColumnTags(),
-            // this.createColumnAnnotations(),
             this.createColumnProgress(),
-            // this.createColumnButtons()
         ];
 
     }
@@ -431,6 +411,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
             this.createColumnAdded(),
             this.createColumnSite(),
             this.createColumnTags(),
+            this.createColumnFolders(),
             this.createColumnAnnotations(),
             this.createColumnProgress(),
             this.createColumnButtons()
@@ -559,8 +540,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
     }
 
     private createContextMenuHandlers() {
-        const contextMenuHandlers = prepareContextMenuHandlers({id: CONTEXT_MENU_ID});
-        return contextMenuHandlers;
+        return prepareContextMenuHandlers({id: CONTEXT_MENU_ID});
     }
 
     public render() {
@@ -572,7 +552,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
         return (
 
             <div id="doc-table"
-                 className="ml-1"
+                 className=""
                  style={{height: '100%', overflow: 'auto'}}>
 
                 {/*TODO: removing now because it breaks scrollbars for new users.*/}
@@ -612,7 +592,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                                 // needed to avoid the columns being placed wrong due to the scrollbar.
                                 paddingRight: '1em'
                             }
-                        }
+                        };
                     }}
 
                     // sorted={[{
@@ -621,12 +601,46 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                     // }]}
                     getTrProps={(state: any, rowInfo: any) => {
 
+                        const computeStyle = (): React.CSSProperties => {
+
+                            if (rowInfo) {
+
+                                if (this.props.selected.includes(rowInfo.viewIndex)) {
+                                    return {
+                                        background: 'var(--selected-background-color)',
+                                        color: 'var(--selected-text-color)'
+                                    };
+                                } else {
+
+                                    const even = (rowInfo.viewIndex % 2) === 0;
+
+                                    if (even) {
+                                        return {
+                                            background: 'var(--grey050)'
+                                        };
+                                    } else {
+                                        return {
+                                            background: 'var(--primary-background-color)'
+                                        };
+                                    }
+
+                                }
+
+                            } else {
+                                return {
+                                    background: 'var(--primary-background-color)'
+                                };
+                            }
+
+                        };
+
+                        const style = computeStyle();
+
                         return {
 
                             draggable: true,
                             onDragStart: (event: DragEvent) => (this.props.onDragStart || NULL_FUNCTION)(event),
                             onDragEnd: (event: DragEvent) => (this.props.onDragEnd || NULL_FUNCTION)(event),
-
 
                             // include the doc fingerprint in the table
                             // so that the tour can use
@@ -634,13 +648,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
 
                             tabIndex: rowInfo ? (rowInfo.viewIndex as number) + 1 : undefined,
 
-                            style: {
-                                // TODO: dark-mode.  Use CSS variable
-                                // names for colors
-
-                                background: rowInfo && this.props.selected.includes(rowInfo.viewIndex) ? 'var(--selected-background-color)' : 'var(--primary-background-color)',
-                                color: rowInfo && this.props.selected.includes(rowInfo.viewIndex) ? 'var(--selected-text-color)' : 'var(--primary-text-color)',
-                            },
+                            style,
 
                             onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => {
                                 this.onKeyDown(event);
@@ -736,7 +744,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
 }
 
 interface IProps {
-    readonly columns: DocRepoTableColumns;
+    readonly columns: DocRepoTableColumnsMap;
     readonly selected: ReadonlyArray<number>;
     readonly data: ReadonlyArray<RepoDocInfo>;
     readonly relatedTags: RelatedTags;

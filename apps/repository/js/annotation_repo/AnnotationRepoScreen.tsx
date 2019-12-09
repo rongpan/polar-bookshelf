@@ -10,13 +10,11 @@ import {MessageBanner} from '../MessageBanner';
 import {FixedNav} from '../FixedNav';
 import PreviewAndMainViewDock from './PreviewAndMainViewDock';
 import {Dock} from '../../../../web/js/ui/dock/Dock';
-import {TagTree} from '../../../../web/js/ui/tree/TagTree';
 import {AnnotationRepoFilterEngine, UpdatedCallback} from './AnnotationRepoFilterEngine';
 import {PersistenceLayerManagers} from '../../../../web/js/datastore/PersistenceLayerManagers';
 import {RepoDocMetaLoaders} from '../RepoDocMetaLoaders';
 import {AnnotationRepoFiltersHandler} from './AnnotationRepoFiltersHandler';
 import ReleasingReactComponent from '../framework/ReleasingReactComponent';
-import {TagDescriptor} from '../../../../web/js/tags/TagNode';
 import {Tag, Tags, TagStr} from 'polar-shared/src/tags/Tags';
 import {FilteredTags} from '../FilteredTags';
 import {TreeState} from "../../../../web/js/ui/tree/TreeState";
@@ -29,6 +27,11 @@ import {StartReviewDropdown} from "./filter_bar/StartReviewDropdown";
 import {RepetitionMode} from "polar-spaced-repetition-api/src/scheduler/S2Plus/S2Plus";
 import {RepoFooter} from "../repo_footer/RepoFooter";
 import {IDocAnnotation} from "../../../../web/js/annotation_sidebar/DocAnnotation";
+import {AnnotationRepoTableDropdown} from "./AnnotationRepoTableDropdown";
+import {FolderSidebar} from "../folders/FolderSidebar";
+import {PersistenceLayerProvider} from "../../../../web/js/datastore/PersistenceLayer";
+import {TagDescriptor} from "polar-shared/src/tags/TagDescriptors";
+import {PersistenceLayerMutator} from "../persistence_layer/PersistenceLayerMutator";
 
 export default class AnnotationRepoScreen extends ReleasingReactComponent<IProps, IState> {
 
@@ -45,6 +48,7 @@ export default class AnnotationRepoScreen extends ReleasingReactComponent<IProps
      * The tags that are selected by the user.
      */
     private selectedFolders: ReadonlyArray<Tag> = [];
+    private persistenceLayerMutator: PersistenceLayerMutator;
 
     constructor(props: IProps, context: any) {
         super(props, context);
@@ -55,7 +59,6 @@ export default class AnnotationRepoScreen extends ReleasingReactComponent<IProps
 
         this.state = {
             data: [],
-            tags: [],
         };
 
         const onSelected = (values: ReadonlyArray<TagStr>) => this.onSelectedFolders(values);
@@ -75,13 +78,8 @@ export default class AnnotationRepoScreen extends ReleasingReactComponent<IProps
         };
 
         const onUpdated: UpdatedCallback = repoAnnotations => {
-
-            const tags = this.props.repoDocMetaManager.repoDocAnnotationIndex.toTagDescriptors();
-
-            const state = {...this.state, data: repoAnnotations, tags};
-
+            const state = {...this.state, data: repoAnnotations};
             setStateInBackground(state);
-
         };
 
         const repoAnnotationsProvider: () => ReadonlyArray<IDocAnnotation> =
@@ -92,6 +90,15 @@ export default class AnnotationRepoScreen extends ReleasingReactComponent<IProps
         this.filtersHandler = new AnnotationRepoFiltersHandler(filters => filterEngine.onFiltered(filters));
 
         const doRefresh = () => filterEngine.onProviderUpdated();
+
+        const repoDocInfosProvider = () => this.props.repoDocMetaManager.repoDocInfoIndex.values();
+
+        this.persistenceLayerMutator
+            = new PersistenceLayerMutator(this.props.repoDocMetaManager,
+                                          this.props.persistenceLayerProvider,
+                                          this.props.tags,
+                                          repoDocInfosProvider,
+                                          () => doRefresh());
 
         PersistenceLayerManagers.onPersistenceManager(this.props.persistenceLayerManager, (persistenceLayer) => {
 
@@ -116,7 +123,8 @@ export default class AnnotationRepoScreen extends ReleasingReactComponent<IProps
                       className="annotations-view">
 
                 <header>
-                    <RepoHeader persistenceLayerManager={this.props.persistenceLayerManager}/>
+                    <RepoHeader persistenceLayerProvider={this.props.persistenceLayerProvider}
+                                persistenceLayerController={this.props.persistenceLayerManager}/>
 
                     <Row id="header-filter"
                          className="border-bottom p-1">
@@ -140,8 +148,13 @@ export default class AnnotationRepoScreen extends ReleasingReactComponent<IProps
                                                                 onSelected={selected => this.filtersHandler.update({colors: selected})}/>
                                 </div>
 
-                                <div className="d-none-mobile">
+                                <div className="ml-1 d-none-mobile">
                                     <TextFilter updateFilters={filters => this.filtersHandler.update(filters)}/>
+                                </div>
+
+                                <div className="ml-1 d-none-mobile mt-auto mb-auto">
+                                    <AnnotationRepoTableDropdown persistenceLayerProvider={() => this.props.persistenceLayerManager.get()}
+                                                                 annotations={this.state.data}/>
                                 </div>
 
                             </div>
@@ -159,32 +172,9 @@ export default class AnnotationRepoScreen extends ReleasingReactComponent<IProps
                         splitter: 'd-none-mobile'
                       }}
                       left={
-                          // TODO this should be its own component
-                          <div style={{
-                              display: 'flex' ,
-                              flexDirection: 'column',
-                              height: '100%',
-                              overflow: 'auto',
-                          }}>
-
-                            <div className="m-1">
-
-                                <TagTree tags={this.state.tags}
+                          <FolderSidebar persistenceLayerMutator={this.persistenceLayerMutator}
                                          treeState={this.treeState}
-                                         rootTitle="Folders"
-                                         tagType='folder'
-                                         noCreate={true}/>
-
-                                <TagTree tags={this.state.tags}
-                                         treeState={this.treeState}
-                                         rootTitle="Tags"
-                                         tagType='regular'
-                                         filterDisabled={true}
-                                         noCreate={true}/>
-
-                            </div>
-
-                        </div>
+                                         tags={this.props.tags()}/>
                       }
                       right={
                           <PreviewAndMainViewDock data={this.state.data}
@@ -221,7 +211,7 @@ export default class AnnotationRepoScreen extends ReleasingReactComponent<IProps
         const datastoreCapabilities = persistenceLayer.capabilities();
         const prefs = persistenceLayer.datastore.getPrefs();
 
-        Reviewers.start(datastoreCapabilities, prefs.get().prefs, this.state.data, mode, 10);
+        Reviewers.start(datastoreCapabilities, prefs.get(), this.state.data, mode, 10);
     }
 
 }
@@ -229,6 +219,8 @@ export default class AnnotationRepoScreen extends ReleasingReactComponent<IProps
 export interface IProps {
 
     readonly persistenceLayerManager: PersistenceLayerManager;
+
+    readonly persistenceLayerProvider: PersistenceLayerProvider;
 
     readonly updatedDocInfoEventDispatcher: IEventDispatcher<IDocInfo>;
 
@@ -238,6 +230,7 @@ export interface IProps {
 
     readonly repoDocMetaLoader: RepoDocMetaLoader;
 
+    readonly tags: () => ReadonlyArray<TagDescriptor>;
 }
 
 export interface IState {
@@ -245,18 +238,6 @@ export interface IState {
     readonly repoAnnotation?: IDocAnnotation;
 
     readonly data: ReadonlyArray<IDocAnnotation>;
-
-
-
-    /**
-     * All available tags
-     */
-    readonly tags: ReadonlyArray<TagDescriptor>;
-
-    /**
-     * The currently selected tags.
-     */
-    // readonly selected: ReadonlyArray<TagStr>;
 
 }
 
