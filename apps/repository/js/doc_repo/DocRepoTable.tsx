@@ -30,7 +30,6 @@ import {CheckCell} from "./cells/CheckCell";
 import {DocButtonsCell} from "./cells/DocButtonsCell";
 import {ReactTableHolder} from "../../../../web/js/ui/ReactTables";
 import {RepoDocInfos} from "../RepoDocInfos";
-import {ListOptionTypeMap} from "../../../../web/js/ui/list_selector/ListSelector";
 import {DocRepoTableColumnsMap} from "./DocRepoTableColumns";
 
 const log = Logger.create();
@@ -541,8 +540,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
     }
 
     private createContextMenuHandlers() {
-        const contextMenuHandlers = prepareContextMenuHandlers({id: CONTEXT_MENU_ID});
-        return contextMenuHandlers;
+        return prepareContextMenuHandlers({id: CONTEXT_MENU_ID});
     }
 
     public render() {
@@ -554,7 +552,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
         return (
 
             <div id="doc-table"
-                 className="ml-1"
+                 className=""
                  style={{height: '100%', overflow: 'auto'}}>
 
                 {/*TODO: removing now because it breaks scrollbars for new users.*/}
@@ -603,12 +601,46 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
                     // }]}
                     getTrProps={(state: any, rowInfo: any) => {
 
+                        const computeStyle = (): React.CSSProperties => {
+
+                            if (rowInfo) {
+
+                                if (this.props.selected.includes(rowInfo.viewIndex)) {
+                                    return {
+                                        background: 'var(--selected-background-color)',
+                                        color: 'var(--selected-text-color)'
+                                    };
+                                } else {
+
+                                    const even = (rowInfo.viewIndex % 2) === 0;
+
+                                    if (even) {
+                                        return {
+                                            background: 'var(--grey050)'
+                                        };
+                                    } else {
+                                        return {
+                                            background: 'var(--primary-background-color)'
+                                        };
+                                    }
+
+                                }
+
+                            } else {
+                                return {
+                                    background: 'var(--primary-background-color)'
+                                };
+                            }
+
+                        };
+
+                        const style = computeStyle();
+
                         return {
 
                             draggable: true,
                             onDragStart: (event: DragEvent) => (this.props.onDragStart || NULL_FUNCTION)(event),
                             onDragEnd: (event: DragEvent) => (this.props.onDragEnd || NULL_FUNCTION)(event),
-
 
                             // include the doc fingerprint in the table
                             // so that the tour can use
@@ -616,13 +648,7 @@ export class DocRepoTable extends ReleasingReactComponent<IProps, IState> {
 
                             tabIndex: rowInfo ? (rowInfo.viewIndex as number) + 1 : undefined,
 
-                            style: {
-                                // TODO: dark-mode.  Use CSS variable
-                                // names for colors
-
-                                background: rowInfo && this.props.selected.includes(rowInfo.viewIndex) ? 'var(--selected-background-color)' : 'var(--primary-background-color)',
-                                color: rowInfo && this.props.selected.includes(rowInfo.viewIndex) ? 'var(--selected-text-color)' : 'var(--primary-text-color)',
-                            },
+                            style,
 
                             onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => {
                                 this.onKeyDown(event);

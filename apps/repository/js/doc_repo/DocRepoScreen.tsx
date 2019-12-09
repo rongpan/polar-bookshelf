@@ -13,14 +13,13 @@ import {DocRepoTableColumns, DocRepoTableColumnsMap} from './DocRepoTableColumns
 import {SettingsStore} from '../../../../web/js/datastore/SettingsStore';
 import {IDocInfo} from 'polar-shared/src/metadata/IDocInfo';
 import {IEventDispatcher} from '../../../../web/js/reactor/SimpleReactor';
-import {PersistenceLayerManager} from '../../../../web/js/datastore/PersistenceLayerManager';
+import {PersistenceLayerController} from '../../../../web/js/datastore/PersistenceLayerManager';
 import {RepoDocMetaLoaders} from '../RepoDocMetaLoaders';
-import {PersistenceLayerManagers} from '../../../../web/js/datastore/PersistenceLayerManagers';
 import {SynchronizingDocLoader} from '../util/SynchronizingDocLoader';
 import ReleasingReactComponent from '../framework/ReleasingReactComponent';
 import {RepoHeader} from '../repo_header/RepoHeader';
 import {FixedNav} from '../FixedNav';
-import {ListOptionType, ListOptionTypeMap} from '../../../../web/js/ui/list_selector/ListSelector';
+import {ListOptionType} from '../../../../web/js/ui/list_selector/ListSelector';
 import {NULL_FUNCTION} from 'polar-shared/src/util/Functions';
 import {DocRepoFilterBar} from './DocRepoFilterBar';
 import {DocRepoFilters, RefreshedCallback} from './DocRepoFilters';
@@ -32,17 +31,18 @@ import {Dialogs} from '../../../../web/js/ui/dialogs/Dialogs';
 import {DocRepoButtonBar} from './DocRepoButtonBar';
 import {DocRepoTable} from './DocRepoTable';
 import {Dock} from '../../../../web/js/ui/dock/Dock';
-import {TagDescriptor} from '../../../../web/js/tags/TagNode';
-import {TagTree} from '../../../../web/js/ui/tree/TagTree';
 import {Instance} from "react-table";
 import {Arrays} from "polar-shared/src/util/Arrays";
 import {Numbers} from "polar-shared/src/util/Numbers";
 import {DraggingSelectedDocs} from "./SelectedDocs";
 import {TreeState} from "../../../../web/js/ui/tree/TreeState";
-import {DocSidebar} from "../../../../web/spectron0/ui-components/DocSidebar";
 import {SetArrays} from "polar-shared/src/util/SetArrays";
 import {FolderSidebar} from "../folders/FolderSidebar";
-import {IDMap, IDMaps} from "polar-shared/src/util/IDMaps";
+import {IDMaps} from "polar-shared/src/util/IDMaps";
+import {ListenablePersistenceLayerProvider} from "../../../../web/js/datastore/PersistenceLayer";
+import {TagDescriptor, TagDescriptors} from "polar-shared/src/tags/TagDescriptors";
+import {PersistenceLayerMutator} from "../persistence_layer/PersistenceLayerMutator";
+import {DocRepoRenderProps} from "../persistence_layer/PersistenceLayerApp";
 
 const log = Logger.create();
 
@@ -54,19 +54,19 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
     private static hasSentInitAnalytics = false;
 
-    private readonly persistenceLayerManager: PersistenceLayerManager;
-
     private readonly synchronizingDocLoader: SynchronizingDocLoader;
 
     private reactTable?: Instance;
 
     private readonly docRepoFilters: DocRepoFilters;
 
+    private readonly tagsProvider: () => ReadonlyArray<Tag>;
+    private persistenceLayerMutator: PersistenceLayerMutator;
+
     constructor(props: IProps, context: any) {
         super(props, context);
 
-        this.persistenceLayerManager = this.props.persistenceLayerManager;
-        this.synchronizingDocLoader = new SynchronizingDocLoader(this.props.persistenceLayerManager);
+        this.synchronizingDocLoader = new SynchronizingDocLoader(this.props.persistenceLayerProvider);
 
         this.onDocDeleteRequested = this.onDocDeleteRequested.bind(this);
 
@@ -94,11 +94,10 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
         this.onDragStart = this.onDragStart.bind(this);
         this.onDragEnd = this.onDragEnd.bind(this);
 
-        this.onRemoveFromFolder = this.onRemoveFromFolder.bind(this);
+        this.onRemoveFromTag = this.onRemoveFromTag.bind(this);
 
         this.state = {
             data: [],
-            tags: [],
             columns: IDMaps.create(Object.values(new DocRepoTableColumns())),
             selected: [],
             docSidebarVisible: false
@@ -106,13 +105,19 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
         const onRefreshed: RefreshedCallback = repoDocInfos => this.doRefresh(repoDocInfos);
 
-        const repoDocInfosProvider = () => this.props.repoDocMetaManager!.repoDocInfoIndex.values();
+        const repoDocInfosProvider = () => this.props.repoDocMetaManager.repoDocInfoIndex.values();
+        this.tagsProvider = this.props.tags;
 
-        this.docRepoFilters =
-            new DocRepoFilters(onRefreshed, repoDocInfosProvider);
+        this.persistenceLayerMutator
+            = new PersistenceLayerMutator(this.props.repoDocMetaManager,
+                                          this.props.persistenceLayerProvider,
+                                          this.tagsProvider,
+                                          repoDocInfosProvider,
+                                          () => this.refresh());
+
+        this.docRepoFilters = new DocRepoFilters(onRefreshed, repoDocInfosProvider);
 
         const onSelected = (tags: ReadonlyArray<TagStr>) => this.docRepoFilters.onTagged(tags.map(current => Tags.create(current)));
-
         const onDropped = (tag: TagDescriptor) => this.onMultiTagged([tag], DraggingSelectedDocs.get());
 
         this.treeState = new TreeState(onSelected, onDropped);
@@ -130,12 +135,9 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
         // the old event listener as the component is still mounted but the old
         // persistence layer has now gone away.
 
-        PersistenceLayerManagers.onPersistenceManager(this.props.persistenceLayerManager, (persistenceLayer) => {
+        const persistenceLayer = this.props.persistenceLayerProvider();
 
-            this.releaser.register(
-                persistenceLayer.addEventListener(() => this.refresh()));
-
-        });
+        this.releaser.register(persistenceLayer.addEventListener(() => this.refresh()));
 
         this.releaser.register(
             RepoDocMetaLoaders.addThrottlingEventListener(this.props.repoDocMetaLoader, () => this.refresh()));
@@ -177,7 +179,7 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
         RendererAnalytics.set({'nrDocs': nrDocs});
 
-        const persistenceLayerType = this.persistenceLayerManager.currentType();
+        const persistenceLayerType = this.props.persistenceLayerController.currentType();
 
         RendererAnalytics.event({category: 'document-repository', action: `docs-loaded-${persistenceLayerType}-${nrDocs}`});
 
@@ -197,12 +199,14 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
     }
 
-    private onRemoveFromFolder(folder: Tag, repoDocInfos: ReadonlyArray<RepoDocInfo>) {
+    private onRemoveFromTag(rawTag: Tag, repoDocInfos: ReadonlyArray<RepoDocInfo>) {
 
         for (const repoDocInfo of repoDocInfos) {
             const existingTags = Object.values(repoDocInfo.tags || {});
-            const newTags = Tags.difference(existingTags, [folder]);
+            const newTags = Tags.difference(existingTags, [rawTag]);
 
+            // TODO: this does N at once but we should really be using a queue for
+            // this operation.
             this.onDocTagged(repoDocInfo, newTags)
                 .catch(err => log.error(err));
 
@@ -375,10 +379,7 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
     public render() {
 
-        const tagsProvider = () => this.props.repoDocMetaManager!.repoDocInfoIndex.toTagDescriptors();
-
-        const selectedDocs = this.getSelected();
-        const primaryDoc = selectedDocs.length > 0 ? selectedDocs[0] : undefined ;
+        const tagsProvider = this.props.tags;
 
         const docActive = {
             right: 'd-none-mobile',
@@ -389,7 +390,6 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
             right: 'd-none',
             splitter: 'd-none'
         };
-
 
         const rightDocComponentClassNames = this.state.docSidebarVisible ? docActive : docInactive;
 
@@ -404,7 +404,8 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
                     <header>
 
-                        <RepoHeader persistenceLayerManager={this.props.persistenceLayerManager}/>
+                        <RepoHeader persistenceLayerProvider={this.props.persistenceLayerProvider}
+                                    persistenceLayerController={this.props.persistenceLayerController}/>
 
                         <div id="header-filter" className="border-bottom">
 
@@ -465,8 +466,9 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
                         side='left'
                         initialWidth={300}
                         left={
-                            <FolderSidebar treeState={this.treeState}
-                                           tags={this.state.tags}/>
+                            <FolderSidebar persistenceLayerMutator={this.persistenceLayerMutator}
+                                           treeState={this.treeState}
+                                           tags={this.props.tags()}/>
                         }
                         right={
                             <Dock
@@ -499,7 +501,7 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
                                                   filters={this.docRepoFilters.filters}
                                                   getSelected={() => this.getSelected()}
                                                   getRow={(viewIndex) => this.getRow(viewIndex)}
-                                                  onRemoveFromFolder={(folder, repoDocInfos) => this.onRemoveFromFolder(folder, repoDocInfos)}/>
+                                                  onRemoveFromFolder={(folder, repoDocInfos) => this.onRemoveFromTag(folder, repoDocInfos)}/>
 
                                 }
                                 right={
@@ -669,6 +671,7 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
     }
 
     private refresh() {
+        // this applies the filters and then calls doRefresh...
         this.docRepoFilters.refresh();
     }
 
@@ -677,15 +680,14 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
      */
     private doRefresh(data: ReadonlyArray<RepoDocInfo>) {
 
-        const tags = this.props.repoDocMetaManager.repoDocInfoIndex.toTagDescriptors();
-
-        const state = {...this.state, data, tags};
-
         setTimeout(() => {
 
             // The react table will not update when I change the state from
             // within the event listener
-            this.setState(state);
+            this.setState({
+                ...this.state,
+                data,
+            });
 
         }, 1);
 
@@ -703,7 +705,9 @@ export default class DocRepoScreen extends ReleasingReactComponent<IProps, IStat
 
 interface IProps {
 
-    readonly persistenceLayerManager: PersistenceLayerManager;
+    readonly persistenceLayerProvider: ListenablePersistenceLayerProvider;
+
+    readonly persistenceLayerController: PersistenceLayerController;
 
     readonly updatedDocInfoEventDispatcher: IEventDispatcher<IDocInfo>;
 
@@ -711,11 +715,14 @@ interface IProps {
 
     readonly repoDocMetaLoader: RepoDocMetaLoader;
 
+    readonly tags: () => ReadonlyArray<TagDescriptor>;
+
+    readonly docRepo: DocRepoRenderProps;
+
 }
 
 interface IState {
     readonly data: ReadonlyArray<RepoDocInfo>;
-    readonly tags: ReadonlyArray<TagDescriptor>;
     readonly columns: DocRepoTableColumnsMap;
     readonly selected: ReadonlyArray<number>;
     readonly docSidebarVisible: boolean;

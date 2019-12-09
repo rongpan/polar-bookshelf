@@ -1,6 +1,17 @@
 
 ## Features
 
+- odd/even coloring in the document list / table.
+
+- usability: the sidebar has been significantly redesigned
+    - "+" button for adding tags and folders
+    - context menu for adding tags and folders
+    - remove tag from docs
+
+- usability: expand/collapse of folders now works now. 
+
+- UI: better UI filter control.
+
 - usability: you can now see the folders a file is within in the document repository
 
 - usability: you can now export annotations from the annotations view.
@@ -8,6 +19,10 @@
 - usability: double click of comments or flashcards edits them.
 
 ## Fixes
+
+- ChromeOS is now a desktop platform
+
+- upgrade account button now works.  
 
 - improved text in suggestions dialog.
 

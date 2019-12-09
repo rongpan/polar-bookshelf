@@ -7,10 +7,10 @@ import {TasksCalculator} from "polar-spaced-repetition/src/spaced_repetition/sch
 import {Lorems} from "polar-shared/src/util/Lorems";
 import {Task} from "polar-spaced-repetition-api/src/scheduler/S2Plus/S2Plus";
 import {FontAwesomeIcon} from "../../js/ui/fontawesome/FontAwesomeIcon";
-import {DocSidebar} from "./DocSidebar";
-import {EditableText} from "./EditableText";
-import {Suggestions} from "../../js/ui/feedback/Suggestions";
-import {UIComponents} from "./UIComponents";
+import {InputFilter} from "../../js/ui/input_filter/InputFilter";
+import {Tracer} from "./Tracer";
+import {Button} from "reactstrap";
+import {TimesIcon} from "../../js/ui/icons/FixedWidthIcons";
 
 const styles = {
     swatch: {
@@ -255,11 +255,21 @@ export class App<P> extends React.Component<{}, IAppState> {
 
         return (
 
-            <div>
+            <div className="p-1">
 
-                <UIComponents/>
+                <Button className="mt-auto mb-auto text-secondary p-0 no-focus"
+                        style={{outline: 'none', boxShadow: 'none'}}
+                        onClick={() => console.log("FIXME clear")}
+                        color="clear">
 
-                {/*<Suggestions category={"foo"} title={"bar"}/>*/}
+                    <TimesIcon/>
+
+                </Button>
+
+                <InputFilter placeholder="Filter by title"/>
+
+                {/*<Tracer id="1"/>*/}
+                {/*<Tracer id="2"/>*/}
 
                 {/*<WhatsNewModal/>*/}
 
