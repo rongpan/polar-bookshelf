@@ -1,6 +1,5 @@
 const fs = require('fs');
 const libpath = require('path');
-const workbox = require("workbox");
 
 const globDirectory = 'dist/public';
 
@@ -169,13 +168,15 @@ module.exports = {
     maximumFileSizeToCacheInBytes: 15000000,
     runtimeCaching: [{
         urlPattern: /.*/,
-        handler: 'CacheFirst'
+        handler: 'CacheFirst',
+        options: {
+            cacheName: "default-cache",
+            expiration: {
+                // Only cache requests for a week
+                maxAgeSeconds: 7 * 24 * 60 * 60,
+            }
+        }
     }],
-    // TODO: we can u
-    expiration: {
-        // Only cache requests for a week
-        maxAgeSeconds: 7 * 24 * 60 * 60,
-    }
     // plugins: [
     //     new workbox_expiration.Plugin({
     //         // Only cache requests for a week
