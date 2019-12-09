@@ -152,12 +152,11 @@ console.log("====");
 // networkOnly:
 // cacheOnly:
 
-// TODO: I think we want stale-while-revalidate so we cache , then attempt to update
-// the cache in the background.
+// I think this is our best strategy, to do cache first and then expire
+// everything after 1x week.
 //
-// plan B , for now, is to just allow users to cache for 7 days and then we will roll out a new version eventually.
-
-// FIXME: maybe I need to skip waiting so that the new version is installed?
+// TODO: the problem is that we're going to have an issue with constantly
+// flushing and re-downloading in the foreground after a week.
 
 module.exports = {
     globDirectory: 'dist/public',
@@ -177,12 +176,6 @@ module.exports = {
             }
         }
     }],
-    // plugins: [
-    //     new workbox_expiration.Plugin({
-    //         // Only cache requests for a week
-    //         maxAgeSeconds: 7 * 24 * 60 * 60,
-    //     }),
-    // ],
     swDest: 'dist/public/service-worker.js',
     modifyURLPrefix: {
         // Remove a '/dist' prefix from the URLs:
