@@ -1,9 +1,13 @@
 import * as React from 'react';
 import {Button, Form, FormGroup, FormText, Input, Label} from "reactstrap";
+import {ColorButton} from "../../js/ui/colors/ColorButton";
 
 const ExampleForm = () => {
+
+
     return (
         <Form>
+            <h1>Forms</h1>
             <FormGroup>
                 <Label for="exampleEmail">Email</Label>
                 <Input type="email" name="email" id="exampleEmail" placeholder="with a placeholder" />
@@ -100,6 +104,44 @@ const ExampleButtons = () => {
 
 };
 
+const Colors = () => {
+
+    interface ColorProps {
+        readonly name: string;
+    }
+
+    const Color = (props: ColorProps) =>
+        <div style={{display: 'flex'}} className="mt-1">
+            <div style={{
+                    width: '20em',
+                 }}>
+                {props.name}
+            </div>
+
+            <div style={{
+                    width: '15em',
+                    backgroundColor: 'var(--' + props.name + ')'
+                 }}>
+                &nbsp;
+            </div>
+        </div>;
+
+    return <div>
+
+        <h1>Colors</h1>
+        <Color name="primary-background-color"/>
+        <Color name="primary-text-color"/>
+        <Color name="selected-background-color"/>
+        <Color name="selected-text-color"/>
+        <Color name="success"/>
+        <Color name="primary"/>
+        <Color name="secondary"/>
+        <Color name="info"/>
+        <Color name="danger"/>
+    </div>;
+
+};
+
 const ExampleBorders = () => {
 
     return <div>
@@ -115,7 +157,9 @@ export class UIComponents extends React.Component<IProps, IState> {
         return (
 
             <div className="m-1">
-                <h1>Forms</h1>
+
+                <Colors/>
+
                 <ExampleForm/>
 
                 <ExampleButtons/>
