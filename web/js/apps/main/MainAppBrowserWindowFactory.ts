@@ -1,7 +1,8 @@
-import {BrowserWindow, nativeImage, shell, DownloadItem, WebContents, screen} from "electron";
+import {BrowserWindow, screen, shell} from "electron";
 import {Logger} from 'polar-shared/src/logger/Logger';
 import {ResourcePaths} from '../../electron/webresource/ResourcePaths';
 import {AuthHosts} from "./AuthHosts";
+import {ElectronUserAgents} from "../electron_browser/ElectronUserAgents";
 
 const log = Logger.create();
 
@@ -10,6 +11,8 @@ const HEIGHT = 1100 * 1.2;
 const SIDEBAR_BUFFER = 100;
 
 const DEFAULT_URL = ResourcePaths.resourceURLFromRelativeURL('./apps/home/default.html');
+
+export const MAIN_SESSION_PARTITION_NAME = 'persist:polar-app';
 
 // TODO: files in the root are always kept in the package we can just load
 // this as a native_image directly.
@@ -52,7 +55,7 @@ export const BROWSER_WINDOW_OPTIONS: Electron.BrowserWindowConstructorOptions = 
          * that we keep user cookies including Google Analytics cookies.
          */
         //
-        partition: 'persist:polar-app'
+        partition: MAIN_SESSION_PARTITION_NAME
 
     }
 
@@ -62,6 +65,8 @@ export class MainAppBrowserWindowFactory {
 
     public static createWindow(browserWindowOptions: Electron.BrowserWindowConstructorOptions = BROWSER_WINDOW_OPTIONS,
                                url = DEFAULT_URL): Promise<BrowserWindow> {
+
+        // ElectronUserAgents.registerUserAgentHandler(MAIN_SESSION_PARTITION_NAME);
 
         browserWindowOptions = Object.assign({}, browserWindowOptions);
 
@@ -119,9 +124,14 @@ export class MainAppBrowserWindowFactory {
             if (browserWindow.webContents) {
 
                 browserWindow.webContents.clearHistory();
-                browserWindow.webContents.session.clearCache(() => {
+
+                const clearCache = async () => {
+                    await browserWindow.webContents.session.clearCache();
                     browserWindow.destroy();
-                });
+                };
+
+                clearCache()
+                    .catch(err => log.error("Unable to close window: ", err));
 
             }
 
@@ -163,9 +173,12 @@ export class MainAppBrowserWindowFactory {
 
         });
 
+        // compute the userAgent that we should be using for the renderer
+        const userAgent = ElectronUserAgents.computeUserAgentFromWebContents(browserWindow.webContents);
+
         log.info("Loading URL: " + url);
-        browserWindow.loadURL(url)
-            .catch(err => log.error("Cloud not load URL ", err, url));
+        browserWindow.loadURL(url, {userAgent})
+            .catch(err => log.error("Could not load URL ", err, url));
 
         return new Promise<BrowserWindow>(resolve => {
 
@@ -175,7 +188,7 @@ export class MainAppBrowserWindowFactory {
                 // it persists teh zoom factor between restarts and restores
                 // the zoom factor for the user but this can break / confuse
                 // PHZ loading so we always want them to start at 1.0
-                browserWindow.webContents.setZoomFactor(1.0);
+                browserWindow.webContents.zoomFactor = 1.0;
 
                 browserWindow.show();
 

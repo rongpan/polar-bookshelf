@@ -191,8 +191,9 @@ export class RepositoryApp {
 
         const renderDefaultScreenByDevice = () => {
 
-            if (Devices.get() === 'phone' || Platforms.isMobile()) {
-                // for tablets or phones we need to use the annotation repo screen
+            if (['phone', 'tablet'].includes(Devices.get())) {
+                // for tablets or phones we need to use the annotation repo screen as the other UI
+                // isn't ready yet.
                 return renderAnnotationRepoScreen();
             }
 
@@ -286,6 +287,7 @@ export class RepositoryApp {
             return (<GroupHighlightScreen persistenceLayerProvider={persistenceLayerProvider}
                                           persistenceLayerController={persistenceLayerController}/>);
         };
+
         const onNavChange = () => {
 
             try {
@@ -323,6 +325,8 @@ export class RepositoryApp {
             throw new Error("No root element to render to");
         }
 
+        // TODO: splashes renders far far far too late and there's a delay.
+
         ReactDOM.render(
 
             <div style={{height: '100%'}}>
@@ -332,8 +336,6 @@ export class RepositoryApp {
                 <Splashes persistenceLayerManager={this.persistenceLayerManager}/>
 
                 <SyncBar progress={syncBarProgress}/>
-
-                <RepositoryTour/>
 
                 <BrowserRouter>
 
@@ -358,6 +360,7 @@ export class RepositoryApp {
                         <Route exact path='/#premium' render={premiumScreen}/>
 
                         <Route path='/group/:group/highlights' render={renderGroupHighlightsScreen}/>
+
                         <Route path='/group/:group/docs' render={renderGroupScreen}/>
 
                         <Route path='/group/:group/highlight/:id' render={renderGroupHighlightScreen}/>

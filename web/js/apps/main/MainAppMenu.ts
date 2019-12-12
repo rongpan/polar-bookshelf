@@ -469,7 +469,7 @@ export class MainAppMenu {
             message: this.createAboutMessage(),
             detail: '',
             // icon: APP_ICON
-        });
+        }).catch(err => log.error("Unable to show dialog: ", err));
 
     }
 
@@ -482,3 +482,4 @@ export enum MainMenuMode {
     DOC_REPO_APP,
     VIEWER_APP
 }
+

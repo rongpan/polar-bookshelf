@@ -3,6 +3,9 @@ import {DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown} from '
 import {ExportFormat} from '../../metadata/exporter/Exporters';
 import {remote} from 'electron';
 import {AppRuntime} from '../../AppRuntime';
+import {Logger} from "polar-shared/src/logger/Logger";
+
+const log = Logger.create();
 
 export class ExportButton extends React.Component<IProps, IState> {
 
@@ -44,9 +47,7 @@ export class ExportButton extends React.Component<IProps, IState> {
     }
 
     private doExport(format: ExportFormat) {
-
         this.props.onExport(format);
-
     }
 
 }
