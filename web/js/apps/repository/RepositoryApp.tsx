@@ -60,6 +60,7 @@ import {AccountProvider} from "../../accounts/AccountProvider";
 import {PersistenceLayerApp} from "../../../../apps/repository/js/persistence_layer/PersistenceLayerApp";
 import {UIComponents} from "../../../spectron0/ui-components/UIComponents";
 import {UIComponentsScreen} from "../../../../apps/repository/js/ui-components/UIComponentsScreen";
+import {LoadingSplash} from "../../ui/loading_splash/LoadingSplash";
 
 const log = Logger.create();
 
@@ -77,6 +78,8 @@ export class RepositoryApp {
     public async start() {
 
         log.info("Running with Polar version: " + Version.get());
+
+        renderLoadingSplash();
 
         const persistenceLayerProvider = () => this.persistenceLayerManager.get();
         const persistenceLayerController = this.persistenceLayerManager;
@@ -102,7 +105,7 @@ export class RepositoryApp {
 
         const platform = Platforms.get();
 
-        log.notice("Running on platform: " + platform);
+        log.notice("Running on platform: " + Platforms.toSymbol(platform));
 
         if (authStatus !== 'needs-authentication') {
 
@@ -321,13 +324,10 @@ export class RepositoryApp {
         Accounts.listenForPlanUpgrades()
             .catch(err => log.error("Unable to listen for plan upgrades: ", err));
 
-        const rootElement = document.getElementById('root') as HTMLElement;
-
-        if (! rootElement) {
-            throw new Error("No root element to render to");
-        }
 
         // TODO: splashes renders far far far too late and there's a delay.
+
+        const rootElement = getRootElement();
 
         ReactDOM.render(
 
@@ -348,8 +348,6 @@ export class RepositoryApp {
                         <Route exact path='/#(logout|overview|login|configured|invite|premium)?' render={renderDocRepoScreen}/>
 
                         <Route exact path='/#community' render={renderCommunityScreen}/>
-
-                        <Route exact path='/#stats' render={renderStatsScreen}/>
 
                         <Route exact path='/#logs' render={renderLogsScreen}/>
 
@@ -376,7 +374,19 @@ export class RepositoryApp {
 
                         <Route exact path='/groups/create' render={renderCreateGroupScreen}/>
 
-                        <Route exact path='/#annotations' component={renderAnnotationRepoScreen} />
+                        <Route exact path={['/#stats', '/stats']} render={renderStatsScreen}/>
+
+                        <Route exact
+                               path={
+                                   [
+                                       '/#annotations',
+                                       '/annotations',
+                                       '/annotations#start-review',
+                                       '/annotations#review-flashcards',
+                                       '/annotations#review-reading'
+                                   ]
+                               }
+                               component={renderAnnotationRepoScreen} />
 
                         <Route exact path='/' component={renderDefaultScreenByDevice}/>
 
@@ -400,6 +410,8 @@ export class RepositoryApp {
 
         );
 
+        // TODO: return authStatus as an object and then do authState.authenticated
+        // and unauthenticated so that if statements are cleaner
         if (authStatus !== 'needs-authentication') {
 
             this.handleRepoDocInfoEvents();
@@ -559,3 +571,22 @@ export class RepositoryApp {
 
 }
 
+function getRootElement() {
+
+    const rootElement = document.getElementById('root') as HTMLElement;
+
+    if (! rootElement) {
+        throw new Error("No root element to render to");
+    }
+
+    return rootElement;
+
+}
+
+function renderLoadingSplash() {
+
+    const rootElement = getRootElement();
+
+    ReactDOM.render(<LoadingSplash/>, rootElement);
+
+}

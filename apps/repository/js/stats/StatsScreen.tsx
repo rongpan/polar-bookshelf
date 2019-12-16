@@ -6,19 +6,19 @@ import TopTagsTable from './TopTagsTable';
 import {MessageBanner} from '../MessageBanner';
 import {FixedNav, FixedNavBody} from '../FixedNav';
 import {RepoHeader} from '../repo_header/RepoHeader';
-import {
-    PersistenceLayerController,
-    PersistenceLayerManager
-} from '../../../../web/js/datastore/PersistenceLayerManager';
+import {PersistenceLayerController} from '../../../../web/js/datastore/PersistenceLayerManager';
 import ReadingProgressTable from './ReadingProgressTable';
 import {SpacedRepQueueChart} from "./SpacedRepQueueChart";
 import {ReviewerTasks} from "../reviewer/ReviewerTasks";
 import {Logger} from "polar-shared/src/logger/Logger";
 import {PremiumFeature} from "../../../../web/js/ui/premium_feature/PremiumFeature";
-import {Devices} from "../../../../web/js/util/Devices";
 import {IDocInfo} from "polar-shared/src/metadata/IDocInfo";
 import {RepoFooter} from "../repo_footer/RepoFooter";
 import {PersistenceLayerProvider} from "../../../../web/js/datastore/PersistenceLayer";
+import {DeviceRouter} from "../../../../web/js/ui/DeviceRouter";
+import {Row} from "../../../../web/js/ui/layout/Row";
+import {NavIcon} from "../nav/NavIcon";
+import {CloudAuthButton} from "../../../../web/js/ui/cloud_auth/CloudAuthButton";
 
 const log = Logger.create();
 
@@ -120,11 +120,10 @@ export default class StatsScreen extends React.Component<IProps, IState> {
 
     public render() {
 
-        if (Devices.get() === 'phone') {
-            return <StatsScreen.Phone {...this.props}/>;
-        } else {
-            return <StatsScreen.Default {...this.props}/>;
-        }
+        const desktop = <StatsScreen.Desktop {...this.props}/>;
+        const phoneAndTablet = <StatsScreen.PhoneAndTablet {...this.props}/>;
+
+        return <DeviceRouter desktop={desktop} phone={phoneAndTablet} tablet={phoneAndTablet}/>;
 
     }
 
@@ -133,31 +132,49 @@ export default class StatsScreen extends React.Component<IProps, IState> {
             .map(current => current.docInfo);
     }
 
-    public static Phone = class extends StatsScreen {
+    public static PhoneAndTablet = class extends StatsScreen {
         public render() {
             return <FixedNav id="doc-repository" className="statistics-view">
 
                 <header>
 
-                    <RepoHeader persistenceLayerProvider={this.props.persistenceLayerProvider}
-                                persistenceLayerController={this.props.persistenceLayerController}/>
+                    <Row id="header-filter" className="border-bottom p-1 mt-1">
 
-                    <MessageBanner/>
+                        <Row.Main>
+
+                            <div style={{display: 'flex'}}>
+
+                                <div className="mr-1">
+                                    <NavIcon/>
+                                </div>
+
+                            </div>
+
+                        </Row.Main>
+
+                        <Row.Right>
+                            <CloudAuthButton persistenceLayerController={this.props.persistenceLayerController} />
+                        </Row.Right>
+
+                    </Row>
 
                 </header>
 
-                <FixedNavBody className="p-1">
+                <FixedNav.Body className="p-1">
                     <div className="container p-0">
                         <ReviewerStats isReviewer={this.state.isReviewer}/>
                     </div>
-                </FixedNavBody>
+                </FixedNav.Body>
 
-                <RepoFooter/>
+                <FixedNav.Footer>
+                    <RepoFooter/>
+                </FixedNav.Footer>
+
             </FixedNav>;
         }
     };
 
-    public static Default = class extends StatsScreen {
+    public static Desktop = class extends StatsScreen {
 
         public render() {
 

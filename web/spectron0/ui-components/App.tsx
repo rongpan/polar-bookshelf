@@ -1,20 +1,16 @@
 import * as React from 'react';
 import {Tags} from 'polar-shared/src/tags/Tags';
-import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
 import {Group} from "../../js/datastore/sharing/db/Groups";
 import {ISODateTimeStrings} from "polar-shared/src/metadata/ISODateTimeStrings";
 import {TasksCalculator} from "polar-spaced-repetition/src/spaced_repetition/scheduler/S2Plus/TasksCalculator";
 import {Lorems} from "polar-shared/src/util/Lorems";
 import {Task} from "polar-spaced-repetition-api/src/scheduler/S2Plus/S2Plus";
 import {FontAwesomeIcon} from "../../js/ui/fontawesome/FontAwesomeIcon";
-import {InputFilter} from "../../js/ui/input_filter/InputFilter";
-import {Tracer} from "./Tracer";
-import {Button} from "reactstrap";
-import {TimesIcon} from "../../js/ui/icons/FixedWidthIcons";
-import {FloatingActionButton} from "./mobile/FloatingActionButton";
-import {LoadingMessages} from "../../js/ui/loading_splash/LoadingMessages";
-import {LoadingSplash} from "../../js/ui/loading_splash/LoadingSplash";
-import {IndeterminateProgressBar} from "../../js/ui/progress_bar/IndeterminateProgressBar";
+import {Link} from "react-router-dom";
+import {Lightbox} from "../../js/ui/util/Lightbox";
+import {Dialogs} from "../../js/ui/dialogs/Dialogs";
+import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
+import {ActionButton} from "../../js/ui/mobile/ActionButton";
 
 const styles = {
     swatch: {
@@ -99,15 +95,15 @@ export class App<P> extends React.Component<{}, IAppState> {
         //     }
         // };
 
-        // Dialogs.confirm({title: 'hello world',
-        //                  subtitle: 'Some really bad stuff is happening right now which you should probably look into.',
-        //                  onConfirm: NULL_FUNCTION,
-        //                  type: 'danger'});
+        Dialogs.confirm({title: 'hello world',
+                         subtitle: 'Some really bad stuff is happening right now which you should probably look into.',
+                         onConfirm: NULL_FUNCTION,
+                         type: 'danger'});
         //
         // Dialogs.prompt({title: 'New folder: ',
         //                 onCancel: NULL_FUNCTION,
         //                 onDone: NULL_FUNCTION});
-
+        //
         // PreviewWarnings.createDialog(NULL_FUNCTION);
 
         const tags = [
@@ -257,13 +253,133 @@ export class App<P> extends React.Component<{}, IAppState> {
             </div>;
         };
 
+        const StartReview = () => <div>start review</div>;
+
+        const DefaultContent = () => <div>
+            <Link to={{hash: '#start-review'}}>
+                start review with router
+            </Link>
+
+        </div>;
+
         return (
 
             <div className="p-1">
 
+                {/*<Lightbox>*/}
+                {/*    asdf*/}
+                {/*</Lightbox>*/}
+
+                {/*<div style={{*/}
+                {/*    position: 'absolute',*/}
+                {/*    top: 0,*/}
+                {/*    left: 0,*/}
+                {/*    width: '100%',*/}
+                {/*    height: '100%',*/}
+                {/*    opacity: 1.0,*/}
+                {/*    zIndex: 10000*/}
+                {/*}}>*/}
+                {/*    asdfasdfasdf*/}
+
+                {/*</div>*/}
+
+                {/*<div style={{*/}
+                {/*        position: 'absolute',*/}
+                {/*        top: 0,*/}
+                {/*        left: 0,*/}
+                {/*        width: '100%',*/}
+                {/*        height: '100%',*/}
+                {/*        backgroundColor: 'rgba(0, 0, 0, 0.7)',*/}
+                {/*        zIndex: 9999*/}
+                {/*    }}>*/}
+                {/*</div>*/}
+
+                {/*<div style={{*/}
+                {/*    position: 'absolute',*/}
+                {/*    top: 0,*/}
+                {/*    left: 0,*/}
+                {/*    width: '100%',*/}
+                {/*    height: '100%',*/}
+                {/*    backgroundColor: 'var(--primary-background-color)',*/}
+                {/*    opacity: 1.0,*/}
+                {/*    zIndex: 10000*/}
+                {/*}}>*/}
+                {/*    asdfasdfasdf*/}
+
+                {/*</div>*/}
+
+
                 {/*<IndeterminateProgressBar/>*/}
 
                 {/*<LoadingSplash/>*/}
+
+                {/*<BrowserRouter>*/}
+
+                {/*    <Switch location={ReactRouters.createLocationWithPathnameHash()}>*/}
+
+                {/*        <Route path='.*#start-review' component={StartReview}/>*/}
+                {/*        /!*<Route component={DefaultContent}/>*!/*/}
+
+                {/*    </Switch>*/}
+
+                {/*</BrowserRouter>*/}
+
+                {/*<ActionButton icon="fas fa-graduation-cap" onClick={NULL_FUNCTION}/>*/}
+                <ActionButton icon="fas fa-graduation-cap" onClick={NULL_FUNCTION}/>
+
+                {/*<FloatingActionButton icon="fas fa-graduation-cap" onClick={NULL_FUNCTION}/>*/}
+
+                {/*<div className="border"*/}
+                {/*     style={{*/}
+                {/*         width: 150,*/}
+                {/*         height: 150,*/}
+                {/*         display: 'table-cell',*/}
+                {/*         borderRadius: '50%',*/}
+                {/*         textAlign: 'center',*/}
+                {/*         verticalAlign: 'middle'*/}
+                {/*     }}>*/}
+
+                {/*    asdfasdf*/}
+
+                {/*</div>*/}
+
+                {/*<hr/>*/}
+
+                {/*<div className="text-center">*/}
+
+                {/*    <Button color="clear"*/}
+                {/*            style={{*/}
+                {/*                padding: 0,*/}
+                {/*                alignItems: 'center'*/}
+                {/*            }}*/}
+                {/*            className="btn-no-outline">*/}
+
+                {/*        <CircularIcon icon="fas fa-graduation-cap" />*/}
+
+                {/*    </Button>*/}
+
+                {/*    <div className="mt-1 text-md">*/}
+                {/*        Reading*/}
+                {/*    </div>*/}
+                {/*</div>*/}
+
+                {/*<hr/>*/}
+                {/*<div style={{*/}
+                {/*        display: 'flex',*/}
+                {/*        flexDirection: 'column',*/}
+                {/*        alignItems: 'center'*/}
+                {/*     }}>*/}
+
+                {/*    <CircularIcon icon="fas fa-graduation-cap" />*/}
+
+                {/*    <div className="mt-1">*/}
+                {/*        Start Reading*/}
+                {/*    </div>*/}
+
+                {/*</div>*/}
+                {/*<hr/>*/}
+
+                {/*<StartReviewBottomSheet onReading={NULL_FUNCTION} onFlashcards={NULL_FUNCTION}/>*/}
 
                 {/*<Button className="mt-auto mb-auto text-secondary p-0 no-focus"*/}
                 {/*        style={{outline: 'none', boxShadow: 'none'}}*/}
@@ -276,7 +392,7 @@ export class App<P> extends React.Component<{}, IAppState> {
 
                 {/*<InputFilter placeholder="Filter by title"/>*/}
 
-                <FloatingActionButton onClick={NULL_FUNCTION} style={{paddingBottom: '4.5em'}}/>
+                {/*<FloatingActionButton onClick={NULL_FUNCTION} style={{paddingBottom: '4.5em'}}/>*/}
 
                 {/*    <h4>Normal Circle Buttons</h4>*/}
                 {/*    <button type="button" className="btn btn-default btn-circle"><i className="fa fa-check"></i>*/}

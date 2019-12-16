@@ -26,7 +26,7 @@ const Styles: IStyleMap = {
 
 /**
  */
-export class NavLogo extends React.PureComponent<IProps, IState> {
+export class NavIcon extends React.PureComponent<IProps, IState> {
 
     constructor(props: IProps, context: any) {
         super(props, context);
@@ -37,7 +37,7 @@ export class NavLogo extends React.PureComponent<IProps, IState> {
         const createLink = () => {
 
             if (Platforms.isMobile()) {
-                return '/#annotations';
+                return '/annotations';
             } else {
                 return '/';
             }
@@ -56,14 +56,13 @@ export class NavLogo extends React.PureComponent<IProps, IState> {
             <div style={Styles.parent}>
                 <div style={Styles.child}>
                     <NavLink>
-                        <div className="invert-parent">
-                            <img src="/apps/repository/img/icon.svg" height="25" alt="Polar"/>
-                        </div>
+                        <img src="/icon.svg"
+                             className="mt-auto mb-auto"
+                             style={{
+                                 height: '35px'
+                             }}
+                             alt="Polar"/>
                     </NavLink>
-                </div>
-
-                <div style={Styles.child}>
-                    <div className="" style={Styles.textLogo}>POLAR</div>
                 </div>
             </div>
         );

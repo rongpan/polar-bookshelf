@@ -1,5 +1,20 @@
 
-- usability: I give up. You guys win. Spaces " " and hyphens "-" are now supported in tags and folders :)
+- Dramatically improved our mobile and tablet apps.
+
+- Fixed bug where PHZ files were breaking with iframes that were invalid.
+
+- Changed #annotations and #stats URLs so that they are /annotations and /stats 
+  as we're going to migrate to anchors for sub-screens for history.
+
+- Fixed privacy policy URL in login page
+
+- Tags can now contain spaces and hyphens
+
+- Semaphore now used for Windows disk writes.
+
+- Removed some unused libraries
+
+- Upgrades to latest firebase
 
 # 1.70.4
 

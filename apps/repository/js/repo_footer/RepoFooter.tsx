@@ -10,15 +10,19 @@ export class RepoFooter extends React.PureComponent<IProps> {
     public render() {
 
         const Delegate =
-            <footer className="border-top">
+            <footer className="border-top text-lg"
+                    style={{
+                        width: '100%',
+                        backgroundColor: 'var(--primary-background-color)',
+                    }}>
 
                 <div className=""
                      style={{
                          display: 'flex'
                      }}>
 
-                    <BottomNavButton pathname="/" hash="#annotations" icon="fas fa-home"/>
-                    <BottomNavButton pathname="/" hash="#stats" icon="fas fa-chart-line"/>
+                    <BottomNavButton pathname="/annotations" icon="fas fa-home" replace={true}/>
+                    <BottomNavButton pathname="/stats" icon="fas fa-chart-line" replace={true}/>
 
                 </div>
 

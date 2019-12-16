@@ -1,6 +1,7 @@
 import * as React from 'react';
-import {SplashBox} from "./SplashBox";
 import {IndeterminateProgressBar} from "../progress_bar/IndeterminateProgressBar";
+import {VerticalCenterBox} from "./VerticalCenterBox";
+import {LogData} from "./LogMessagesDataLoader";
 
 export class LoadingMessages extends React.Component<IProps, IState> {
 
@@ -18,29 +19,38 @@ export class LoadingMessages extends React.Component<IProps, IState> {
         //
         // };
 
+
+        const MessagesBody = (): any => {
+
+            const messages = this.props.logData?.messages || [];
+
+            return messages.map(message => <div key={message.id}>{message.msg}</div>);
+
+        };
+
         return (
-            <SplashBox paddingTop="255px">
-                <div className="pt-5" style={{width: '350px'}}>
+            <VerticalCenterBox paddingTop="110px">
+                <div style={{
+                        width: '350px'
+                     }}
+                     className="ml-auto mr-auto">
 
-                    <IndeterminateProgressBar/>
+                    <div className="mt-0" >
+                        <IndeterminateProgressBar/>
+                    </div>
 
-                    <div style={{opacity: 0.33}}>Connecting to firebase...</div>
-                    <div style={{opacity: 0.66}}>Initializing datastore...</div>
-                    <div>Loading UI...</div>
+                    <div className="mt-3" >
+                        <MessagesBody/>
+                    </div>
                 </div>
-            </SplashBox>
+            </VerticalCenterBox>
         );
     }
 
 }
 
-export interface LoadingMsg {
-    readonly message: string;
-}
-
-export type LoadingMsgs = [LoadingMsg, LoadingMsg?, LoadingMsg?];
-
 export interface IProps {
+    readonly logData: LogData | undefined;
 }
 
 export interface IState {
