@@ -1,7 +1,8 @@
 
-- Dramatically improved our mobile and tablet apps.
+- Dramatically improved our mobile and tablet apps.  They now behave more like 
+  native apps including proper support for tablets. 
 
-- Fixed bug where PHZ files were breaking with iframes that were invalid.
+- Fixed bug where PHZ files (captured web pages) were breaking with iframes that were invalid.
 
 - Changed #annotations and #stats URLs so that they are /annotations and /stats 
   as we're going to migrate to anchors for sub-screens for history.
@@ -10,11 +11,11 @@
 
 - Tags can now contain spaces and hyphens
 
-- Semaphore now used for Windows disk writes.
+- Semaphore now used for Windows disk writes to prevent race conditions within IO.
 
-- Removed some unused libraries
+- Removed some unused node libraries
 
-- Upgrades to latest firebase
+- Upgrades to latest firebase libraries
 
 # 1.70.4
 
