@@ -20,11 +20,20 @@ export class FirebaseDatastorePrefs extends DictionaryPrefs implements Persisten
 
     public async init() {
 
+        console.log("FIXME 21");
+
         const userPref = await UserPrefs.get();
+
+        console.log("FIXME 22");
+
         this.update(userPref.toPrefDict());
 
+        console.log("FIXME 23");
+
         this.firestore = await Firestore.getInstance();
+        console.log("FIXME 24");
         this.user = (await Firebase.currentUser())!;
+        console.log("FIXME 25");
 
         this.initLatch.resolve(true);
 
@@ -32,11 +41,17 @@ export class FirebaseDatastorePrefs extends DictionaryPrefs implements Persisten
 
     public onSnapshot(onNext: UserPrefCallback, onError: ErrorHandlerCallback = NULL_FUNCTION): SnapshotUnsubscriber {
 
+        console.log("FIXME 31");
+
         const snapshotUnsubscriberLatch = new Latch<SnapshotUnsubscriber>();
 
         const doHandle = async () => {
 
+            console.log("FIXME 32");
+
             await this.initLatch.get();
+
+            console.log("FIXME 33");
 
             return UserPrefs.onSnapshot(this.firestore!, this.user!.uid, onNext, onError);
 

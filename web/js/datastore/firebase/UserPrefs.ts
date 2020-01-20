@@ -38,24 +38,38 @@ export class UserPrefs {
         const ref = firestore.collection(this.COLLECTION).doc(uid);
 
         const handleSnapshot = (snapshot: DocumentSnapshot) => {
+            console.log("FIXME: 42");
+
             const data = <UserPref | undefined> snapshot.data();
             onSnapshot(data);
         };
 
+        console.log("FIXME: 41");
         return ref.onSnapshot(handleSnapshot, onError);
 
     }
     public static async set(prefs: PersistentPrefs) {
 
+        console.log("FIXME: 51");
+
         const uid  = await this.getUserID();
+
+        console.log("FIXME: 52");
+
         const ref = await Collections.createRef(this.COLLECTION, uid);
+
+        console.log("FIXME: 53");
 
         const userPref: UserPref = {
             uid,
             value: prefs.toPrefDict()
         };
 
+        console.log("FIXME: 54");
+
         await ref.set(userPref);
+
+        console.log("FIXME: 55");
 
     }
 

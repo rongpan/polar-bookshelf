@@ -37,19 +37,22 @@ export class Accounts {
 
     public static async get(): Promise<Account | undefined> {
 
-        const ref = await this.ref();
-
-        if (! ref) {
-            return undefined;
-        }
-
-        const snapshot = await DocumentReferences.get(ref, {source: 'server-then-cache'});
-
-        if (! snapshot.exists) {
-            return undefined;
-        }
-
-        return <Account> snapshot.data();
+        return undefined;
+        //
+        // const ref = await this.ref();
+        //
+        // if (! ref) {
+        //     return undefined;
+        // }
+        //
+        // const snapshot = await DocumentReferences.get(ref, {source: 'server-then-cache'});
+        // // const snapshot = await DocumentReferences.get(ref, {source: 'cache'});
+        //
+        // if (! snapshot.exists) {
+        //     return undefined;
+        // }
+        //
+        // return <Account> snapshot.data();
 
     }
 

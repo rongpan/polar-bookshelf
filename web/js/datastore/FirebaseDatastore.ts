@@ -91,6 +91,8 @@ export class FirebaseDatastore extends AbstractDatastore implements Datastore, W
     public async init(errorListener: ErrorListener = NULL_FUNCTION,
                       opts: DatastoreInitOpts = {}): Promise<InitResult> {
 
+        console.log("FIXME: 01");
+
         if (this.initialized) {
             return {};
         }
@@ -102,11 +104,17 @@ export class FirebaseDatastore extends AbstractDatastore implements Datastore, W
         this.firestore = await Firestore.getInstance();
         this.storage = firebase.storage();
 
+        console.log("FIXME: 02");
+
         await FirebaseDatastores.init();
+
+        console.log("FIXME: 03");
 
         await this.prefs.init();
 
         if (opts.noInitialSnapshot) {
+            console.log("FIXME: 06 (no initial snapshot)");
+
             log.debug("Skipping initial snapshot");
         } else {
 
@@ -116,9 +124,15 @@ export class FirebaseDatastore extends AbstractDatastore implements Datastore, W
 
             const snapshotListener = async (event: DocMetaSnapshotEvent) => this.docMetaSnapshotEventDispatcher.dispatchEvent(event);
 
+            console.log("FIXME: 04");
+
             this.primarySnapshot = await this.snapshot(snapshotListener, errorListener);
 
+            console.log("FIXME: 05");
+
         }
+
+        console.log("FIXME: 07");
 
         this.initialized = true;
 
@@ -128,6 +142,8 @@ export class FirebaseDatastore extends AbstractDatastore implements Datastore, W
 
     public async snapshot(docMetaSnapshotEventListener: DocMetaSnapshotEventListener,
                           errorListener: ErrorListener = NULL_FUNCTION): Promise<SnapshotResult> {
+
+        console.log("FIXME1");
 
         // setup the initial snapshot so that we query for the users existing
         // data...
@@ -156,9 +172,13 @@ export class FirebaseDatastore extends AbstractDatastore implements Datastore, W
             committed: 0
         };
 
+        console.log("FIXME2");
+
         const onNextForSnapshot = (snapshot: firebase.firestore.QuerySnapshot) => {
 
             try {
+
+                console.log("FIXME3");
 
                 const consistency = this.toConsistency(snapshot);
                 const batchID = batchIDs[consistency];
@@ -182,6 +202,8 @@ export class FirebaseDatastore extends AbstractDatastore implements Datastore, W
 
         if (this.preferredSource() === 'cache') {
 
+            console.log("FIXME4");
+
             // Try to get the FIRST snapshot from the cache if possible and then
             // continue after that working with server snapshots and updated
             // data
@@ -199,6 +221,8 @@ export class FirebaseDatastore extends AbstractDatastore implements Datastore, W
             }
 
         }
+
+        console.log("FIXME5");
 
         const unsubscribe =
             query.onSnapshot({includeMetadataChanges: true}, onNextForSnapshot, onSnapshotError);
@@ -324,7 +348,7 @@ export class FirebaseDatastore extends AbstractDatastore implements Datastore, W
                 // can resolve it from cache.
 
                 const cachePromise = ref.get({ source: 'cache' });
-                const serverPromise = ref.get({ source: 'server' });
+                const serverPromise = ref.get({ source: 'cache' });
 
                 return await Promises.any(cachePromise, serverPromise);
 
@@ -639,7 +663,7 @@ export class FirebaseDatastore extends AbstractDatastore implements Datastore, W
 
             const createRecordPermission = async (): Promise<RecordPermission> => {
 
-                const docPermission = await DocPermissions.get(id, {source: 'server'});
+                const docPermission = await DocPermissions.get(id, {source: 'cache'});
 
                 if (docPermission) {
                     return {
@@ -952,7 +976,7 @@ export class FirebaseDatastore extends AbstractDatastore implements Datastore, W
 
                 log.warn("No entry for fingerprint (fetching directly from server): " + fingerprint);
 
-                return await datastore.getDocMeta(fingerprint, {preferredSource: 'server'});
+                return await datastore.getDocMeta(fingerprint, {preferredSource: 'cache'});
 
             }
 
@@ -969,7 +993,7 @@ export class FirebaseDatastore extends AbstractDatastore implements Datastore, W
                 .collection(DatastoreCollection.DOC_META)
                 .where('uid', '==', uid);
 
-            const source = useCache ? 'cache' : 'server';
+            const source = useCache ? 'cache' : 'cache';
 
             const stopwatch = Stopwatches.create();
             const snapshot = await query.get({source});
