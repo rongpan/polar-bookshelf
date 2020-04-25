@@ -4,7 +4,15 @@ import {FixedNav, FixedNavBody} from '../FixedNav';
 import {RepoHeader} from '../repo_header/RepoHeader';
 import {PersistenceLayerProvider} from "../../../../web/js/datastore/PersistenceLayer";
 import {PersistenceLayerController} from "../../../../web/js/datastore/PersistenceLayerManager";
-import { accounts } from 'polar-accounts/src/accounts';
+
+export interface IProps {
+    readonly persistenceLayerProvider: PersistenceLayerProvider;
+    readonly persistenceLayerController: PersistenceLayerController;
+}
+
+export interface IState {
+
+}
 
 export class SupportScreen extends React.Component<IProps, IState> {
 
@@ -34,7 +42,7 @@ export class SupportScreen extends React.Component<IProps, IState> {
                     <div className="row">
 
                         <div className="col-lg-12 w-100 pt-4">
-                            <SupportContent plan={this.props.plan}/>
+                            <SupportContent/>
                         </div>
                     </div>
 
@@ -44,16 +52,5 @@ export class SupportScreen extends React.Component<IProps, IState> {
 
         );
     }
-
-}
-
-export interface IProps {
-    readonly persistenceLayerProvider: PersistenceLayerProvider;
-    readonly persistenceLayerController: PersistenceLayerController;
-    readonly plan: accounts.Plan;
-
-}
-
-export interface IState {
 
 }

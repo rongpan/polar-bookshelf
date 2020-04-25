@@ -1,37 +1,33 @@
 import * as React from 'react';
-import {Logger} from 'polar-shared/src/logger/Logger';
+import {AuthHandlers} from "../../../web/js/apps/repository/auth_handler/AuthHandler";
 import {
-    AuthHandlers,
-    AuthStatus
-} from "../../../web/js/apps/repository/auth_handler/AuthHandler";
+    AuthStatusContext,
+    AuthStatusProps
+} from "../../../web/js/accounts/AccountSnapshotContext";
 
-export class AuthRequired extends React.Component<IProps, IState> {
+interface IProps {
+    readonly children: React.ReactNode;
+}
 
-    constructor(props: IProps, context: any) {
-        super(props, context);
+export function AuthRequired(props: IProps) {
 
-    }
+    const Delegate = (authStatusProps: AuthStatusProps) => {
 
-    public render() {
-
-        if (this.props.authStatus === 'needs-authentication') {
+        if (authStatusProps.authStatus === 'needs-authentication') {
             const authHandler = AuthHandlers.get();
             authHandler.authenticate();
             return <div/>;
         }
 
-        return this.props.children;
+        return props.children;
 
-    }
+    };
 
-}
-
-interface IProps {
-    readonly authStatus: AuthStatus;
-
-}
-
-interface IState {
+    return (
+        <AuthStatusContext.Consumer>
+            {Delegate}
+        </AuthStatusContext.Consumer>
+    );
 
 }
 

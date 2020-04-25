@@ -42,19 +42,30 @@ export class Repository {
         const app = await AppInitializer.init({
             persistenceLayerManager,
 
-            onNeedsAuthentication: async (app: App) => {
+            withAuthenticatedUser: async (app: App) => {
+
+                console.log("FIXME2");
 
                 new FileImportController(() => app.persistenceLayerManager.get(), updatedDocInfoEventDispatcher)
                     .start();
 
+                console.log("FIXME2.1");
+
+
                 new DocRepoAnkiSyncController(app.persistenceLayerManager, app.syncBarProgress)
                     .start();
 
+                console.log("FIXME2.2");
+
                 await this.doLoadExampleDocs(app);
+
+                console.log("FIXME2.3");
 
                 updatedDocInfoEventDispatcher.addEventListener(docInfo => {
                     this.onUpdatedDocInfo(app, docInfo);
                 });
+
+                console.log("FIXME2.4");
 
                 app.persistenceLayerManager.addEventListener(event => {
 
@@ -69,12 +80,34 @@ export class Repository {
 
                 });
 
+                console.log("FIXME3");
+
+                this.handleRepoDocInfoEvents();
+
+                console.log("FIXME3.1");
+
+                await this.repoDocMetaLoader.start();
+
+                console.log("FIXME3.2");
+
+                new CloudService(persistenceLayerManager)
+                    .start();
+
+                console.log("FIXME3.3");
+
+                await persistenceLayerManager.start();
+
+                console.log("FIXME3.4");
+
             }
 
         });
+        console.log("FIXME4");
 
         Accounts.listenForPlanUpgrades()
             .catch(err => log.error("Unable to listen for plan upgrades: ", err));
+
+        console.log("FIXME4.1");
 
         // TODO: splashes renders far far far too late and there's a delay.
 
@@ -91,22 +124,13 @@ export class Repository {
             rootElement
         );
 
+        console.log("FIXME5");
+
         // TODO: return authStatus as an object and then do authState.authenticated
         // and unauthenticated so that if statements are cleaner
-        if (app.authStatus !== 'needs-authentication') {
+        // if (app.authStatus !== 'needs-authentication') {
 
-            this.handleRepoDocInfoEvents();
-
-            await this.repoDocMetaLoader.start();
-
-            new CloudService(persistenceLayerManager)
-                .start();
-
-            await persistenceLayerManager.start();
-
-            log.info("Started repo doc loader.");
-
-        }
+        // }
 
         AppInstance.notifyStarted('RepositoryApp');
 

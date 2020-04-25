@@ -28,9 +28,7 @@ export class PremiumScreen extends React.Component<IProps> {
                     <div className="row">
 
                         <div className="col-lg-12 w-100 pt-4">
-                            <PremiumContent2 userInfo={this.props.userInfo}
-                                             interval={this.props.interval}
-                                             plan={this.props.plan}/>
+                            <PremiumContent2 interval={this.props.interval}/>
                         </div>
                     </div>
 
@@ -48,7 +46,6 @@ export class PremiumScreen extends React.Component<IProps> {
 export interface IProps {
     readonly persistenceLayerProvider: PersistenceLayerProvider;
     readonly persistenceLayerController: PersistenceLayerController;
-    readonly plan: accounts.Plan;
     readonly interval?: accounts.Interval;
     readonly userInfo?: UserInfo;
 }

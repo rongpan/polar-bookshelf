@@ -94,9 +94,13 @@ export class CloudAwareDatastore extends AbstractDatastore implements Datastore,
     public async init(errorListener: ErrorListener = NULL_FUNCTION,
                       opts: DatastoreInitOpts = {noInitialSnapshot: false, noSync: false}): Promise<InitResult> {
 
+        console.log("FIXME: CloudAwareDatastore.init 1");
         await this.initDelegates(errorListener);
+        console.log("FIXME: CloudAwareDatastore.init 2");
         await this.initPrefs();
+        console.log("FIXME: CloudAwareDatastore.init 3");
         await this.initSnapshots(errorListener, opts);
+        console.log("FIXME: CloudAwareDatastore.init 4");
 
         return {};
 

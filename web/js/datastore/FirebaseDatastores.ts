@@ -33,8 +33,12 @@ export class FirebaseDatastores {
 
         log.notice("Initializing FirebaseDatastores...");
 
+        console.log("FIXME: FirebaseDatastores.1");
+
         // set the current version before we return
         this.user = await Firebase.currentUser();
+
+        console.log("FIXME: FirebaseDatastores.2");
 
         const formatUser = (user: firebase.User | null) => {
 
@@ -46,7 +50,10 @@ export class FirebaseDatastores {
 
         };
 
-        log.notice("Initializing FirebaseDatastores...done", formatUser(this.user));
+        console.log("FIXME: FirebaseDatastores.3");
+
+        const formattedUser = formatUser(this.user);
+        log.notice(`Initializing FirebaseDatastores...done - ${formattedUser}`);
 
         // update in the background
         firebase.auth()
@@ -57,6 +64,8 @@ export class FirebaseDatastores {
                                 });
 
         this.initialized = true;
+
+        console.log("FIXME: FirebaseDatastores.4");
 
     }
 

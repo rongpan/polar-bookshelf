@@ -1,12 +1,10 @@
 import createPersistedState from "use-persisted-state";
-import {
-    MUIThemeTypeContext,
-    ThemeType
-} from "./context/MUIThemeTypeContext";
+import {MUIThemeTypeContext, ThemeType} from "./context/MUIThemeTypeContext";
 import {createMuiTheme, MuiThemeProvider} from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import {GlobalCss} from "../../spectron0/material-ui/GlobalCss";
 import * as React from "react";
+import {AccountContextSubscriber} from "../accounts/AccountSnapshotContext";
 
 interface IProps {
     readonly children: JSX.Element;
@@ -28,15 +26,21 @@ export const MUIAppRoot = (props: IProps) => {
         }
     });
 
+    // FIXME: some of these operations are SLOW... doing them in parallel would
+    // be MUCH MUCH better and maybe the code would be cleaner?
     return (
 
         <MuiThemeProvider theme={muiTheme}>
             <MUIThemeTypeContext.Provider value={{theme, setTheme}}>
+                <AccountContextSubscriber>
+                    <>
+                        <CssBaseline/>
+                        <GlobalCss/>
 
-                <CssBaseline/>
-                <GlobalCss/>
+                        {props.children}
 
-                {props.children}
+                    </>
+                </AccountContextSubscriber>
 
             </MUIThemeTypeContext.Provider>
         </MuiThemeProvider>

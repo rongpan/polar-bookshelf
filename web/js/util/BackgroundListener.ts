@@ -19,6 +19,10 @@ export class BackgroundListeners {
                     return;
                 }
 
+                // FIXME: this is the problem because get() is NOT aware of the
+                // cache and forces the server each time... we have to rewrite
+                // this to properly etch from cache first, then only 'get' from
+                // the server otherwise...
                 value = await listenable.get();
 
                 snapshotUnsubscriber = await listenable.onSnapshot(currentValue => {

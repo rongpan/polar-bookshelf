@@ -6,15 +6,11 @@ import {PlatformStyles} from "../../ui/PlatformStyles";
 import {AppOrigin} from "../AppOrigin";
 import {IEventDispatcher, SimpleReactor} from "../../reactor/SimpleReactor";
 import {SyncBarProgress} from "../../ui/sync_bar/SyncBar";
-import {AuthHandlers, AuthStatus, UserInfo} from "./auth_handler/AuthHandler";
-import {Accounts} from "../../accounts/Accounts";
-import {Account} from "../../accounts/Account";
-import {AccountProvider} from "../../accounts/AccountProvider";
+import {AuthHandlers, AuthStatus} from "./auth_handler/AuthHandler";
 import {MailingList} from "./auth_handler/MailingList";
 import {UpdatesController} from "../../auto_updates/UpdatesController";
 import {ToasterService} from "../../ui/toaster/ToasterService";
 import {ProgressService} from "../../ui/progress_bar/ProgressService";
-import {PrefetchedUserGroupsBackgroundListener} from "../../datastore/sharing/db/PrefetchedUserGroupsBackgroundListener";
 import {MachineDatastores} from "../../telemetry/MachineDatastores";
 import {UniqueMachines} from "../../telemetry/UniqueMachines";
 import {Logger} from "polar-shared/src/logger/Logger";
@@ -29,6 +25,7 @@ import * as ReactDOM from "react-dom";
 import {LoadingSplash} from "../../ui/loading_splash/LoadingSplash";
 import * as React from "react";
 import {ListenablePersistenceLayerProvider} from "../../datastore/PersistenceLayer";
+import {Tracer} from "polar-shared/src/util/Tracer";
 
 const log = Logger.create();
 
@@ -36,26 +33,24 @@ interface IAppInitializerOpts {
 
     readonly persistenceLayerManager: PersistenceLayerManager;
 
-    // called after authentication is needed
-    readonly onNeedsAuthentication: (app: App) => Promise<void>;
+    readonly withAuthenticatedUser: (app: App) => Promise<void>;
 
 }
 
 export interface App {
 
-    readonly authStatus: AuthStatus;
     readonly persistenceLayerManager: PersistenceLayerManager;
     readonly persistenceLayerProvider: ListenablePersistenceLayerProvider;
     readonly persistenceLayerController: PersistenceLayerController;
     readonly syncBarProgress: IEventDispatcher<SyncBarProgress>;
-    readonly account: Account | undefined;
-    readonly userInfo: UserInfo | undefined;
 
 }
 
 export class AppInitializer {
 
     public static async init(opts: IAppInitializerOpts): Promise<App> {
+
+        console.time("AppInitializer.init");
 
         const {persistenceLayerManager} = opts;
 
@@ -85,43 +80,51 @@ export class AppInitializer {
 
         const authHandler = AuthHandlers.get();
 
-        const authStatus = await authHandler.status();
-
-        const account = await Accounts.get();
-        await AccountProvider.init(account);
-        const userInfo = await authHandler.userInfo();
-
         const platform = Platforms.get();
 
         log.notice("Running on platform: " + Platforms.toSymbol(platform));
 
         const app: App = {
-            authStatus, persistenceLayerManager, persistenceLayerProvider,
-            persistenceLayerController, syncBarProgress, account,
-            userInfo: userInfo.getOrUndefined()
+            persistenceLayerManager, persistenceLayerProvider,
+            persistenceLayerController, syncBarProgress,
         };
 
-        if (authStatus !== 'needs-authentication') {
+        // FIXME: this should be removed
+        new ToasterService().start();
 
-            // subscribe but do it in the background as this isn't a high priority UI task.
-            MailingList.subscribeWhenNecessary()
-                .catch(err => log.error(err));
+        new ProgressService().start();
 
-            new UpdatesController().start();
+        const onAuthStatus = async (authStatus: AuthStatus) => {
 
-            new ToasterService().start();
+            if (authStatus !== 'needs-authentication') {
 
-            new ProgressService().start();
+                // subscribe but do it in the background as this isn't a high priority UI task.
+                MailingList.subscribeWhenNecessary()
+                    .catch(err => log.error(err));
 
-            await PrefetchedUserGroupsBackgroundListener.start();
+                new UpdatesController().start();
 
-            MachineDatastores.triggerBackgroundUpdates(persistenceLayerManager);
+                // FIXME: this needs to be fixed too...
+                // await Tracer.async('user-groups', PrefetchedUserGroupsBackgroundListener.start());
 
-            UniqueMachines.trigger();
+                MachineDatastores.triggerBackgroundUpdates(persistenceLayerManager);
 
-            await opts.onNeedsAuthentication(app);
+                UniqueMachines.trigger();
 
-        }
+                await Tracer.async('onNeedsAuthentication', opts.withAuthenticatedUser(app));
+
+            }
+
+        };
+
+        const handleAuthStatus = async () => {
+            const authStatus = await Tracer.async('authStatus', authHandler.status());
+            await onAuthStatus(authStatus);
+        };
+
+        handleAuthStatus().catch(err => log.error(err));
+
+        console.timeEnd("AppInitializer.init");
 
         return app;
 

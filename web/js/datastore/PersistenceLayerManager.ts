@@ -34,7 +34,11 @@ export class PersistenceLayerManager implements IProvider<ListenablePersistenceL
 
     public async start(): Promise<void> {
 
+        console.log("FIXME 6.0")
+
         let type = PersistenceLayerTypes.get();
+
+        console.log("FIXME 6.1")
 
         if (this.requiresReset()) {
 
@@ -52,11 +56,18 @@ export class PersistenceLayerManager implements IProvider<ListenablePersistenceL
 
         }
 
+        console.log("FIXME 6.2")
+
         await this.change(type);
+
+        console.log("FIXME 6.3")
         this.initialized.resolve(true);
+        console.log("FIXME 6.4")
 
         // now we have to listen and auto-change if we've switched in another
         this.listenForPersistenceLayerChange();
+
+        console.log("FIXME 6.5")
 
     }
 
@@ -119,6 +130,7 @@ export class PersistenceLayerManager implements IProvider<ListenablePersistenceL
             this.dispatchEvent({persistenceLayer: this.persistenceLayer, state: 'stopped'});
 
         }
+        console.log("FIXME: 7.4");
 
         this.current = type;
 
@@ -128,11 +140,17 @@ export class PersistenceLayerManager implements IProvider<ListenablePersistenceL
 
         log.info("Changed to persistence layer: " + type);
 
+
+        console.log("FIXME: 7.5");
         await this.persistenceLayer.init(err => {
             // noop
         }, this.opts);
 
+        console.log("FIXME: 7.6");
+
         this.dispatchEvent({persistenceLayer: this.persistenceLayer, state: 'initialized'});
+
+        console.log("FIXME: 7.7");
 
         log.info("Initialized persistence layer: " + type);
 

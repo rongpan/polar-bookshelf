@@ -1,7 +1,6 @@
 /* eslint react/no-multi-comp: 0, react/prop-types: 0 */
 import React from 'react';
 import {UserInfo} from '../../../../../../web/js/apps/repository/auth_handler/AuthHandler';
-import {NullCollapse} from '../../../../../../web/js/ui/null_collapse/NullCollapse';
 import Button from 'reactstrap/lib/Button';
 import {AccountActions} from '../../../../../../web/js/accounts/AccountActions';
 import {Dialogs} from '../../../../../../web/js/ui/dialogs/Dialogs';
@@ -12,6 +11,7 @@ import {DesktopContent, MobileContent} from "./PremiumCopy";
 import {Discount, Discounts} from "./Discounts";
 import {DeviceRouter} from "../../../../../../web/js/ui/DeviceRouter";
 import {accounts} from "polar-accounts/src/accounts";
+import {AccountSnapshotContext} from "../../../../../../web/js/accounts/AccountSnapshotContext";
 
 const discounts = Discounts.create();
 
@@ -34,10 +34,17 @@ function cancelSubscription() {
 
 }
 
-export const CancelSubscriptionButton = (props: IProps) => {
+interface CancelSubscriptionButtonProps {
+    readonly plan: accounts.Plan;
+}
 
-    return <NullCollapse open={props.plan !== 'free'}>
+export const CancelSubscriptionButton = (props: CancelSubscriptionButtonProps) => {
 
+    if (props.plan === 'free') {
+        return null;
+    }
+
+    return (
         <Button color="secondary"
                 size="sm"
                 onClick={() => cancelSubscription()}>
@@ -45,8 +52,8 @@ export const CancelSubscriptionButton = (props: IProps) => {
             Cancel Subscription
 
         </Button>
+    );
 
-    </NullCollapse>;
 };
 
 interface PlanIntervalProps {
@@ -242,6 +249,18 @@ export const GoldPlan = (props: IState) => {
 };
 
 
+interface IProps {
+    readonly userInfo?: UserInfo;
+    readonly interval?: accounts.Interval;
+
+}
+
+interface IState {
+    readonly interval: PlanInterval;
+}
+
+export type PlanInterval = 'month' | 'year';
+
 export class PremiumContent2 extends React.Component<IProps, IState> {
 
     constructor(props: IProps) {
@@ -257,20 +276,35 @@ export class PremiumContent2 extends React.Component<IProps, IState> {
 
     public render() {
 
-        const phoneOrTablet = (
-            <MobileContent {...this.props}
-                           {...this.state}
-                           togglePlanInterval={() => this.togglePlanInterval()}/>
-        );
-
-        const desktop = (
-            <DesktopContent {...this.props}
-                            {...this.state}
-                            togglePlanInterval={() => this.togglePlanInterval()}/>
-        );
-
         return (
-            <DeviceRouter phone={phoneOrTablet} tablet={phoneOrTablet} desktop={desktop}/>
+            <AccountSnapshotContext.Consumer>
+                {
+                    account => {
+
+                        const plan = account?.plan || 'free';
+
+                        const phoneOrTablet = (
+                            <MobileContent {...this.props}
+                                           {...this.state}
+                                           plan={plan}
+                                           togglePlanInterval={() => this.togglePlanInterval()}/>
+                        );
+
+                        const desktop = (
+                            <DesktopContent {...this.props}
+                                            {...this.state}
+                                            plan={plan}
+                                            togglePlanInterval={() => this.togglePlanInterval()}/>
+                        );
+
+                        return (
+                            <DeviceRouter phone={phoneOrTablet}
+                                          tablet={phoneOrTablet} desktop={desktop}/>
+                        );
+
+                    }
+                }
+            </AccountSnapshotContext.Consumer>
         );
 
     }
@@ -284,16 +318,3 @@ export class PremiumContent2 extends React.Component<IProps, IState> {
     }
 
 }
-
-interface IProps {
-    readonly plan: accounts.Plan;
-    readonly userInfo?: UserInfo;
-    readonly interval?: accounts.Interval;
-
-}
-
-interface IState {
-    readonly interval: PlanInterval;
-}
-
-export type PlanInterval = 'month' | 'year';

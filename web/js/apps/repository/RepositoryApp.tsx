@@ -37,11 +37,10 @@ import {FeatureToggleRouter} from "../../ui/FeatureToggleRouter";
 import {DeviceScreen} from "../../../../apps/repository/js/device/DeviceScreen";
 import {ProfileScreen} from "../../../../apps/repository/js/configure/profile/ProfileScreen";
 import {App} from "./AppInitializer";
-import {createMuiTheme} from "@material-ui/core/styles";
 import {Callback} from "polar-shared/src/util/Functions";
-import {ThemeType} from "../../mui/context/MUIThemeTypeContext";
-import createPersistedState from "use-persisted-state";
 import {MUIAppRoot} from "../../mui/MUIAppRoot";
+import {AuthStatus} from "./auth_handler/AuthHandler";
+import {AuthStatusContext, AuthStatusProps} from "../../accounts/AccountSnapshotContext";
 
 interface IProps {
     readonly app: App;
@@ -60,7 +59,7 @@ export const RepositoryApp = (props: IProps) => {
 
         return (
             <Cached>
-                <AuthRequired authStatus={app.authStatus}>
+4                <AuthRequired>
                     <PersistenceLayerApp repoDocMetaManager={repoDocMetaManager}
                                          repoDocMetaLoader={repoDocMetaLoader}
                                          persistenceLayerManager={persistenceLayerManager}
@@ -106,7 +105,7 @@ export const RepositoryApp = (props: IProps) => {
     const renderAnnotationRepoScreen = () => {
         return (
             <Cached>
-                <AuthRequired authStatus={app.authStatus}>
+                <AuthRequired>
                     <PersistenceLayerApp repoDocMetaManager={repoDocMetaManager}
                                          repoDocMetaLoader={repoDocMetaLoader}
                                          persistenceLayerManager={persistenceLayerManager}
@@ -160,7 +159,7 @@ export const RepositoryApp = (props: IProps) => {
     // );
 
     const renderStatsScreen = () => (
-        <AuthRequired authStatus={app.authStatus}>
+        <AuthRequired>
             <StatsScreen persistenceLayerProvider={app.persistenceLayerProvider}
                          persistenceLayerController={app.persistenceLayerController}
                          repoDocMetaManager={repoDocMetaManager}/>
@@ -169,7 +168,7 @@ export const RepositoryApp = (props: IProps) => {
 
     const renderLogsScreen = () => {
         return (
-            <AuthRequired authStatus={app.authStatus}>
+            <AuthRequired>
                 <LogsScreen
                     persistenceLayerProvider={app.persistenceLayerProvider}
                     persistenceLayerController={app.persistenceLayerController}/>
@@ -189,7 +188,7 @@ export const RepositoryApp = (props: IProps) => {
     const renderCreateGroupScreen = () => {
 
         return (
-            <AuthRequired authStatus={app.authStatus}>
+            <AuthRequired>
                 <CreateGroupScreen
                     persistenceLayerProvider={app.persistenceLayerProvider}
                     persistenceLayerController={app.persistenceLayerController}
@@ -198,30 +197,26 @@ export const RepositoryApp = (props: IProps) => {
         );
     };
 
-    const plan = app.account ? app.account.plan : 'free';
-
     const premiumScreen = () => {
         return (<PremiumScreen
                     persistenceLayerProvider={app.persistenceLayerProvider}
                     persistenceLayerController={app.persistenceLayerController}
-                    plan={plan}
-                    userInfo={app.userInfo}/>);
+                    />);
     };
 
     const premiumScreenYear = () => {
         return (<PremiumScreen
                     persistenceLayerProvider={app.persistenceLayerProvider}
                     persistenceLayerController={app.persistenceLayerController}
-                    plan={plan}
                     interval='year'
-                    userInfo={app.userInfo}/>);
+                    />);
     };
 
     const supportScreen = () => {
         return (<SupportScreen
                     persistenceLayerProvider={app.persistenceLayerProvider}
                     persistenceLayerController={app.persistenceLayerController}
-                    plan={plan}/>);
+                    />);
     };
 
     const renderGroupScreen = () => {
@@ -252,7 +247,7 @@ export const RepositoryApp = (props: IProps) => {
         return <InviteScreen
                     persistenceLayerProvider={app.persistenceLayerProvider}
                     persistenceLayerController={app.persistenceLayerController}
-                    plan={app.account?.plan}/>;
+                    />;
     };
 
 

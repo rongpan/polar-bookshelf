@@ -28,14 +28,10 @@ export class PDFApp {
 
         const persistenceLayerManager = this.persistenceLayerManager;
 
-        console.time('AppInitializer.init');
-
         const app = await AppInitializer.init({
             persistenceLayerManager,
-            onNeedsAuthentication: ASYNC_NULL_FUNCTION
+            withAuthenticatedUser: ASYNC_NULL_FUNCTION
         });
-
-        console.timeEnd('AppInitializer.init');
 
         console.time('persistenceLayerManager.start');
         await persistenceLayerManager.start();
