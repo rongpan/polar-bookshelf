@@ -2,14 +2,24 @@ import * as React from "react";
 import {useContextMenu} from "../../../../repository/js/doc_repo/MUIContextMenu";
 import {Elements} from "../../../../../web/js/util/Elements";
 import {GlobalPDFCss} from "./GlobalPDFCss";
+import {memoForwardRef} from "../../../../../web/js/react/ReactUtils";
+import {useViewerContainerCallbacks, useViewerContainerStore} from "../../ViewerContainerStore";
 
 let iter: number = 0;
 
-export const PDFViewerContainer = () => {
+interface IProps {
+    readonly children: JSX.Element;
+}
 
-    ++iter;
+export const PDFViewerContainer = memoForwardRef((props: IProps) => {
 
     const contextMenu = useContextMenu();
+
+    // FIXME: now this is the bug that the store isn't being updated but it should...
+    const {viewerContainer} = useViewerContainerStore(['viewerContainer']);
+    const {setViewerContainer} = useViewerContainerCallbacks();
+
+    console.log("FIXME rendering witih viewerContainer ", viewerContainer);
 
     const onContextMenu = React.useCallback((event: React.MouseEvent<HTMLElement>) => {
 
@@ -29,6 +39,8 @@ export const PDFViewerContainer = () => {
             <GlobalPDFCss/>
             <main onContextMenu={onContextMenu}
                   id="viewerContainer"
+                  className="viewerContainer"
+                  ref={ref => setViewerContainer(ref)}
                   style={{
                       position: 'absolute',
                       overflow: 'auto',
@@ -37,7 +49,7 @@ export const PDFViewerContainer = () => {
                       height: '100%'
                   }}
                   itemProp="mainContentOfPage"
-                  data-iter={iter}>
+                  data-iter={iter++}>
 
                 <div>
                     <div id="viewer" className="pdfViewer">
@@ -47,7 +59,10 @@ export const PDFViewerContainer = () => {
                 </div>
 
             </main>
+
+            {viewerContainer && props.children}
+
         </>
     );
 
-};
+});

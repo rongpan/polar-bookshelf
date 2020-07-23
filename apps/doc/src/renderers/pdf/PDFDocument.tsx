@@ -43,6 +43,7 @@ import {ExtendPagemark} from "polar-pagemarks-auto/src/AutoPagemarker";
 import {useLogger} from "../../../../../web/js/mui/MUILogger";
 import {KnownPrefs} from "../../../../../web/js/util/prefs/KnownPrefs";
 import {ReadingProgressResume} from "../../../../../web/js/view/ReadingProgressResume";
+import { useViewerContainerStore } from '../../ViewerContainerStore';
 
 interface DocViewer {
     readonly eventBus: EventBus;
@@ -53,7 +54,7 @@ interface DocViewer {
     readonly containerElement: HTMLElement;
 }
 
-function createDocViewer(): DocViewer {
+function createDocViewer(containerElement: HTMLElement): DocViewer {
 
     const eventBus = new EventBus({dispatchToDOM: false});
     // TODO  this isn't actually exported..
@@ -69,20 +70,18 @@ function createDocViewer(): DocViewer {
         eventBus
     });
 
-    const containerElement = document.getElementById('viewerContainer')! as HTMLDivElement;
-
-    if (containerElement === null) {
+    if (! containerElement) {
         throw new Error("No containerElement");
     }
 
-    const viewerElement = document.getElementById('viewer')! as HTMLDivElement;
+    const viewerElement = containerElement.querySelector('#viewer')! as HTMLDivElement;
 
-    if (viewerElement === null) {
+    if (! viewerElement) {
         throw new Error("No viewerElement");
     }
 
     const viewerOpts: PDFViewerOptions = {
-        container: containerElement,
+        container: containerElement as HTMLDivElement,
         viewer: viewerElement,
         textLayerMode: 2,
         linkService, 
@@ -132,6 +131,7 @@ export const PDFDocument = React.memo((props: IProps) => {
     const scaleRef = React.useRef<ScaleLevelTuple>(ScaleLevelTuples[1]);
     const docRef = React.useRef<PDFDocumentProxy | undefined>(undefined);
     const log = useLogger();
+    const {viewerContainer} = useViewerContainerStore(['viewerContainer');
 
     const {setDocDescriptor, setPageNavigator, setResizer, setScaleLeveler, setDocScale} = useDocViewerCallbacks();
     const {docURL} = props;
@@ -141,7 +141,7 @@ export const PDFDocument = React.memo((props: IProps) => {
 
     useComponentDidMount(() => {
 
-        docViewerRef.current = createDocViewer();
+        docViewerRef.current = createDocViewer(viewerContainer!);
 
         doLoad(docViewerRef.current)
             .catch(err => console.error("PDFDocument: Could not load PDF: ", err));

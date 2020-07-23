@@ -9,6 +9,7 @@ import {EPUBViewerContainer} from "./epub/EPUBViewerContainer";
 import {FileTypes} from "../../../../web/js/apps/main/file_loaders/FileTypes";
 import {IDocMeta} from "polar-shared/src/metadata/IDocMeta";
 import {FileType} from "../../../../web/js/apps/main/file_loaders/FileType";
+import {memoForwardRef} from "../../../../web/js/react/ReactUtils";
 
 interface ILoadedProps {
     readonly docURL: URLStr;
@@ -18,10 +19,9 @@ interface ILoadedProps {
 const PDFDocumentRenderer = (props: ILoadedProps) => {
     return (
         <>
-            <PDFViewerContainer/>
-
-            <PDFDocument {...props}/>
-
+            <PDFViewerContainer>
+                <PDFDocument {...props}/>
+            </PDFViewerContainer>
         </>
     );
 }
@@ -30,9 +30,7 @@ const EPUBDocumentRenderer = (props: ILoadedProps) => {
     return (
         <>
             <EPUBViewerContainer/>
-
             <EPUBDocument {...props}/>
-
         </>
     );
 }
@@ -68,9 +66,9 @@ const DocRendererDelegate = React.memo((props: DocRendererDelegateProps) => {
 
 });
 
-export const DocRenderer = React.memo(() => {
+export const DocRenderer = memoForwardRef(() => {
 
-    const {docURL, docMeta} = useDocViewerStore();
+    const {docURL, docMeta} = useDocViewerStore(['docURL', 'docMeta']);
 
     if (! docURL || ! docMeta) {
         return null;
@@ -82,4 +80,4 @@ export const DocRenderer = React.memo(() => {
         <DocRendererDelegate docURL={docURL} docMeta={docMeta} fileType={fileType}/>
     );
 
-}, isEqual);
+});

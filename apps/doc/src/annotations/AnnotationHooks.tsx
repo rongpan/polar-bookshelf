@@ -4,7 +4,8 @@ import {
     useComponentWillUnmount
 } from "../../../../web/js/hooks/lifecycle";
 import {Debouncers} from "polar-shared/src/util/Debouncers";
-import { IDimensions } from "polar-shared/src/util/IDimensions";
+import {IDimensions} from "polar-shared/src/util/IDimensions";
+import { useViewerContainerStore } from "../ViewerContainerStore";
 import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
 
 /**
@@ -37,39 +38,44 @@ function useSubscriber(subscriber: Subscriber) {
 
 }
 
-function createScrollSubscriber(delegate: () => void): Subscriber {
+type UpdateType = 'initial' | 'resize' | 'scroll' | 'mutation';
+type AnnotationHandlerDelegate = (updateType: UpdateType) => void;
 
+function useScrollSubscriber(delegate: AnnotationHandlerDelegate): Subscriber {
+
+    const {viewerContainer} = useViewerContainerStore(['viewerContainer']);
+
+    if (! viewerContainer) {
+        return () => NULL_FUNCTION;
+    }
     return () => {
 
-        const viewerContainer = document.getElementById('viewerContainer');
-
         function handleScroll() {
-            delegate();
+            delegate('scroll');
         }
 
-        viewerContainer!.addEventListener('scroll', handleScroll);
+        viewerContainer.addEventListener('scroll', handleScroll);
 
         return () => {
-            viewerContainer!.removeEventListener('scroll', handleScroll);
+            viewerContainer.removeEventListener('scroll', handleScroll);
         }
 
     }
 
 }
 
-function createResizeSubscriber(delegate: () => void): Subscriber {
+function createResizeSubscriber(delegate: AnnotationHandlerDelegate): Subscriber {
 
     return () => {
 
         function handleResize() {
-            delegate();
+            delegate('resize');
         }
 
         window.addEventListener('resize', handleResize);
 
         return () => {
             window.removeEventListener('resize', handleResize);
-
         }
     }
 
@@ -77,7 +83,12 @@ function createResizeSubscriber(delegate: () => void): Subscriber {
 
 
 
-function createMutationObserverSubscriber(delegate: () => void): Subscriber {
+function createMutationObserverSubscriber(delegate: AnnotationHandlerDelegate): Subscriber {
+
+    // FIXME: I think we can totally solve ALL of this by just pushing out
+    // a single mutation observer for ONE page and listening to data-page-loaded
+    // which is esentially the same... ... IT's like a hacky store but it should
+    // work just fine.
 
     return () => {
 
@@ -88,11 +99,11 @@ function createMutationObserverSubscriber(delegate: () => void): Subscriber {
             for (const mutation of mutations) {
 
                 if (mutation.type === "attributes") {
-                    delegate();
+                    delegate('mutation');
                 }
 
                 if (mutation.type === "childList") {
-                    delegate();
+                    delegate('mutation');
                 }
 
             }
@@ -127,6 +138,7 @@ function getContainer(page: number): HTMLElement | undefined {
     const textLayerElement = pageElement.querySelector(".textLayer");
 
     if (! textLayerElement) {
+        // if there is no textLayer the page isn't rendered and we can't use it
         return undefined;
     }
 
@@ -136,10 +148,16 @@ function getContainer(page: number): HTMLElement | undefined {
 
 export function useAnnotationContainer(pageNum: number) {
 
+    // FIXME: I think we have to have ONE of these at the high level to listen
+    // ONCE to the state then update the context via a store so that the
+    // components can be efficiently updated ...
+
     const containerRef = React.useRef<HTMLElement | undefined>(undefined);
     const [, setContainer] = React.useState<HTMLElement | undefined>(undefined);
 
-    function doUpdateDelegate() {
+    function doUpdateDelegate(updateType: UpdateType) {
+
+        console.log("FIXME: updateType: ", updateType);
 
         const newContainer = getContainer(pageNum);
         const container = containerRef.current;
@@ -151,23 +169,20 @@ export function useAnnotationContainer(pageNum: number) {
 
     }
 
-    const doUpdate = React.useMemo(() => Debouncers.create(doUpdateDelegate), []);
+    const doUpdate = React.useMemo(() => Debouncers.create1(doUpdateDelegate), []);
 
     useComponentDidMount(() => {
-
         // call the delegate directly to force a draw when the component mounts
-        doUpdateDelegate();
-
+        doUpdateDelegate('initial');
     });
 
-    useSubscriber(createScrollSubscriber(doUpdate));
+    useSubscriber(useScrollSubscriber(doUpdate));
     useSubscriber(createResizeSubscriber(doUpdate));
     useSubscriber(createMutationObserverSubscriber(doUpdate));
 
     return containerRef.current;
 
 }
-
 
 export function getPageElement(page: number): HTMLElement {
     // FIXME: this is not portable to 2.0 with multiple PDFs loaded.
