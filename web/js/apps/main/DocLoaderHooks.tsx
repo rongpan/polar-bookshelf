@@ -9,6 +9,7 @@ import {ViewerURLs} from "./doc_loaders/ViewerURLs";
 import {PersistentRoute} from "../repository/PersistentRoute";
 import {useBrowserDocLoader} from './doc_loaders/browser/BrowserDocLoader';
 import {RepositoryDocViewerScreen} from '../repository/RepositoryApp';
+import { AppRuntime } from 'polar-shared/src/util/AppRuntime';
 
 function useDocLoaderElectron2() {
 
@@ -27,6 +28,8 @@ function useDocLoaderElectron() {
     const {addTab} = useBrowserTabsCallbacks();
 
     return React.useCallback((loadDocRequest: LoadDocRequest) => {
+
+        console.log("FIXME: loading via electron loader...");
 
         const viewerURL = ViewerURLs.create(persistenceLayerProvider, loadDocRequest);
         const parsedURL = new URL(viewerURL);
@@ -83,6 +86,6 @@ function useDocLoaderNull() {
 //
 // This will ALSO break the rule to only call hooks at the top level and not
 // conditionally.
-// export const useDocLoader = AppRuntime.isElectron() ? useDocLoaderElectron : useDocLoaderDefault;
-
-export const useDocLoader = useDocLoaderDefault;
+export const useDocLoader = AppRuntime.isElectron() ? useDocLoaderElectron : useDocLoaderDefault;
+//
+// export const useDocLoader = useDocLoaderDefault;
