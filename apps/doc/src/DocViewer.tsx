@@ -250,16 +250,19 @@ const DocViewerMain = React.memo(() => {
 
 });
 
-export const DocViewer = React.memo(() => {
+// Component now takes url through props instead of document.location.href
+interface DocViewerProps {
+  readonly url: string;
+}
+
+export const DocViewer = React.memo((props: DocViewerProps) => {
 
     const {docURL} = useDocViewerStore(['docURL']);
     const {setDocMeta} = useDocViewerCallbacks();
     const log = useLogger();
     const persistenceLayerContext = usePersistenceLayerContext()
 
-    // TODO: do this in a root context component so we could make
-    // this into a component that takes props, not just a URL.
-    const parsedURL = DocViewerAppURLs.parse(document.location.href);
+    const parsedURL = DocViewerAppURLs.parse(props.url);
 
     // TODO: I think I can have hard wired types for state transition functions
     // like an uninitialized store, with missing values, then an initialized one
@@ -270,7 +273,7 @@ export const DocViewer = React.memo(() => {
         const handleLoad = async () => {
 
             if (! parsedURL) {
-                console.warn("Could not parse URL: " + document.location.href)
+                console.warn("Could not parse URL: " + props.url)
                 return;
             }
 

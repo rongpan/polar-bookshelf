@@ -4,7 +4,7 @@ import {usePersistenceLayerContext} from "../../../../apps/repository/js/persist
 import {
     TabDescriptor,
     useBrowserTabsCallbacks
-} from "../../browser_tabs/BrowserTabsStore";
+} from "../../chrome_tabs/BrowserTabsStore";
 import {ViewerURLs} from "./doc_loaders/ViewerURLs";
 import {PersistentRoute} from "../repository/PersistentRoute";
 import {useBrowserDocLoader} from './doc_loaders/browser/BrowserDocLoader';
@@ -36,6 +36,8 @@ function useDocLoaderElectron() {
 
             async load(): Promise<void> {
 
+// Commented out for now since TabDescriptor doesn't have component and addTab won't work
+/*
                 const tabDescriptor: TabDescriptor = {
                     url: path,
                     title: loadDocRequest.title,
@@ -49,6 +51,7 @@ function useDocLoaderElectron() {
                 }
 
                 addTab(tabDescriptor);
+*/
 
             }
 
@@ -58,8 +61,26 @@ function useDocLoaderElectron() {
 
 }
 
+// Tabs were implemented in a browser environment, should probably be under electron
+// Simply uncomment useBrowserDocLoader() and move to useDocLoaderElectron()
 function useDocLoaderDefault() {
-    return useBrowserDocLoader();
+    const {persistenceLayerProvider} = usePersistenceLayerContext();
+    const {addTab} = useBrowserTabsCallbacks();
+
+    return React.useCallback((loadDocRequest: LoadDocRequest) => {
+
+        const viewerURL = ViewerURLs.create(persistenceLayerProvider, loadDocRequest);
+        const parsedURL = new URL(viewerURL);
+        const path = parsedURL.pathname;
+        const tabDescriptor: = {
+            url: path,
+            title: loadDocRequest.title,
+        }
+
+        addTab(tabDescriptor);
+
+    }, []);
+    //return useBrowserDocLoader();
 }
 
 function useDocLoaderNull() {

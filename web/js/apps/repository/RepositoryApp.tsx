@@ -23,7 +23,7 @@ import {SettingsScreen} from "../../../../apps/repository/js/configure/settings/
 import {DeviceScreen} from "../../../../apps/repository/js/device/DeviceScreen";
 import {App} from "./AppInitializer";
 import {Callback} from "polar-shared/src/util/Functions";
-import {MUIRepositoryRoot} from "../../mui/MUIRepositoryRoot";
+import {MUIAppRoot} from "../../mui/MUIAppRoot";
 import {DocRepoScreen2} from "../../../../apps/repository/js/doc_repo/DocRepoScreen2";
 import {DocRepoStore2} from "../../../../apps/repository/js/doc_repo/DocRepoStore2";
 import {DocRepoSidebarTagStore} from "../../../../apps/repository/js/doc_repo/DocRepoSidebarTagStore";
@@ -51,6 +51,10 @@ import isEqual from 'react-fast-compare';
 import {RepoHeader3} from "../../../../apps/repository/js/repo_header/RepoHeader3";
 import {RepoFooter} from "../../../../apps/repository/js/repo_footer/RepoFooter";
 import {MUIDialogController} from "../../mui/dialogs/MUIDialogController";
+import {BrowserTabs} from "../../chrome_tabs/BrowserTabs";
+import {useBrowserTabsCallbacks, useBrowserTabsStore} from "../../chrome_tabs/BrowserTabsStore";
+import {DocViewerAppURLs} from "../../../../apps/doc/src/DocViewerAppURLs";
+import {useLocation} from "react-router-dom"
 
 interface IProps {
     readonly app: App;
@@ -63,6 +67,7 @@ interface IProps {
 
 interface RepositoryDocViewerScreenProps {
     readonly persistenceLayerProvider: ListenablePersistenceLayerProvider;
+    readonly url: string
 }
 
 export const RepositoryDocViewerScreen = React.memo((props: RepositoryDocViewerScreenProps) => (
@@ -74,7 +79,7 @@ export const RepositoryDocViewerScreen = React.memo((props: RepositoryDocViewerS
                         <DocViewerStore>
                             <DocFindStore>
                                 <AnnotationSidebarStoreProvider>
-                                    <DocViewer/>
+                                    <DocViewer url={props.url}/>
                                 </AnnotationSidebarStoreProvider>
                             </DocFindStore>
                         </DocViewerStore>
@@ -91,9 +96,6 @@ export const RepositoryApp = (props: IProps) => {
 
     Preconditions.assertPresent(app, 'app');
 
-    const RenderDocViewerScreen = React.memo(() => (
-        <RepositoryDocViewerScreen persistenceLayerProvider={app.persistenceLayerProvider}/>
-    ));
 
     const RenderDocRepoScreen = React.memo(() => (
             <AuthRequired>
@@ -274,108 +276,166 @@ export const RepositoryApp = (props: IProps) => {
     };
 
 
+    // Get tabStore
+    const { activeTab, tabs, tabContents } = useBrowserTabsStore([
+      "activeTab",
+      "tabs",
+      "tabContents"
+    ]);
+
+    // Map tabContents to array of DocViewers in Persistent Routes
+    // Note: Deletion of a tab may cause rerender
+    const docViewers = tabContents.map(tabContent => {
+      if (!tabContent.url || tabContent.url === "/") {
+        return undefined;
+      }
+
+
+      return (
+        <PersistentRoute exact path={tabContent.url}>
+          <RepositoryDocViewerScreen persistenceLayerProvider={app.persistenceLayerProvider} url={tabContent.url} />
+        </PersistentRoute>
+      );
+      }
+    ).filter(value => return value !== undefined);
+
     return (
-        <MUIRepositoryRoot>
-            <RepositoryRoot>
-                <div className="RepositoryApp"
-                     style={{
-                         display: 'flex',
-                         minHeight: 0,
-                         flexDirection: 'column',
-                         flexGrow: 1
-                     }}>
+        // <React.StrictMode>
+            <MUIAppRoot>
+                <RepositoryRoot>
+                    <div className="RepositoryApp"
+                         style={{
+                             display: 'flex',
+                             minHeight: 0,
+                             flexDirection: 'column',
+                             flexGrow: 1
+                         }}>
 
-                    <>
+                        <>
 
-                        <BrowserRouter>
-                            <MUIDialogController>
+                            <BrowserRouter>
+                              <BrowserTabs/>
+                                <MUIDialogController>
 
-                                <Switch>
+                                    <Switch>
+                                        {docViewers}
 
-                                    <Route exact path={["/login", "/login.html"]}>
-                                        <LoginScreen/>
-                                    </Route>
+                                        <Route exact path={["/login", "/login.html"]}>
+                                            <LoginScreen/>
+                                        </Route>
 
-                                    <Route exact path={["/doc", "/doc/:id"]}>
-                                        <RenderDocViewerScreen/>
-                                    </Route>
 
-                                    <Route exact path="/error">
-                                        <ErrorScreen/>
-                                    </Route>
+                                        <Route exact path="/error">
+                                            <ErrorScreen/>
+                                        </Route>
 
-                                    <Route exact path='/logout'>
-                                        <LogoutScreen/>
-                                    </Route>
+                                        <Route exact path='/logout'>
+                                            <LogoutScreen/>
+                                        </Route>
 
-                                    <Route>
-                                        <RepoHeader3/>
+                                        <Route>
+                                            <RepoHeader3/>
 
-                                        <PersistentRoute exact path="/">
-                                            <RenderDefaultScreen/>
-                                        </PersistentRoute>
+                                            <PersistentRoute exact path="/">
+                                                <RenderDefaultScreen/>
+                                            </PersistentRoute>
 
-                                        <PersistentRoute exact path="/annotations">
-                                            <RenderAnnotationRepoScreen/>
-                                        </PersistentRoute>
+                                            <PersistentRoute exact path="/annotations">
+                                                <RenderAnnotationRepoScreen/>
+                                            </PersistentRoute>
 
-                                        <Switch location={ReactRouters.createLocationWithPathOnly()}>
+                                            <Switch location={ReactRouters.createLocationWithPathOnly()}>
 
-                                            <Route exact path='/whats-new'
-                                                   render={renderWhatsNewScreen}/>
+                                                {/*<RepoHeader3/>*/}
 
-                                            <Route exact path='/invite' render={renderInvite}/>
+                                                {/*<Route exact path='/logs' render={renderLogsScreen}/>*/}
 
-                                            <Route exact path='/plans' render={premiumScreen}/>
+                                                <Route exact path='/whats-new'
+                                                       render={renderWhatsNewScreen}/>
 
-                                            <Route exact path='/plans-year'
-                                                   render={premiumScreenYear}/>
+                                                {/*<Route path='/group/:group/highlights'*/}
+                                                {/*       render={renderGroupHighlightsScreen}/>*/}
 
-                                            <Route exact path='/premium' render={premiumScreen}/>
+                                                {/*<Route path='/group/:group/docs'*/}
+                                                {/*       render={renderGroupScreen}/>*/}
 
-                                            <Route exact path='/support' render={supportScreen}/>
+                                                {/*<Route path='/group/:group/highlight/:id'*/}
+                                                {/*       render={renderGroupHighlightScreen}/>*/}
 
-                                            <Route exact path='/stats'
-                                                   component={renderStatsScreen}/>
+                                                {/*<Route path='/group/:group'*/}
+                                                {/*       render={renderGroupHighlightsScreen}/>*/}
 
-                                            <Route exact path="/settings"
-                                                   component={RenderSettingsScreen}/>
+                                                {/*<Route exact path='/groups'*/}
+                                                {/*       render={renderGroupsScreen}/>*/}
 
-                                            <Route exact path="/device"
-                                                   component={renderDeviceScreen}/>
+                                                {/*<Route exact path='/groups/create'*/}
+                                                {/*       render={renderCreateGroupScreen}/>*/}
 
-                                        </Switch>
-                                        <RepoFooter/>
-                                    </Route>
+                                                <Route exact path='/invite' render={renderInvite}/>
 
-                                </Switch>
+                                                <Route exact path='/plans' render={premiumScreen}/>
 
-                                <Switch location={ReactRouters.createLocationWithHashOnly()}>
+                                                <Route exact path='/plans-year'
+                                                       render={premiumScreenYear}/>
 
-                                    <Route path='#account'
-                                           component={() =>
-                                               <Cached>
-                                                   <AccountControlSidebar persistenceLayerController={app.persistenceLayerController}/>
-                                               </Cached>
-                                           }/>
+                                                <Route exact path='/premium' render={premiumScreen}/>
 
-                                    <Route path='#add'>
-                                        <AuthRequired>
-                                            <PersistenceLayerContext.Provider value={{persistenceLayerProvider: app.persistenceLayerProvider}}>
-                                                <AddFileDropzoneScreen/>
-                                            </PersistenceLayerContext.Provider>
-                                        </AuthRequired>
-                                    </Route>
+                                                <Route exact path='/support' render={supportScreen}/>
 
-                                </Switch>
-                            </MUIDialogController>
-                         </BrowserRouter>
+                                                <Route exact path='/stats'
+                                                       component={renderStatsScreen}/>
 
-                    </>
+                                                {/*/!*<Route exact path="/annotations"*!/*/}
+                                                {/*/!*       component={RenderAnnotationRepoScreen}/>*!/*/}
 
-                </div>
-            </RepositoryRoot>
-        </MUIRepositoryRoot>
+                                                <Route exact path="/settings"
+                                                       component={RenderSettingsScreen}/>
+
+                                                {/*<Route exact path="/profile"*/}
+                                                {/*       component={renderProfileScreen}/>*/}
+
+                                                <Route exact path="/device"
+                                                       component={renderDeviceScreen}/>
+
+                                                {/*<Route exact path='/'*/}
+                                                {/*       component={RenderDefaultScreen}/>*/}
+
+                                                {/*<Route exact path='/'>*/}
+                                                {/*    <RenderDefaultScreen/>*/}
+                                                {/*</Route>*/}
+                                            </Switch>
+                                            <RepoFooter/>
+                                        </Route>
+
+                                    </Switch>
+
+                                    <Switch location={ReactRouters.createLocationWithHashOnly()}>
+
+                                        <Route path='#account'
+                                               component={() =>
+                                                   <Cached>
+                                                       <AccountControlSidebar persistenceLayerController={app.persistenceLayerController}/>
+                                                   </Cached>
+                                               }/>
+
+                                        <Route path='#add'>
+                                            <AuthRequired>
+                                                <PersistenceLayerContext.Provider value={{persistenceLayerProvider: app.persistenceLayerProvider}}>
+                                                    <AddFileDropzoneScreen/>
+                                                </PersistenceLayerContext.Provider>
+                                            </AuthRequired>
+                                        </Route>
+
+                                    </Switch>
+                                </MUIDialogController>
+                        </BrowserRouter>
+
+                        </>
+
+                    </div>
+                </RepositoryRoot>
+            </MUIAppRoot>
+        // </React.StrictMode>
     );
 
 };
