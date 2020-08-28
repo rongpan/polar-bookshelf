@@ -285,7 +285,7 @@ export const RepositoryApp = (props: IProps) => {
 
     // Map tabContents to array of DocViewers in Persistent Routes
     // Note: Deletion of a tab may cause rerender
-    const docViewers = tabContents.map(tabContent => {
+    const docViewers = tabContents.map((tabContent) => {
       if (!tabContent.url || tabContent.url === "/") {
         return undefined;
       }
@@ -297,7 +297,7 @@ export const RepositoryApp = (props: IProps) => {
         </PersistentRoute>
       );
       }
-    ).filter(value => return value !== undefined);
+    ).filter((value) => value !== undefined);
 
     return (
         // <React.StrictMode>

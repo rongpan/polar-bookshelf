@@ -72,9 +72,10 @@ function useDocLoaderDefault() {
         const viewerURL = ViewerURLs.create(persistenceLayerProvider, loadDocRequest);
         const parsedURL = new URL(viewerURL);
         const path = parsedURL.pathname;
-        const tabDescriptor: = {
+        const tabDescriptor: TabDescriptor = {
             url: path,
             title: loadDocRequest.title,
+            tabContentIndex: 0
         }
 
         addTab(tabDescriptor);
