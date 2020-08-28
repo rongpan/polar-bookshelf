@@ -25,7 +25,17 @@ import {ScaleLevelTuple} from "./ScaleLevels";
 import {PageNavigator} from "./PageNavigator";
 import {useLogger} from "../../../web/js/mui/MUILogger";
 import {DocViewerSnapshots} from "./DocViewerSnapshots";
-import { DocMetas } from '../../../web/js/metadata/DocMetas';
+import {DocMetas} from '../../../web/js/metadata/DocMetas';
+import {Arrays} from 'polar-shared/src/util/Arrays';
+import {
+    Direction,
+    FluidPagemarkFactory,
+    NullFluidPagemarkFactory
+} from "./FluidPagemarkFactory";
+import {IPagemarkRect} from "polar-shared/src/metadata/IPagemarkRect";
+import {PagemarkRect} from "../../../web/js/metadata/PagemarkRect";
+import {IPagemarkRef} from "polar-shared/src/metadata/IPagemarkRef";
+import {PagemarkMode} from "polar-shared/src/metadata/PagemarkMode";
 
 /**
  * Lightweight metadata describing the currently loaded document.
@@ -98,9 +108,26 @@ export interface IDocViewerStore {
 
     readonly hasPendingWrites?: boolean;
 
+    readonly fluidPagemarkFactory: FluidPagemarkFactory;
+
 }
 
-export interface IPagemarkCreateToPoint {
+export interface IPagemarkCoverage {
+    readonly percentage: number;
+    readonly rect: PagemarkRect;
+    readonly range: Range | undefined;
+}
+
+export interface IPagemarkCreateOrUpdate {
+
+    /**
+     * The DOM range for the covering pagemark (use for fluid pagemarks).
+     */
+    readonly range: Range | undefined;
+
+}
+
+export interface IPagemarkCreateToPoint extends IPagemarkCreateOrUpdate {
 
     readonly type: 'create-to-point';
 
@@ -114,9 +141,10 @@ export interface IPagemarkCreateToPoint {
 
     // the page number of the current page.
     readonly pageNum: number;
+
 }
 
-export interface IPagemarkCreateFromPage {
+export interface IPagemarkCreateFromPage extends IPagemarkCreateOrUpdate {
 
     readonly type: 'create-from-page';
 
@@ -135,11 +163,49 @@ export interface IPagemarkCreateFromPage {
 
 }
 
-export interface IPagemarkUpdate {
+export interface IPagemarkUpdate extends IPagemarkCreateOrUpdate {
+
     readonly type: 'update',
     readonly pageNum: number;
-    readonly pagemark: IPagemark;
+
+    /**
+     * The existing pagemark to update.
+     */
+    readonly existing: IPagemark;
+
+    /**
+     * The new pagemark's percentage.
+     */
+    readonly percentage: number;
+
+    /**
+     * The new pagemark's covering rect (for PDF)
+     */
+    readonly rect: IPagemarkRect;
+
+    /**
+     * Direction must be specified when updating / resizing pagemarks.
+     */
+    readonly direction: Direction;
+
 }
+
+export interface IPagemarkUpdateMode {
+
+    readonly type: 'update-mode',
+
+    /**
+     * The existing pagemark to update.
+     */
+    readonly existing: IPagemark;
+
+    /**
+     * The new pagemark's percentage.
+     */
+    readonly mode: PagemarkMode;
+
+}
+
 
 export interface IPagemarkDelete {
     readonly type: 'delete',
@@ -147,7 +213,11 @@ export interface IPagemarkDelete {
     readonly pagemark: IPagemark;
 }
 
-export type IPagemarkMutation = IPagemarkCreateToPoint | IPagemarkCreateFromPage | IPagemarkUpdate | IPagemarkDelete;
+export type IPagemarkMutation = IPagemarkCreateToPoint |
+                                IPagemarkCreateFromPage |
+                                IPagemarkUpdate |
+                                IPagemarkDelete |
+                                IPagemarkUpdateMode;
 
 /**
  * The type of update for setDocMeta.
@@ -174,23 +244,27 @@ export interface IDocViewerCallbacks {
     readonly annotationMutations: IAnnotationMutationCallbacks;
     readonly onPageJump: (page: number) => void;
     readonly setScale: (scaleLevel: ScaleLevelTuple) => void;
+    readonly setPage: (page: number) => void;
+    readonly setFluidPagemarkFactory: (fluidPagemarkFactory: FluidPagemarkFactory) => void;
+
+    readonly setDocFlagged: (flagged: boolean) => void;
+    readonly setDocArchived: (archived: boolean) => void;
+
     // readonly getAnnotationsFromDocMeta: (refs: ReadonlyArray<IAnnotationRef>) => void;
 
-    onPagemark(opts: IPagemarkMutation): void;
+    onPagemark(opts: IPagemarkMutation): ReadonlyArray<IPagemarkRef>;
     setPageNavigator(pageNavigator: PageNavigator): void;
 
     onPagePrev(): void;
     onPageNext(): void;
-
-    // FIXME: where do we put the callback for injecting content from the
-    // annotation control into the main doc.
 
 }
 
 const initialStore: IDocViewerStore = {
     page: 1,
     docLoaded: false,
-    pendingWrites: 0
+    pendingWrites: 0,
+    fluidPagemarkFactory: new NullFluidPagemarkFactory()
 }
 
 interface Mutator {
@@ -358,6 +432,11 @@ function callbacksFactory(storeProvider: Provider<IDocViewerStore>,
 
     }
 
+    function setFluidPagemarkFactory(fluidPagemarkFactory: FluidPagemarkFactory) {
+        const store = storeProvider();
+        setStore({...store, fluidPagemarkFactory});
+    }
+
     const annotationMutations = AnnotationMutationCallbacks.create(updateStore, NULL_FUNCTION);
 
     function updateStore(docMetas: ReadonlyArray<IDocMeta>): ReadonlyArray<IDocMeta> {
@@ -366,61 +445,101 @@ function callbacksFactory(storeProvider: Provider<IDocViewerStore>,
         return docMetas.map(docMeta => updateDocMeta(docMeta));
     }
 
-    function onPagemark(mutation: IPagemarkMutation) {
+    function onPagemark(mutation: IPagemarkMutation): ReadonlyArray<IPagemarkRef> {
 
-        function createPagemarkToPoint(opts: IPagemarkCreateToPoint, start?: number) {
+        function updatePagemarkRange(pagemark: IPagemark,
+                                     range: Range | undefined,
+                                     direction: Direction | undefined,
+                                     existing: IPagemark | undefined) {
+            const store = storeProvider();
+            const fluidPagemark = store.fluidPagemarkFactory.create({range, direction, existing});
+            // now add the range which is needed for fluid pagemarks.
+            pagemark.range = fluidPagemark?.range;
+        }
+
+        function createPagemarkToPoint(opts: IPagemarkCreateToPoint, start?: number): ReadonlyArray<IPagemarkRef> {
 
             const store = storeProvider();
             const {docMeta} = store;
 
             if (!docMeta) {
-                return;
+                return [];
             }
 
             const {pageNum} = opts;
 
             const verticalOffsetWithinPageElement = opts.y;
-
             const pageHeight = opts.height;
 
             const percentage = Percentages.calculate(verticalOffsetWithinPageElement,
                                                      pageHeight,
                                                      {noRound: true});
 
-            console.log("percentage for pagemark: ", percentage);
+            console.log("Created pagemark with percentage: ", percentage);
 
-            function deletePagemark(pageNum: number) {
-
+            function deletePagemarkForCurrentPage(pageNum: number) {
                 Preconditions.assertNumber(pageNum, "pageNum");
-
                 Pagemarks.deletePagemark(docMeta!, pageNum);
-
             }
 
             function createPagemarksForRange(endPageNum: number, percentage: number) {
-                Pagemarks.updatePagemarksForRange(docMeta!, endPageNum, percentage, {start});
+
+                const createdPagemarks = Pagemarks.updatePagemarksForRange(docMeta!, endPageNum, percentage, {start});
+
+                if (createdPagemarks.length > 0) {
+                    const last = Arrays.last(createdPagemarks)!
+                    const fluidPagemark = store.fluidPagemarkFactory.create({range: opts.range, direction: undefined, existing: undefined});
+                    // now add the range which is needed for fluid pagemarks.
+                    last.pagemark.range = fluidPagemark?.range;
+                    updatePagemarkRange(last.pagemark, opts.range, undefined, undefined);
+                }
+
+                return createdPagemarks;
+
             }
 
-            deletePagemark(pageNum);
-            createPagemarksForRange(pageNum, percentage);
+            deletePagemarkForCurrentPage(pageNum);
+            const createdPagemarks = createPagemarksForRange(pageNum, percentage);
 
             writeUpdatedDocMetas([docMeta])
                .catch(err => log.error(err));
 
+            return createdPagemarks;
+
         }
 
         function createPagemarkFromPage(opts: IPagemarkCreateFromPage) {
-            createPagemarkToPoint({...opts, type: 'create-to-point'}, opts.fromPage);
+
+            const createOpts: IPagemarkCreateToPoint = {
+                ...opts,
+                type: 'create-to-point',
+                range: opts.range,
+            };
+
+            return createPagemarkToPoint(createOpts, opts.fromPage);
+
         }
 
         function updatePagemark(mutation: IPagemarkUpdate) {
             const store = storeProvider();
             const docMeta = store.docMeta!;
-            Pagemarks.updatePagemark(docMeta, mutation.pageNum, mutation.pagemark);
+
+            function createPagemark() {
+                const newPagemark = Object.assign({}, mutation.existing);
+                newPagemark.percentage = mutation.percentage;
+                newPagemark.rect = mutation.rect;
+                return newPagemark;
+            }
+
+            const pagemark = createPagemark();
+            updatePagemarkRange(pagemark, mutation.range, mutation.direction, mutation.existing);
+            Pagemarks.updatePagemark(docMeta, mutation.pageNum, pagemark);
 
             updateDocMeta(docMeta);
             writeUpdatedDocMetas([docMeta])
                 .catch(err => log.error(err));
+
+            return [{pageNum: mutation.pageNum, pagemark}];
         }
 
         function deletePagemark(mutation: IPagemarkDelete) {
@@ -435,22 +554,33 @@ function callbacksFactory(storeProvider: Provider<IDocViewerStore>,
                 .catch(err => log.error(err));
         }
 
+        function updatePagemarkMode(mutation: IPagemarkUpdateMode) {
+
+            const store = storeProvider();
+            const docMeta = store.docMeta!;
+
+            mutation.existing.mode = mutation.mode;
+            updateDocMeta(docMeta);
+            writeUpdatedDocMetas([docMeta])
+                .catch(err => log.error(err));
+
+            return [];
+
+        }
+
         switch (mutation.type) {
 
             case "create-to-point":
-                createPagemarkToPoint(mutation);
-                break;
-
+                return createPagemarkToPoint(mutation);
             case "create-from-page":
-                createPagemarkFromPage(mutation);
-                break;
-
+                return createPagemarkFromPage(mutation);
             case "update":
-                updatePagemark(mutation);
-                break;
+                return updatePagemark(mutation);
             case "delete":
                 deletePagemark(mutation);
-                break;
+                return [];
+            case "update-mode":
+                return updatePagemarkMode(mutation);
 
         }
 
@@ -496,7 +626,7 @@ function callbacksFactory(storeProvider: Provider<IDocViewerStore>,
             return;
         }
 
-        await pageNavigator.set(newPage);
+        await pageNavigator.jumpToPage(newPage);
         setStore({
             ...store,
             page: newPage
@@ -513,7 +643,8 @@ function callbacksFactory(storeProvider: Provider<IDocViewerStore>,
             await doPageJump(newPage);
         }
 
-        doAsync().catch(err => log.error("Could not handle page nav: ", err));
+        doAsync()
+            .catch(err => log.error("Could not handle page nav: ", err));
 
     }
 
@@ -523,6 +654,42 @@ function callbacksFactory(storeProvider: Provider<IDocViewerStore>,
 
     function onPagePrev() {
         doPageNav(-1);
+    }
+
+    function setPage(page: number) {
+        const store = storeProvider();
+        setStore({
+             ...store,
+             page
+         });
+    }
+
+    /**
+     * Execute the mutator on the DocMeta and write the docMeta and update the
+     * UI store.
+     */
+    function writeDocMetaMutation(mutator: (docMeta: IDocMeta) => void) {
+
+        const store = storeProvider();
+        const {docMeta} = store;
+
+        if (! docMeta) {
+            return;
+        }
+
+        mutator(docMeta);
+
+        writeUpdatedDocMetas([docMeta])
+            .catch(err => log.error(err));
+
+    }
+
+    function setDocFlagged(flagged: boolean) {
+        writeDocMetaMutation(docMeta => docMeta.docInfo.flagged = flagged);
+    }
+
+    function setDocArchived(archived: boolean) {
+        writeDocMetaMutation(docMeta => docMeta.docInfo.archived = archived);
     }
 
     return {
@@ -539,7 +706,11 @@ function callbacksFactory(storeProvider: Provider<IDocViewerStore>,
         onPageNext,
         setResizer,
         setScaleLeveler,
-        setScale
+        setScale,
+        setPage,
+        setFluidPagemarkFactory,
+        setDocFlagged,
+        setDocArchived
     };
 
 }

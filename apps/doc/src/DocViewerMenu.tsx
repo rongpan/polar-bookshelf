@@ -33,8 +33,9 @@ import {Numbers} from "polar-shared/src/util/Numbers";
 import {InvalidInput} from "../../../web/js/ui/dialogs/InputValidators";
 import {FileType} from "../../../web/js/apps/main/file_loaders/FileType";
 import {Ranges} from "../../../web/js/highlights/text/selection/Ranges";
-import AssignmentIcon from '@material-ui/icons/Assignment';
 import {Clipboards} from "../../../web/js/util/system/clipboard/Clipboards";
+import {IFluidPagemark} from "./FluidPagemarkFactory";
+import {MUIMenuSubheader} from "../../../web/js/mui/menu/MUIMenuSubheader";
 
 type AnnotationMetaResolver = (annotationMeta: IAnnotationMeta) => IAnnotationRef;
 
@@ -92,6 +93,7 @@ export interface IDocViewerContextMenuOrigin {
     readonly clientY: number;
     readonly pointWithinPageElement: IPoint;
 
+    readonly target: EventTarget | null;
     readonly fileType: FileType;
 
     readonly hasSelection: boolean;
@@ -101,6 +103,17 @@ export interface IDocViewerContextMenuOrigin {
     readonly pagemarks: ReadonlyArray<IAnnotationMeta>;
     readonly areaHighlights: ReadonlyArray<IAnnotationMeta>;
     readonly textHighlights: ReadonlyArray<IAnnotationMeta>;
+
+    /**
+     * The first range when we're activated.
+     */
+    readonly range: Range | undefined;
+
+    readonly pageX: number;
+    readonly pageY: number;
+
+    readonly windowWidth: number;
+    readonly windowHeight: number;
 
 }
 
@@ -282,9 +295,37 @@ export function computeDocViewerContextMenuOrigin(event: IMouseEvent): IDocViewe
 
     }
 
+    function computeRange() {
+
+        const view = event.nativeEvent.view;
+
+        if (! view) {
+            return undefined;
+        }
+
+        const selection = view.getSelection();
+
+        if (! selection) {
+            return undefined;
+        }
+
+        if (selection.rangeCount === 0) {
+            return undefined;
+        }
+
+        return selection.getRangeAt(0);
+
+    }
+
+    const range = computeRange();
+
     return {
         clientX: event.clientX,
         clientY: event.clientY,
+        pageX: event.pageX,
+        pageY: event.pageY,
+        windowWidth: event.nativeEvent.view!.innerWidth,
+        windowHeight: event.nativeEvent.view!.innerHeight,
         x: eventTargetOffset.left + (event.nativeEvent as any).offsetX,
         y: eventTargetOffset.top + (event.nativeEvent as any).offsetY,
         width: pageElement.clientWidth,
@@ -296,14 +337,16 @@ export function computeDocViewerContextMenuOrigin(event: IMouseEvent): IDocViewe
         textHighlights,
         fileType,
         hasSelection,
-        selectionToText
+        selectionToText,
+        target: event.target,
+        range
     };
 
 }
 
 export const DocViewerMenu = (props: MenuComponentProps<IDocViewerContextMenuOrigin>) => {
 
-    const {docDescriptor} = useDocViewerStore(['docDescriptor']);
+    const {docDescriptor, fluidPagemarkFactory} = useDocViewerStore(['docDescriptor', 'fluidPagemarkFactory']);
     const {onPagemark} = useDocViewerCallbacks();
     const {onAreaHighlightCreated} = useAreaHighlightHooks();
     const annotationMutationsContext = useAnnotationMutationsContext();
@@ -312,27 +355,21 @@ export const DocViewerMenu = (props: MenuComponentProps<IDocViewerContextMenuOri
 
     const origin = props.origin!;
 
-    // FIXME this one needs to specify a 'type' or other parameters
-
     const onCreatePagemarkToPoint = React.useCallback(() => {
-
-        // FIXM I think this would need to read the previous pagemark, use that
-        // page and epubcfi,
-        //
-        // FIXME: I could decompose these into smaller pagemarks that take up
-        // 100% of the page
-
-        // FIXME: make a fake/testable function for adding EPUBCFI data to Pagemarks
-        // to make it work properly...
 
         onPagemark({
             type: 'create-to-point',
-            ...origin,
+            x: origin.x,
+            y: origin.y,
+            width: origin.width,
+            height: origin.height,
+            pageNum: origin.pageNum,
+            range: origin.range
         });
 
     }, []);
 
-    // FIXME: this one also needs to nave an 'end' point but needs to start
+    // FIXME: this one also needs to have an 'end' point but needs to start
     // from a page so we would need some type of custom range for this.
 
     const onCreatePagemarkFromPage = React.useCallback(() => {
@@ -432,12 +469,13 @@ export const DocViewerMenu = (props: MenuComponentProps<IDocViewerContextMenuOri
             {/*                 icon={<AssignmentIcon/>}*/}
             {/*                 onClick={onCopy}/>}*/}
 
-            {isPDF &&
-                <MUIMenuItem text="Create Pagemark to Point"
-                             icon={<BookmarkIcon/>}
-                             onClick={onCreatePagemarkToPoint}/>}
+            <MUIMenuSubheader>Pagemarks</MUIMenuSubheader>
 
-            {isPDF && origin.pageNum > 1 && (
+            <MUIMenuItem text="Create Pagemark to Point"
+                         icon={<BookmarkIcon/>}
+                         onClick={onCreatePagemarkToPoint}/>
+
+            {origin.pageNum > 1 && (
                 <MUIMenuItem text="Create Pagemark from Page To Point"
                              icon={<BookmarksIcon/>}
                              onClick={onCreatePagemarkFromPage}/>)}
@@ -447,7 +485,7 @@ export const DocViewerMenu = (props: MenuComponentProps<IDocViewerContextMenuOri
                              icon={<PhotoSizeSelectLargeIcon/>}
                              onClick={onCreateAreaHighlight}/>}
 
-            {isPDF && (props.origin?.pagemarks?.length || 0) > 0 &&
+            {(props.origin?.pagemarks?.length || 0) > 0 &&
                 <MUIMenuItem text="Delete Pagemark"
                              icon={<DeleteForeverIcon/>}
                              onClick={() => onDeletePagemark(origin.pagemarks)}/>}

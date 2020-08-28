@@ -1,11 +1,14 @@
-import {Rnd} from "react-rnd";
+import {HandleStyles, ResizeEnable, Rnd, ResizableDelta} from "react-rnd";
+import {ResizeDirection} from "re-resizable";
 import * as React from "react";
 import {useState} from "react";
 import {ILTRect} from "polar-shared/src/util/rects/ILTRect";
 import {NULL_FUNCTION} from "polar-shared/src/util/Functions";
-import {Simulate} from "react-dom/test-utils";
-import keyDown = Simulate.keyDown;
 import {Dictionaries} from "polar-shared/src/util/Dictionaries";
+import {deepMemo} from "../../../../web/js/react/ReactUtils";
+import {useWindowResizeEventListener} from "../../../../web/js/react/WindowHooks";
+import {IPoint} from "../../../../web/js/Point";
+import {IXYRect} from "polar-shared/src/util/rects/IXYRect";
 
 interface IProps {
     readonly id?: string;
@@ -14,34 +17,141 @@ interface IProps {
 
     readonly className?: string;
 
-    readonly left: number;
-    readonly top: number;
-    readonly width: number;
-    readonly height: number;
+    readonly bounds?: string;
 
-    readonly onResized?: (resizeRect: ILTRect) => void;
+    readonly document?: Document;
+    readonly window?: Window;
+
+    /**
+     * Used to compute the initial position of the resize box during initial
+     * mount
+     */
+    readonly computePosition: () => ILTRect;
+
+    readonly resizeHandleStyles?: HandleStyles;
+
+    /**
+     * Handle the box being resized, and we can then return a new rect that is
+     * used to position it after the resize so we could 'snap' to some computed
+     * box after the user re-sizes it manually.  We return undefined if no
+     * mutation needs to be made.
+     */
+    readonly onResized?: (resizeRect: ILTRect, direction: ResizeDirection) => IXYRect | undefined;
 
     readonly onContextMenu?: (event: React.MouseEvent<HTMLElement, MouseEvent>) => void;
 
+    readonly enableResizing?: ResizeEnable;
+
+    readonly resizeAxis?: 'y'
+
 }
 
-interface IState {
-    readonly active: boolean;
+interface IBox {
     readonly x: number;
     readonly y: number;
     readonly width: number;
     readonly height: number;
 }
 
-export function ResizeBox(props: IProps) {
+interface IState extends IBox {
+    readonly active: boolean;
+}
 
-    const [state, setState] = useState<IState>({
+function deriveStateFromInitialPosition(computeInitialPosition: () => ILTRect): IState {
+
+    const initialPosition = computeInitialPosition();
+
+    return {
         active: true,
-        x: props.left,
-        y: props.top,
-        width: props.width,
-        height: props.height
-    });
+        x: initialPosition.left,
+        y: initialPosition.top,
+        width: initialPosition.width,
+        height: initialPosition.height
+    };
+
+}
+
+function computeNewBox(box: IBox, direction: ResizeDirection, delta: ResizableDelta): IBox {
+
+    if (direction.startsWith('left') || direction.startsWith('top')) {
+        return {
+            x: box.x - delta.width,
+            width: box.width + delta.width,
+            y: box.y - delta.height,
+            height: box.height + delta.height
+        };
+    }
+
+    if (direction.startsWith('right') || direction.startsWith('bottom')) {
+        return {
+            x: box.x,
+            y: box.y,
+            width: box.width + delta.width,
+            height: box.height + delta.height
+        };
+    }
+
+    throw new Error("unhandled direction: " + direction);
+
+}
+
+export const ResizeBox = deepMemo((props: IProps) => {
+
+    const computeNewState = () => deriveStateFromInitialPosition(props.computePosition);
+
+    const [state, setState] = useState<IState>(computeNewState);
+    const rndRef = React.useRef<Rnd | null>(null);
+
+    useWindowResizeEventListener(() => {
+        setState(computeNewState());
+    }, {win: props.window});
+
+    const handleResize = React.useCallback((newState: IState,
+                                            direction: ResizeDirection) => {
+
+        function computeStateWithAxisHandling(): IState {
+
+            if (props.resizeAxis === 'y') {
+                return {
+                    active: newState.active,
+                    x: state.x,
+                    y: newState.y,
+                    width: state.width,
+                    height: newState.height
+                }
+            }
+
+            return newState;
+
+        }
+
+        newState = computeStateWithAxisHandling();
+
+        setState(newState);
+
+        try {
+
+            // It's important to always catch exceptions here as if we don't
+            // then react-rnd breaks.
+
+            const onResized = props.onResized || NULL_FUNCTION
+
+            const newPosition = onResized({
+                left: newState.x,
+                top: newState.y,
+                width: newState.width,
+                height: newState.height
+            }, direction);
+
+            if (newPosition) {
+                setState({...state, ...newPosition});
+            }
+
+        } catch (e) {
+            console.error(e);
+        }
+
+    }, [])
 
     // force pointer events on the resize corners.
     const resizeHandleStyle: React.CSSProperties = {
@@ -63,31 +173,42 @@ export function ResizeBox(props: IProps) {
         });
     }
 
-    const handleResize = React.useCallback((state: IState) => {
+    const dataProps = Dictionaries.filter<any>(props, key => key.startsWith('data-'));
 
-        setState(state);
+    const outlineSize = 5
+    const outlineSizePX = `${outlineSize}px`;
 
-        try {
+    const resizeStyles = {
+        vertical: {
+            width: outlineSizePX
+        },
+        horizontal: {
+            height: outlineSizePX
+        },
+        corner: {
+            width: outlineSizePX,
+            height: outlineSizePX
+        }
+    }
 
-            // It's important to always catch exceptions here as if we don't
-            // then react-rnd breaks.
+    function computePosition(state: IState): IPoint {
+        return {x: state.x, y: state.y};
+    }
 
-            const onResized = props.onResized || NULL_FUNCTION
+    const position = computePosition(state);
+    const doc = props.document || document;
 
-            onResized({
-                left: state.x,
-                top: state.y,
-                width: state.width,
-                height: state.height
-            });
+    const toggleUserSelect = (resizing: boolean) => {
+        // this is a hack to disable user select of the document to prevent
+        // parts of the UI from being selected
 
-        } catch (e) {
-            console.error(e);
+        if (resizing) {
+            doc.body.style.userSelect = 'none';
+        } else {
+            doc.body.style.userSelect = 'auto';
         }
 
-    }, [])
-
-    const dataProps = Dictionaries.filter<any>(props, key => key.startsWith('data-'));
+    };
 
     return (
         <>
@@ -96,50 +217,94 @@ export function ResizeBox(props: IProps) {
             {/*    <ControlBar bottom={state.y} left={state.x} width={state.width}/>}*/}
 
             <Rnd
+                ref={ref => rndRef.current = ref}
                 id={props.id}
-                bounds="parent"
+                bounds={props.bounds || "parent"}
                 className={props.className}
                 size={{
                     width: state.width,
                     height: state.height
                 }}
-                position={{ x: state.x, y: state.y }}
+                onMouseDown={() => toggleUserSelect(true)}
+                onMouseUp={() => toggleUserSelect(false)}
+                position={position}
                 // onMouseOver={() => handleOnMouseOver()}
                 // onMouseOut={() => handleOnMouseOut()}
                 onDragStop={(e, d) => {
-                    handleResize({
-                        ...state,
-                        x: d.x,
-                        y: d.y
-                    });
+                    // handleResize({
+                    //     ...state,
+                    //     x: d.x,
+                    //     y: d.y
+                    // });
                 }}
-                onResizeStop={(e,
+                onResizeStop={(event,
                                direction,
-                               ref,
-                               delta,
-                               position) => {
+                               elementRef,
+                               delta) => {
 
-                    const width = parseInt(ref.style.width);
-                    const height = parseInt(ref.style.height);
+                    const box = computeNewBox(state, direction, delta);
 
                     handleResize({
                         ...state,
-                        width,
-                        height,
-                        ...position,
-                    });
+                        ...box,
+                    }, direction);
 
                 }}
                 disableDragging={true}
+                enableResizing={props.enableResizing}
                 resizeHandleStyles={{
-                    bottom: resizeHandleStyle,
-                    bottomLeft: resizeHandleStyle,
-                    bottomRight: resizeHandleStyle,
-                    top: resizeHandleStyle,
-                    topLeft: resizeHandleStyle,
-                    topRight: resizeHandleStyle,
-                    left: resizeHandleStyle,
-                    right: resizeHandleStyle
+                    top: {
+                        ...resizeHandleStyle,
+                        ...props.resizeHandleStyles?.top,
+                        ...resizeStyles.horizontal,
+                        top: '0px'
+                    },
+                    bottom: {
+                        ...resizeHandleStyle,
+                        ...props.resizeHandleStyles?.bottom,
+                        ...resizeStyles.horizontal,
+                        bottom: '0px'
+                    },
+                    left: {
+                        ...resizeHandleStyle,
+                        ...props.resizeHandleStyles?.left,
+                        ...resizeStyles.vertical,
+                        left: '0px',
+                    },
+                    right: {
+                        ...resizeHandleStyle,
+                        ...props.resizeHandleStyles?.right,
+                        ...resizeStyles.vertical,
+                        right: '0px'
+                    },
+                    topLeft: {
+                        ...resizeHandleStyle,
+                        ...props.resizeHandleStyles?.topLeft,
+                        ...resizeStyles.corner,
+                        top: `0px`,
+                        left: `0px`
+                    },
+                    topRight: {
+                        ...resizeHandleStyle,
+                        ...props.resizeHandleStyles?.topRight,
+                        ...resizeStyles.corner,
+                        top: `0px`,
+                        right: `0px`
+                    },
+                    bottomLeft: {
+                        ...resizeHandleStyle,
+                        ...props.resizeHandleStyles?.bottomLeft,
+                        ...resizeStyles.corner,
+                        bottom: `0px`,
+                        left: `0px`
+                    },
+                    bottomRight: {
+                        ...resizeHandleStyle,
+                        ...props.resizeHandleStyles?.bottomRight,
+                        ...resizeStyles.corner,
+                        bottom: `0px`,
+                        right: `0px`
+                    },
                 }}
                 style={{
                     ...props.style,
@@ -157,4 +322,4 @@ export function ResizeBox(props: IProps) {
         </>
     );
 
-}
+})
