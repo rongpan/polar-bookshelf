@@ -119,11 +119,19 @@ interface PagemarkInnerProps {
     readonly pagemark: IPagemark;
     readonly pagemarkColor: PagemarkColors.PagemarkColor;
 
+    /**
+     * Updated when we're given a new pagemark after a resize.
+     */
+    readonly onPagemark: (pagemark: IPagemark) => void;
+
 }
 
 const PagemarkInner = deepMemo((props: PagemarkInnerProps) => {
 
-    const {id, fingerprint, pagemark, pageNum, className, pagemarkColor} = props;
+    console.log("FIXME: render of PagemarkInner");
+
+    const {id, fingerprint, pageNum, className, pagemarkColor} = props;
+    const [pagemark, setPagemark] = React.useState<IPagemark>(props.pagemark);
 
     const contextMenu = useContextMenu();
     const iframe = useEPUBIFrameElement();
@@ -220,14 +228,21 @@ const PagemarkInner = deepMemo((props: PagemarkInnerProps) => {
         const updated = onPagemark(mutation);
 
         if (updated.length === 1) {
+
+            const newPagemark = updated[0].pagemark;
+
             // recompute the position and return the new box.
-            const rect = computePositionUsingPagemark(updated[0].pagemark);
+            const rect = computePositionUsingPagemark(newPagemark);
             return {
                 x: rect.left,
                 y: rect.top,
                 width: rect.width,
                 height: rect.height
             }
+
+            setPagemark(newPagemark);
+            props.onPagemark(newPagemark);
+
         }
 
         return undefined;
@@ -276,9 +291,13 @@ interface IProps {
 
 export const PagemarkRendererForFluid = deepMemo((props: IProps) => {
 
-    const {pagemark, fingerprint, pageNum, container} = props;
-    useWindowScrollEventListener(NULL_FUNCTION);
-    useWindowResizeEventListener(NULL_FUNCTION);
+    console.log("FIXME: render: ");
+
+    const {fingerprint, pageNum, container} = props;
+    const [pagemark, setPagemark] = React.useState<IPagemark>(props.pagemark);
+
+    // useWindowScrollEventListener(NULL_FUNCTION);
+    // useWindowResizeEventListener(NULL_FUNCTION);
 
     if (! container) {
         return null;
@@ -308,6 +327,7 @@ export const PagemarkRendererForFluid = deepMemo((props: IProps) => {
                                    fingerprint={fingerprint}
                                    pageNum={pageNum}
                                    pagemark={pagemark}
+                                   onPagemark={newPagemark => setPagemark(newPagemark)}
                                    pagemarkColor={pagemarkColor}/>
                 </ContextMenu>
             </PagemarkValueContext.Provider>,
