@@ -76,7 +76,7 @@ export const RepositoryDocViewerScreen = React.memo((props: RepositoryDocViewerS
                         <DocViewerStore>
                             <DocFindStore>
                                 <AnnotationSidebarStoreProvider>
-                                    <DocViewer/>
+                                    <DocViewer url={document.location.href}/>
                                 </AnnotationSidebarStoreProvider>
                             </DocFindStore>
                         </DocViewerStore>
@@ -98,23 +98,23 @@ export const RepositoryApp = (props: IProps) => {
     ));
 
     const RenderDocRepoScreen = React.memo(() => (
-            <AuthRequired>
-                <PersistenceLayerApp tagsType="documents"
-                                     repoDocMetaManager={repoDocMetaManager}
-                                     repoDocMetaLoader={repoDocMetaLoader}
-                                     persistenceLayerManager={persistenceLayerManager}
-                                     render={(docRepo) =>
-                                         <DocRepoStore2>
-                                             <DocRepoSidebarTagStore>
-                                                 <>
-                                                     <AnkiSyncController/>
-                                                     <DocRepoScreen2/>
-                                                 </>
-                                             </DocRepoSidebarTagStore>
-                                         </DocRepoStore2>
-                                     }/>
-            </AuthRequired>
-        ));
+        <AuthRequired>
+            <PersistenceLayerApp tagsType="documents"
+                                 repoDocMetaManager={repoDocMetaManager}
+                                 repoDocMetaLoader={repoDocMetaLoader}
+                                 persistenceLayerManager={persistenceLayerManager}
+                                 render={(docRepo) =>
+                                     <DocRepoStore2>
+                                         <DocRepoSidebarTagStore>
+                                             <>
+                                                 <AnkiSyncController/>
+                                                 <DocRepoScreen2/>
+                                             </>
+                                         </DocRepoSidebarTagStore>
+                                     </DocRepoStore2>
+                                 }/>
+        </AuthRequired>
+    ));
 
     const RenderAnnotationRepoScreen = React.memo(() => {
         return (
@@ -373,7 +373,7 @@ export const RepositoryApp = (props: IProps) => {
                                         </Switch>
                                     </MUIDialogController>
                                 </UseLocationChangeRoot>
-                         </BrowserRouter>
+                            </BrowserRouter>
                         </UseLocationChangeStoreProvider>
                     </>
 

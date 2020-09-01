@@ -28,7 +28,7 @@ export const DocViewerScreen = React.memo(() => {
                                 <DocViewerStore>
                                     <DocFindStore>
                                         <AnnotationSidebarStoreProvider>
-                                            <DocViewer/>
+                                            <DocViewer url={document.location.href} />
                                         </AnnotationSidebarStoreProvider>
                                     </DocFindStore>
                                 </DocViewerStore>
