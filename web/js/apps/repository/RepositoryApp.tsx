@@ -53,6 +53,10 @@ import {RepoFooter} from "../../../../apps/repository/js/repo_footer/RepoFooter"
 import {MUIDialogController} from "../../mui/dialogs/MUIDialogController";
 import {UseLocationChangeStoreProvider} from '../../../../apps/doc/src/annotations/UseLocationChangeStore';
 import {UseLocationChangeRoot} from "../../../../apps/doc/src/annotations/UseLocationChangeRoot";
+import {BrowserTabs} from "../../chrome_tabs/BrowserTabs";
+import {useBrowserTabsCallbacks, useBrowserTabsStore} from "../../chrome_tabs/BrowserTabsStore";
+import {DocViewerAppURLs} from "../../../../apps/doc/src/DocViewerAppURLs";
+import {useLocation} from "react-router-dom"
 
 interface IProps {
     readonly app: App;
@@ -65,6 +69,7 @@ interface IProps {
 
 interface RepositoryDocViewerScreenProps {
     readonly persistenceLayerProvider: ListenablePersistenceLayerProvider;
+    readonly url: string
 }
 
 export const RepositoryDocViewerScreen = React.memo((props: RepositoryDocViewerScreenProps) => (
@@ -76,7 +81,7 @@ export const RepositoryDocViewerScreen = React.memo((props: RepositoryDocViewerS
                         <DocViewerStore>
                             <DocFindStore>
                                 <AnnotationSidebarStoreProvider>
-                                    <DocViewer url={document.location.href}/>
+                                    <DocViewer url={props.url}/>
                                 </AnnotationSidebarStoreProvider>
                             </DocFindStore>
                         </DocViewerStore>
@@ -92,10 +97,6 @@ export const RepositoryApp = (props: IProps) => {
     const {app, repoDocMetaManager, repoDocMetaLoader, persistenceLayerManager} = props;
 
     Preconditions.assertPresent(app, 'app');
-
-    const RenderDocViewerScreen = React.memo(() => (
-        <RepositoryDocViewerScreen persistenceLayerProvider={app.persistenceLayerProvider}/>
-    ));
 
     const RenderDocRepoScreen = React.memo(() => (
         <AuthRequired>
@@ -275,6 +276,28 @@ export const RepositoryApp = (props: IProps) => {
         return <InviteScreen/>;
     };
 
+    // Get tabStore
+    const { activeTab, tabs, tabContents } = useBrowserTabsStore([
+      "activeTab",
+      "tabs",
+      "tabContents"
+    ]);
+
+    // Map tabContents to array of DocViewers in Persistent Routes
+    // Note: Deletion of a tab may cause rerender
+    const docViewers = tabContents.map(tabContent => {
+
+      if (!tabContent.url || tabContent.url === "/") {
+        return undefined;
+      }
+
+      return (
+        <PersistentRoute exact path={tabContent.url}>
+          <RepositoryDocViewerScreen persistenceLayerProvider={app.persistenceLayerProvider} url={tabContent.url} />
+        </PersistentRoute>
+      );
+      }
+    ).filter(value => value !== undefined);
 
     return (
         <MUIRepositoryRoot>
@@ -295,13 +318,15 @@ export const RepositoryApp = (props: IProps) => {
 
                                         <Switch>
 
+                                            {docViewers}
+
                                             <Route exact path={["/login", "/login.html"]}>
                                                 <LoginScreen/>
                                             </Route>
 
-                                            <Route exact path={["/doc", "/doc/:id"]}>
-                                                <RenderDocViewerScreen/>
-                                            </Route>
+                                            {/*<Route exact path={["/doc", "/doc/:id"]}>*/}
+                                            {/*    <RenderDocViewerScreen/>*/}
+                                            {/*</Route>*/}
 
                                             <Route exact path="/error">
                                                 <ErrorScreen/>
