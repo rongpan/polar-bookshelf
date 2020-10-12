@@ -270,20 +270,20 @@ autoUpdater.on('download-progress', (progress: ProgressInfo) => {
     Broadcasters.send("download-progress", progress);
 
 });
+//
+// ipcMain.on('app-update:check-for-update', () => {
+//     Updates.checkForUpdatesManually();
+// });
+//
+// ipcMain.on('app-update:quit-and-install', () => {
+//     autoUpdater.quitAndInstall();
+// });
 
-ipcMain.on('app-update:check-for-update', () => {
-    Updates.checkForUpdatesManually();
-});
-
-ipcMain.on('app-update:quit-and-install', () => {
-    autoUpdater.quitAndInstall();
-});
-
-if (ENABLE_AUTO_UPDATE && AppUpdates.platformSupportsUpdates()) {
-    log.info("Auto updates enabled.");
-
-    Updates.scheduleAutoUpdate(AUTO_UPDATE_DELAY_INITIAL);
-} else {
-    log.info("Auto updates disabled.");
-}
-
+// if (ENABLE_AUTO_UPDATE && AppUpdates.platformSupportsUpdates()) {
+//     log.info("Auto updates enabled.");
+//
+//     Updates.scheduleAutoUpdate(AUTO_UPDATE_DELAY_INITIAL);
+// } else {
+//     log.info("Auto updates disabled.");
+// }
+//
