@@ -12,7 +12,7 @@
     "setup-dist-default": "npm run-script verify-electron-version && cp web/js/dist_config/DefaultDistConfig.ts web/js/dist_config/DistConfig.ts",
     "setup-dist-appx": "cp web/js/dist_config/AppXDistConfig.ts web/js/dist_config/DistConfig.ts",
     "publish-linux-snapcraft": "snapcraft push --release stable ./dist/polar-bookshelf-${npm_package_version}-amd64.snap",
-    "publish-linux": "electron-builder --config=electron-builder.yml --linux snap appimage deb tar.gz --publish always",
+    "publish-linux": "electron-builder --config=electron-builder.yml --linux appimage deb tar.gz --publish always",
     "__publish-linux": "electron-builder --config=electron-builder.yml --linux appimage deb tar.gz --publish always",
     "publish-macos": "electron-builder --config=electron-builder.yml --macos dmg zip --publish always",
     "publish-webapp": "npm run-script build-webapp && firebase use polar-32b0f && firebase target:apply hosting app.getpolarized.io polar-webapp && firebase deploy",
