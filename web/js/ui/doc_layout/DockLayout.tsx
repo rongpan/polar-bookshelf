@@ -5,6 +5,8 @@ import {IDStr} from "polar-shared/src/util/Strings";
 import {Callback, NULL_FUNCTION} from "polar-shared/src/util/Functions";
 import {Debouncers} from "polar-shared/src/util/Debouncers";
 import {DockSplitter} from "./DockSplitter";
+import {deepMemo} from "../../react/ReactUtils";
+import {useRefState} from "../../hooks/ReactHooks";
 
 class Styles {
 
@@ -16,207 +18,182 @@ class Styles {
 
 }
 
+
+interface IProps {
+    readonly dockPanels: ReadonlyArray<DockPanel>;
+    readonly onResize?: Callback;
+}
+
 /**
  * A simple expand/collapse dock with a persistent mode where it stays docked
  * next time you open the UI and a temporary mode too where it expand when the
  * toggle button is pushed.
  *
  */
-export class DockLayout extends React.Component<IProps, IState> {
+export const DockLayout = deepMemo((props: IProps) => {
 
-    private mousePosition = MousePositions.get();
+    const mousePosition = React.useRef(MousePositions.get());
+    const mouseDown = React.useRef(false);
 
-    private mouseDown: boolean = false;
+    const createFixedDocPanelStateMap = (): FixedDocPanelStateMap => {
 
-    constructor(props: IProps, context: any) {
-        super(props, context);
+        const result: FixedDocPanelStateMap = {};
 
-        this.onMouseDown = this.onMouseDown.bind(this);
-        this.onMouseUp = this.onMouseUp.bind(this);
-        this.onMouseMove = this.onMouseMove.bind(this);
-        this.markResizing = this.markResizing.bind(this);
+        for (const docPanel of props.dockPanels) {
 
-        const createFixedDocPanelStateMap = (): FixedDocPanelStateMap => {
-
-            const result: FixedDocPanelStateMap = {};
-
-            for (const docPanel of this.props.dockPanels) {
-
-                if (docPanel.type === 'fixed') {
-                    result[docPanel.id] = {
-                        id: docPanel.id,
-                        width: docPanel.width || 400
-                    };
-                }
-
+            if (docPanel.type === 'fixed') {
+                result[docPanel.id] = {
+                    id: docPanel.id,
+                    width: docPanel.width || 400
+                };
             }
 
-            return result;
+        }
 
-        };
+        return result;
 
-        this.state = {
-            resizing: undefined,
-            panels: createFixedDocPanelStateMap()
-        };
+    };
 
-    }
+    const [state, setState, stateRef] = useRefState<IState>({
+        resizing: undefined,
+        panels: createFixedDocPanelStateMap()
+    });
 
-    public render() {
+    const createDockPanels = (): ReadonlyArray<JSX.Element> => {
 
-        const createDockPanels = (): ReadonlyArray<JSX.Element> => {
+        const tuples = Tuples.createSiblings(props.dockPanels.filter(current => ! current.disabled));
 
-            const tuples = Tuples.createSiblings(this.props.dockPanels.filter(current => ! current.disabled));
+        const result: JSX.Element[] = [];
 
-            const result: JSX.Element[] = [];
+        const createBaseStyle = (): React.CSSProperties => {
 
-            const createBaseStyle = (): React.CSSProperties => {
-
-                const style = {
-                    overflow: 'auto',
-                };
-
-                if (this.state.resizing) {
-                    return {
-                        ...style,
-                        pointerEvents: 'none',
-                        userSelect: 'none'
-                    };
-                } else {
-                    return style;
-                }
-
+            const style = {
+                overflow: 'auto',
             };
 
-            const createFixedDockPanelElement = (docPanel: FixedDockPanel, idx: number): JSX.Element => {
-
-                const panelState = this.state.panels[docPanel.id];
-
-                const {width} = panelState;
-
-                const baseStyle = createBaseStyle();
-
-                const style: React.CSSProperties = {
-                    ...baseStyle,
-                    width,
-                    maxWidth: width,
-                    minWidth: width,
-                    ...(docPanel.style || {})
+            if (stateRef.current.resizing) {
+                return {
+                    ...style,
+                    pointerEvents: 'none',
+                    userSelect: 'none'
                 };
-
-                return (
-                    <div className="dock-layout-fixed"
-                         style={style}
-                         key={idx}
-                         id={docPanel.id}>
-                        {docPanel.component}
-                    </div>
-                );
-
-            };
-
-            const createGrowDockPanelElement = (docPanel: GrowDockPanel, idx: number): JSX.Element => {
-
-                const style: React.CSSProperties = {
-                    ...createBaseStyle(),
-                    flexGrow: docPanel.grow || 1,
-                    ...(docPanel.style || {})
-                };
-
-                return (
-                    <div className="dock-layout-grow" style={style} key={idx} id={docPanel.id}>
-                        {docPanel.component}
-                    </div>
-                );
-
-            };
-
-            const createDocPanelElement = (docPanel: DockPanel, idx: number): JSX.Element => {
-
-                if (docPanel.type === 'fixed') {
-                    return createFixedDockPanelElement(docPanel, idx);
-                }
-
-                return createGrowDockPanelElement(docPanel, idx);
-
-            };
-
-            for (const tuple of tuples) {
-
-                result.push(createDocPanelElement(tuple.curr, tuple.idx));
-
-                const computeResizeTarget = (): ResizeTarget => {
-
-                    if (tuple.curr.type === 'fixed') {
-                        return {
-                            id: tuple.curr.id,
-                            direction: 'left'
-                        };
-                    }
-
-                    return {
-                        id: tuple.next!.id,
-                        direction: 'right'
-                    };
-
-                };
-
-                if  (tuple.next !== undefined) {
-                    const resizeTarget = computeResizeTarget();
-                    const splitter = <DockSplitter key={'splitter-' + tuple.idx}
-                                                   onMouseDown={() => this.onMouseDown(resizeTarget)}/>;
-                    result.push(splitter);
-                }
-
+            } else {
+                return style;
             }
 
-            return result;
+        };
+
+        const createFixedDockPanelElement = (docPanel: FixedDockPanel, idx: number): JSX.Element => {
+
+            const panelState = stateRef.current.panels[docPanel.id];
+
+            const {width} = panelState;
+
+            const baseStyle = createBaseStyle();
+
+            const style: React.CSSProperties = {
+                ...baseStyle,
+                width,
+                maxWidth: width,
+                minWidth: width,
+                ...(docPanel.style || {})
+            };
+
+            return (
+                <div className="dock-layout-fixed"
+                     style={style}
+                     key={idx}
+                     id={docPanel.id}>
+                    {docPanel.component}
+                </div>
+            );
 
         };
 
-        const docPanels = createDockPanels();
+        const createGrowDockPanelElement = (docPanel: GrowDockPanel, idx: number): JSX.Element => {
 
-        // I'm not sure how much CPU this is going to save. It might be test
-        // to show a sort of live preview of where the bar would go, then drop
-        // it there when completed
-        const handleMouseMove = Debouncers.create(() => this.onMouseMove());
+            const style: React.CSSProperties = {
+                ...createBaseStyle(),
+                flexGrow: docPanel.grow || 1,
+                ...(docPanel.style || {})
+            };
 
-        return (
+            return (
+                <div className="dock-layout-grow" style={style} key={idx} id={docPanel.id}>
+                    {docPanel.component}
+                </div>
+            );
 
-            <div className="dock-layout"
-                 style={{...Styles.Dock}}
-                 onMouseMove={() => handleMouseMove()}
-                 draggable={false}>
+        };
 
-                {...docPanels}
+        const createDocPanelElement = (docPanel: DockPanel, idx: number): JSX.Element => {
 
-            </div>
+            if (docPanel.type === 'fixed') {
+                return createFixedDockPanelElement(docPanel, idx);
+            }
 
-        );
-    }
+            return createGrowDockPanelElement(docPanel, idx);
 
-    private onMouseUp() {
+        };
 
-        this.mousePosition = MousePositions.get();
+        for (const tuple of tuples) {
 
-        this.markResizing(undefined);
-    }
+            result.push(createDocPanelElement(tuple.curr, tuple.idx));
 
-    private onMouseDown(resizeTarget: ResizeTarget) {
+            const computeResizeTarget = (): ResizeTarget => {
 
-        this.mousePosition = MousePositions.get();
+                if (tuple.curr.type === 'fixed') {
+                    return {
+                        id: tuple.curr.id,
+                        direction: 'left'
+                    };
+                }
 
-        this.markResizing(resizeTarget);
+                return {
+                    id: tuple.next!.id,
+                    direction: 'right'
+                };
+
+            };
+
+            if  (tuple.next !== undefined) {
+                const resizeTarget = computeResizeTarget();
+                const splitter = <DockSplitter key={'splitter-' + tuple.idx}
+                                               onMouseDown={() => onMouseDown(resizeTarget)}/>;
+                result.push(splitter);
+            }
+
+        }
+
+        return result;
+
+    };
+
+    const docPanels = createDockPanels();
+
+    const onMouseUp = React.useCallback(() => {
+
+        mousePosition.current = MousePositions.get();
+
+        markResizing(undefined);
+
+    }, [mousePosition]);
+
+    const onMouseDown = React.useCallback((resizeTarget: ResizeTarget) => {
+
+        mousePosition.current = MousePositions.get();
+
+        markResizing(resizeTarget);
 
         window.addEventListener('mouseup', () => {
             // this code properly handles the mouse leaving the window
             // during mouse up and then leaving wonky event handlers.
-            this.onMouseUp();
+            onMouseUp();
         }, {once: true});
 
-    }
+    }, [mousePosition]);
 
-    private markResizing(resizeTarget: ResizeTarget | undefined) {
+    const markResizing = React.useCallback((resizeTarget: ResizeTarget | undefined) => {
 
         const toggleUserSelect = (resizing: boolean) => {
             // this is a hack to disable user select of the document to prevent
@@ -232,26 +209,27 @@ export class DockLayout extends React.Component<IProps, IState> {
 
         toggleUserSelect(resizeTarget !== undefined);
 
-        this.mouseDown = resizeTarget !== undefined;
-        this.setState({...this.state, resizing: resizeTarget});
-    }
+        mouseDown.current = resizeTarget !== undefined;
+        setState({...stateRef.current, resizing: resizeTarget});
 
-    private onMouseMove() {
+    }, [mouseDown]);
 
-        if (!this.mouseDown) {
+    const onMouseMove = React.useCallback(() => {
+
+        if (! mouseDown.current) {
             return;
         }
 
         const lastMousePosition = MousePositions.get();
 
-        const resizeTarget = this.state.resizing!;
+        const resizeTarget = stateRef.current.resizing!;
 
         // TODO: this might not be correct with multiple panels
         const mult = resizeTarget.direction === 'left' ? 1 : -1;
 
-        const delta = mult * (lastMousePosition.clientX - this.mousePosition.clientX);
+        const delta = mult * (lastMousePosition.clientX - mousePosition.current.clientX);
 
-        const panelState = this.state.panels[resizeTarget.id];
+        const panelState = stateRef.current.panels[resizeTarget.id];
         const width = panelState.width + delta;
 
         const newPanelState = {
@@ -260,34 +238,46 @@ export class DockLayout extends React.Component<IProps, IState> {
         };
 
         const newPanels = {
-            ...this.state.panels
+            ...stateRef.current.panels
         };
 
         newPanels[resizeTarget.id] = newPanelState;
 
-        (this.props.onResize || NULL_FUNCTION)();
+        // FIXME: this doesn't seem to be causeing the pdf viewer to resize though...
+        console.log("FIXME calling onResize");
+        (props.onResize || NULL_FUNCTION)();
 
-        this.setState({
-            ...this.state,
+        setState({
+            ...stateRef.current,
             panels: newPanels
         });
 
-        this.mousePosition = lastMousePosition;
+        mousePosition.current = lastMousePosition;
 
-    }
+    }, [mousePosition, mouseDown]);
 
-}
 
-interface IProps {
+    // I'm not sure how much CPU this is going to save. It might be test
+    // to show a sort of live preview of where the bar would go, then drop
+    // it there when completed
+    const handleMouseMove = React.useMemo(() => Debouncers.create(() => onMouseMove()), [onMouseMove]);
 
-    /**
-     * The configuration of the panels.
-     */
-    readonly dockPanels: ReadonlyArray<DockPanel>;
+    console.log("FIXME: docPanels: ", docPanels);
 
-    readonly onResize?: Callback;
+    return (
 
-}
+        <div className="dock-layout"
+             style={{...Styles.Dock}}
+             onMouseMove={() => handleMouseMove()}
+             draggable={false}>
+
+            {...docPanels}
+
+        </div>
+
+    );
+
+});
 
 
 /**
@@ -317,7 +307,6 @@ interface IState {
     readonly panels: FixedDocPanelStateMap;
 
 }
-
 
 /**
  * A CSS width in CSS units (px, em, etc).
