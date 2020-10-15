@@ -54,12 +54,12 @@ export const DockLayout = deepMemo((props: IProps) => {
 
     };
 
-    const [state, setState, stateRef] = useRefState<IState>({
+    const [, setState, stateRef] = useRefState<IState>({
         resizing: undefined,
         panels: createFixedDocPanelStateMap()
     });
 
-    const createDockPanels = (): ReadonlyArray<JSX.Element> => {
+    const createDockPanels = React.useCallback((): ReadonlyArray<JSX.Element> => {
 
         const tuples = Tuples.createSiblings(props.dockPanels.filter(current => ! current.disabled));
 
@@ -167,16 +167,13 @@ export const DockLayout = deepMemo((props: IProps) => {
 
         return result;
 
-    };
+    }, []);
 
     const docPanels = createDockPanels();
 
     const onMouseUp = React.useCallback(() => {
-
         mousePosition.current = MousePositions.get();
-
         markResizing(undefined);
-
     }, [mousePosition]);
 
     const onMouseDown = React.useCallback((resizeTarget: ResizeTarget) => {
@@ -191,7 +188,7 @@ export const DockLayout = deepMemo((props: IProps) => {
             onMouseUp();
         }, {once: true});
 
-    }, [mousePosition]);
+    }, [mousePosition, onMouseUp]);
 
     const markResizing = React.useCallback((resizeTarget: ResizeTarget | undefined) => {
 
@@ -243,8 +240,6 @@ export const DockLayout = deepMemo((props: IProps) => {
 
         newPanels[resizeTarget.id] = newPanelState;
 
-        // FIXME: this doesn't seem to be causeing the pdf viewer to resize though...
-        console.log("FIXME calling onResize");
         (props.onResize || NULL_FUNCTION)();
 
         setState({
@@ -262,8 +257,6 @@ export const DockLayout = deepMemo((props: IProps) => {
     // it there when completed
     const handleMouseMove = React.useMemo(() => Debouncers.create(() => onMouseMove()), [onMouseMove]);
 
-    console.log("FIXME: docPanels: ", docPanels);
-
     return (
 
         <div className="dock-layout"
@@ -278,7 +271,6 @@ export const DockLayout = deepMemo((props: IProps) => {
     );
 
 });
-
 
 /**
  * Keeps a map from the ID to the width.
