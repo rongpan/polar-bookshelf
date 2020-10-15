@@ -1,67 +1,37 @@
 import React from 'react';
 import {Provider} from 'polar-shared/src/util/Providers';
-import {createObservableStore, SetStore} from '../react/store/ObservableStore';
-import {arrayStream} from "polar-shared/src/util/ArrayStreams";
+import {createObservableStore, SetStore} from "../../react/store/ObservableStore";
 
 interface IDockLayoutStore {
 
-    readonly activeTab: number | undefined;
-
-    readonly tabs: ReadonlyArray<TabDescriptor>;
+    /**
+     * The sizes of the docks
+     */
+    readonly sizes: ReadonlyArray<number>;
 
 }
 
 interface IDockLayoutCallbacks {
 
-    readonly setActiveTab: (id: number) => void;
-    readonly addTab: (tabDescriptor: TabDescriptor) => void;
-    readonly removeTab: (id: number) => void;
+    readonly setSizes: (sizes: ReadonlyArray<number>) => void;
 
 }
 
-function createInitialTabs(): ReadonlyArray<TabDescriptor> {
-    return [
-        {
-            url: '/',
-            title: 'Polar: Document Repository'
-        },
-        // {
-        //     id: 2,
-        //     url: '/doc/39b730b6e9d281b0eae91b2c2c29b842',
-        //     title: 'availability.pdf'
-        // },
-        // {
-        //     id: 3,
-        //     url: '/doc/65633831393839653565636565353663396137633437306630313331353264366266323462366463373335343834326562396534303262653534353034363564',
-        //     title: 'Venture Deals'
-        // }
-    ]
-}
 
 const initialStore: IDockLayoutStore = {
-    activeTab: 0,
-    tabs: createInitialTabs(),
+    sizes: []
 }
 
 interface Mutation {
-    readonly activeTab: number;
-    readonly tabs: ReadonlyArray<TabDescriptor>;
 }
 
 interface Mutator {
-
-    readonly doUpdate: (mutation: Mutation) => void;
-
 }
 
 function mutatorFactory(storeProvider: Provider<IDockLayoutStore>,
                         setStore: SetStore<IDockLayoutStore>): Mutator {
 
-    function doUpdate(mutation: Mutation) {
-        setStore(mutation);
-    }
-
-    return {doUpdate};
+    return {};
 
 }
 
@@ -69,87 +39,15 @@ function callbacksFactory(storeProvider: Provider<IDockLayoutStore>,
                           setStore: (store: IDockLayoutStore) => void,
                           mutator: Mutator): IDockLayoutCallbacks {
 
-    // FIXME: now the issue is useHistory here I think...
-    // FIXME: useHistory caues the components to reload and it might be that
-    // we have two BrowserRouters at the root. I think we should try to go with
-    // just ONE router if possible and more properly use switches.
-
-    // const history = useHistory();
-
-    // FIXME: I think this is better BUT ... the memo is still being called
-    // and created at least once...
-
     return React.useMemo((): IDockLayoutCallbacks => {
 
-        function setActiveTab(activeTab: number) {
+        function setSizes(sizes: ReadonlyArray<number>) {
             const store = storeProvider();
-            setStore({...store, activeTab});
-        }
-
-        function addTab(tabDescriptor: TabDescriptor) {
-
-            const store = storeProvider();
-
-            function computeExistingTab() {
-                return arrayStream(store.tabs)
-                    .withIndex()
-                    .filter(current => current.value.url === tabDescriptor.url)
-                    .first();
-            }
-
-            function doTabMutation(newStore: IDockLayoutStore) {
-                // history.replace(tabDescriptor.url);
-                history.replaceState(null, tabDescriptor.title, tabDescriptor.url);
-                setStore(newStore);
-            }
-
-            const existingTab = computeExistingTab();
-
-            if (existingTab) {
-                // just switch to the existing tab when one already exists and we
-                // want to switch to it again.
-                doTabMutation({...store, activeTab: existingTab.index});
-                return;
-            }
-
-            const tabs = [...store.tabs, tabDescriptor];
-
-            // now switch to the new tab
-            const activeTab = tabs.length - 1;
-
-            doTabMutation({...store, tabs, activeTab});
-
-        }
-
-        function removeTab(id: number) {
-
-            const store = storeProvider();
-
-            function computeTabs() {
-                const tabs = [...store.tabs];
-                tabs.splice(id, 1);
-                return tabs;
-            }
-
-            function computeActiveTab() {
-
-                if (store.activeTab === id) {
-                    return Math.max(store.activeTab - 1, 1);
-                }
-
-                return store.activeTab;
-
-            }
-
-            const tabs = computeTabs();
-            const activeTab = computeActiveTab();
-
-            setStore({...store, tabs, activeTab});
-
+            setStore({...store, sizes});
         }
 
         return {
-            addTab, removeTab, setActiveTab
+            setSizes
         };
 
     }, [storeProvider, setStore]);
