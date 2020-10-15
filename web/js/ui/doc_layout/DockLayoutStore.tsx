@@ -1,25 +1,22 @@
 import React from 'react';
 import {Provider} from 'polar-shared/src/util/Providers';
 import {createObservableStore, SetStore} from "../../react/store/ObservableStore";
+import { FixedDocPanelStateMap } from './DockLayout';
 
 interface IDockLayoutStore {
 
-    /**
-     * The sizes of the docks
-     */
-    readonly sizes: ReadonlyArray<number>;
+     readonly panels: FixedDocPanelStateMap;
 
 }
 
 interface IDockLayoutCallbacks {
 
-    readonly setSizes: (sizes: ReadonlyArray<number>) => void;
+    readonly setPanels: (panels: FixedDocPanelStateMap) => void;
 
 }
 
-
 const initialStore: IDockLayoutStore = {
-    sizes: []
+    panels: {}
 }
 
 interface Mutation {
@@ -41,13 +38,13 @@ function callbacksFactory(storeProvider: Provider<IDockLayoutStore>,
 
     return React.useMemo((): IDockLayoutCallbacks => {
 
-        function setSizes(sizes: ReadonlyArray<number>) {
+        function setPanels(panels: FixedDocPanelStateMap) {
             const store = storeProvider();
-            setStore({...store, sizes});
+            setStore({...store, panels});
         }
 
         return {
-            setSizes
+            setPanels
         };
 
     }, [storeProvider, setStore]);

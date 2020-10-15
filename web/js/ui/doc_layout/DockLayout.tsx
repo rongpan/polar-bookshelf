@@ -7,6 +7,8 @@ import {Debouncers} from "polar-shared/src/util/Debouncers";
 import {DockSplitter} from "./DockSplitter";
 import {deepMemo} from "../../react/ReactUtils";
 import {useRefState} from "../../hooks/ReactHooks";
+import { useDockLayoutStore, useDockLayoutCallbacks } from './DockLayoutStore';
+import {useComponentDidMount} from "../../hooks/ReactLifecycleHooks";
 
 class Styles {
 
@@ -17,7 +19,6 @@ class Styles {
     };
 
 }
-
 
 interface IProps {
     readonly dockPanels: ReadonlyArray<DockPanel>;
@@ -34,6 +35,8 @@ export const DockLayout = deepMemo((props: IProps) => {
 
     const mousePosition = React.useRef(MousePositions.get());
     const mouseDown = React.useRef(false);
+    const {panels} = useDockLayoutStore(['panels']);
+    const {setPanels} = useDockLayoutCallbacks();
 
     const createFixedDocPanelStateMap = (): FixedDocPanelStateMap => {
 
@@ -56,8 +59,11 @@ export const DockLayout = deepMemo((props: IProps) => {
 
     const [, setState, stateRef] = useRefState<IState>({
         resizing: undefined,
-        panels: createFixedDocPanelStateMap()
     });
+
+    if (Object.keys(panels).length === 0) {
+        setPanels(createFixedDocPanelStateMap());
+    }
 
     const createDockPanels = React.useCallback((): ReadonlyArray<JSX.Element> => {
 
@@ -85,9 +91,9 @@ export const DockLayout = deepMemo((props: IProps) => {
 
         const createFixedDockPanelElement = (docPanel: FixedDockPanel, idx: number): JSX.Element => {
 
-            const panelState = stateRef.current.panels[docPanel.id];
+            const panel = panels[docPanel.id];
 
-            const {width} = panelState;
+            const {width} = panel;
 
             const baseStyle = createBaseStyle();
 
@@ -167,9 +173,7 @@ export const DockLayout = deepMemo((props: IProps) => {
 
         return result;
 
-    }, []);
-
-    const docPanels = createDockPanels();
+    }, [panels]);
 
     const onMouseUp = React.useCallback(() => {
         mousePosition.current = MousePositions.get();
@@ -226,7 +230,7 @@ export const DockLayout = deepMemo((props: IProps) => {
 
         const delta = mult * (lastMousePosition.clientX - mousePosition.current.clientX);
 
-        const panelState = stateRef.current.panels[resizeTarget.id];
+        const panelState = panels[resizeTarget.id];
         const width = panelState.width + delta;
 
         const newPanelState = {
@@ -235,17 +239,14 @@ export const DockLayout = deepMemo((props: IProps) => {
         };
 
         const newPanels = {
-            ...stateRef.current.panels
+            ...panels
         };
 
         newPanels[resizeTarget.id] = newPanelState;
 
         (props.onResize || NULL_FUNCTION)();
 
-        setState({
-            ...stateRef.current,
-            panels: newPanels
-        });
+        setPanels(panels);
 
         mousePosition.current = lastMousePosition;
 
@@ -256,6 +257,8 @@ export const DockLayout = deepMemo((props: IProps) => {
     // to show a sort of live preview of where the bar would go, then drop
     // it there when completed
     const handleMouseMove = React.useMemo(() => Debouncers.create(() => onMouseMove()), [onMouseMove]);
+
+    const docPanels = createDockPanels();
 
     return (
 
@@ -275,7 +278,7 @@ export const DockLayout = deepMemo((props: IProps) => {
 /**
  * Keeps a map from the ID to the width.
  */
-interface FixedDocPanelStateMap {
+export interface FixedDocPanelStateMap {
     [id: string]: FixedDocPanelState;
 }
 
@@ -295,8 +298,6 @@ interface IState {
      * The id of the panel we are resizing or undefined if not being resized.
      */
     readonly resizing: ResizeTarget | undefined;
-
-    readonly panels: FixedDocPanelStateMap;
 
 }
 
