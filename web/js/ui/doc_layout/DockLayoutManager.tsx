@@ -210,6 +210,8 @@ export const DockLayoutManager = deepMemo((props: DocLayoutProps) => {
 
         const delta = mult * (lastMousePosition.clientX - mousePosition.current.clientX);
 
+        console.log("FIXME: delta: " + delta);
+
         const panelState = panels[resizeTarget.id];
         const width = panelState.width + delta;
 
