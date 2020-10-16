@@ -1,15 +1,15 @@
 import React from 'react';
 import {Provider} from 'polar-shared/src/util/Providers';
 import {createObservableStore, SetStore} from "../../react/store/ObservableStore";
-import { FixedDocPanelStateMap } from './DockLayout';
+import { FixedDocPanelStateMap } from './DockLayoutManager';
 
-interface IDockLayoutStore {
+export interface IDockLayoutStore {
 
      readonly panels: FixedDocPanelStateMap;
 
 }
 
-interface IDockLayoutCallbacks {
+export interface IDockLayoutCallbacks {
 
     readonly setPanels: (panels: FixedDocPanelStateMap) => void;
 
@@ -17,9 +17,6 @@ interface IDockLayoutCallbacks {
 
 const initialStore: IDockLayoutStore = {
     panels: {}
-}
-
-interface Mutation {
 }
 
 interface Mutator {
@@ -51,14 +48,9 @@ function callbacksFactory(storeProvider: Provider<IDockLayoutStore>,
 
 }
 
-export function createDockLayoutStore() {
-
-    return createObservableStore<IDockLayoutStore, Mutator, IDockLayoutCallbacks>({
+export const [DockLayoutStoreProvider, useDockLayoutStore, useDockLayoutCallbacks] =
+    createObservableStore<IDockLayoutStore, Mutator, IDockLayoutCallbacks>({
         initialValue: initialStore,
         mutatorFactory,
         callbacksFactory
     });
-}
-
-export const [DockLayoutStoreProvider, useDockLayoutStore, useDockLayoutCallbacks]
-    = createDockLayoutStore();

@@ -142,7 +142,11 @@ function createObservableStoreContext<V>(store: InternalObservableStore<V>): Int
 }
 
 interface ObservableStoreProps<V> {
+    // TODO: add the ability to include the default store value so we can create it BEFORE we use the provider
     readonly children: JSX.Element | Provider<JSX.Element>;
+
+    readonly store?: V;
+
 }
 
 export type ObservableStoreProviderComponent<V> = (props: ObservableStoreProps<V>) => JSX.Element;
@@ -287,19 +291,15 @@ export function createObservableStore<V, M, C>(opts: ObservableStoreOpts<V, M, C
 
     const providerComponent = (props: ObservableStoreProps<V>) => {
 
-        // const [store, mutator, componentCallbacksFactory]
-        //     = useMemo(() => createInitialContextValues(opts), []);
-
         return (
-            <storeContext.Provider value={store}>
+            <storeContext.Provider value={props.store ? createInternalObservableStore(props.store) : store}>
                 <callbacksContext.Provider value={componentCallbacksFactory}>
                     <mutatorContext.Provider value={mutator}>
                         {props.children}
                     </mutatorContext.Provider>
                 </callbacksContext.Provider>
             </storeContext.Provider>
-
-        )
+        );
 
     }
 
