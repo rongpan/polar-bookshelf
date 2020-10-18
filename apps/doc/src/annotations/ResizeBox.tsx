@@ -12,8 +12,11 @@ import {IXYRect} from "polar-shared/src/util/rects/IXYRect";
 import {useScrollIntoViewUsingLocation} from "./ScrollIntoViewUsingLocation";
 
 interface IProps {
+
     readonly id?: string;
+
     readonly style?: React.CSSProperties;
+
     readonly resizeHandleStyle?: React.CSSProperties;
 
     readonly className?: string;
@@ -110,10 +113,12 @@ export const ResizeBox = deepMemo((props: IProps) => {
     }, {win: props.window});
 
     const handleRndRef = React.useCallback((rnd: Rnd | null) => {
+
         rndRef.current = rnd;
         // now handle the scroll ref so that we can jump to the pagemark...
         scrollIntoViewRef(rndRef.current ? rndRef.current.getSelfElement() : null);
-    }, []);
+
+    }, [scrollIntoViewRef]);
 
     const handleResize = React.useCallback((newState: IState,
                                             direction: ResizeDirection) => {
@@ -160,7 +165,7 @@ export const ResizeBox = deepMemo((props: IProps) => {
             console.error(e);
         }
 
-    }, [])
+    }, [props.onResized, props.resizeAxis, state])
 
     // force pointer events on the resize corners.
     const resizeHandleStyle: React.CSSProperties = {

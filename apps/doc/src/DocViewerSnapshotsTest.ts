@@ -26,4 +26,18 @@ describe('DocViewerSnapshots', function() {
 
     });
 
+    it('self...', function() {
+
+        const currUUID = 'z2020-10-17T16:00:20.885Z+000002-669108819983';
+        const nextUUID = 'z2020-10-17T16:01:08.120Z+000000-427357489886';
+
+        assert.equal(UUIDs.cmp2('z2020-10-17T16:00:20.885Z', 'z2020-10-17T16:01:08.120Z'), 1);
+        assert.equal(UUIDs.cmp2(currUUID, nextUUID), 1);
+
+        assert.equal(DocViewerSnapshots.computeUpdateType3(currUUID, nextUUID).type, 'fresh');
+
+    });
+
 });
+
+

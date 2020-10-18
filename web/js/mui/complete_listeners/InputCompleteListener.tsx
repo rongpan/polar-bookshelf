@@ -6,9 +6,20 @@ import {
     useComponentDidMount,
     useComponentWillUnmount
 } from "../../hooks/ReactLifecycleHooks";
+import useTheme from "@material-ui/core/styles/useTheme";
+import { Platforms, Platform } from "polar-shared/src/util/Platforms";
 
-export function isInputCompleteEvent(event: KeyboardEvent) {
-    return event.key === 'Enter';
+export function isInputCompleteEvent(type: InputType, event: KeyboardEvent) {
+
+    switch (type) {
+
+        case "enter":
+            return event.key === 'Enter';
+        case "meta+enter":
+            return (event.ctrlKey || event.metaKey) && event.key === 'Enter';
+
+    }
+
 }
 
 interface InputCompleteListenerOpts {
@@ -22,11 +33,17 @@ interface InputCompleteListenerOpts {
      */
     readonly completable?: () => boolean;
 
+    readonly type: InputType;
+
 }
 
 export function useInputCompleteListener(opts: InputCompleteListenerOpts) {
 
     const completable = opts.completable || Providers.of(true);
+
+    // TODO: I think this is technically wrong because we have to
+    // listen and unmount the key listeners on both unmount but also
+    // when dependencies change.
 
     const onKeyDown = React.useCallback((event: KeyboardEvent) => {
 
@@ -38,7 +55,7 @@ export function useInputCompleteListener(opts: InputCompleteListenerOpts) {
         // ObserveKeys when using an <input> but it doesn't matter because we
         // can just listen to the key directly
 
-        if (isInputCompleteEvent(event)) {
+        if (isInputCompleteEvent(opts.type, event)) {
             opts.onComplete();
             return;
         }
@@ -60,9 +77,50 @@ export function useInputCompleteListener(opts: InputCompleteListenerOpts) {
 
 }
 
+const InputCompleteSuggestion = () => {
+
+    const theme = useTheme();
+
+    const platform = Platforms.get();
+
+    // if ([Platform.MACOS, Platform.LINUX, Platform.WINDOWS].includes(platform)) {
+    //     // only do this on desktop platforms
+    //     return null;
+    // }
+
+    function computeShortcut() {
+
+        if (platform === Platform.MACOS) {
+            return "command + enter";
+        } else {
+            return "control + enter"
+        }
+
+    }
+
+    const shortcut = computeShortcut();
+
+    return (
+        <div style={{
+                 textAlign: 'center',
+                 color: theme.palette.text.hint
+             }}>
+
+            {shortcut} to complete input
+
+        </div>
+    )
+};
+
+type InputType = 'enter' | 'meta+enter';
+
 interface IProps extends InputCompleteListenerOpts {
 
     readonly children: JSX.Element;
+
+    readonly type: InputType;
+
+    readonly noHint?: boolean;
 
 }
 
@@ -70,6 +128,11 @@ export const InputCompleteListener = deepMemo((props: IProps) => {
 
     useInputCompleteListener(props);
 
-    return props.children;
+    return (
+        <>
+            {props.children}
+            {! props.noHint && <InputCompleteSuggestion/>}
+        </>
+    );
 
 });

@@ -90,12 +90,14 @@ export const DocFindBar = React.memo(() => {
 
     const cancelFind = React.useCallback(() => {
         reset();
-    }, []);
+    }, [reset]);
 
     const handleFind = React.useCallback((query: string) => {
+
         const newOpts = {...opts, query, onMatches: setMatches};
         doFind(newOpts);
-    }, []);
+
+    }, [doFind, setMatches, opts]);
 
     return (
         <Collapse in={active} timeout={50}>

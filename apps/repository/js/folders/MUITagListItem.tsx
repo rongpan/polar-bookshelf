@@ -74,7 +74,7 @@ export const MUITagListItemInner = React.memo((props: IProps) => {
     const onCheckbox = useCallback((event: React.MouseEvent) => {
         props.selectRow(props.nodeId, event, 'checkbox');
         event.stopPropagation();
-    }, []);
+    }, [props]);
 
     const className = clsx(
         classes.root,
@@ -113,8 +113,10 @@ export const MUITagListItemInner = React.memo((props: IProps) => {
 export const MUITagListItem = React.memo((props: IProps) => {
 
     const onDrop = useCallback((event: React.DragEvent) => {
-        props.onDrop(event, props.nodeId)
-    }, [])
+
+        props.onDrop(event, props.nodeId);
+
+    }, [props])
 
     return (
         <DragTarget2 onDrop={onDrop}>

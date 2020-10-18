@@ -171,7 +171,7 @@ export function useAnnotationContainers(): ReadonlyArray<AnnotationContainer> {
     const docViewerElementsContext = useRefProvider(useDocViewerElementsContext);
     const [annotationContainers, setAnnotationContainers] = React.useState<ReadonlyArray<AnnotationContainer>>([]);
 
-    const doUpdateDelegate = () => {
+    const doUpdateDelegate = React.useCallback(() => {
 
         function toAnnotationContainer(pageDescriptor: IPageDescriptor): AnnotationContainer | undefined {
 
@@ -202,9 +202,9 @@ export function useAnnotationContainers(): ReadonlyArray<AnnotationContainer> {
             setAnnotationContainers(newAnnotationContainers);
         }
 
-    }
+    }, [annotationContainers, docViewerElementsContext]);
 
-    const doUpdate = React.useMemo(() => Debouncers.create(doUpdateDelegate), []);
+    const doUpdate = React.useMemo(() => Debouncers.create(doUpdateDelegate), [doUpdateDelegate]);
 
     doUpdateDelegate();
 

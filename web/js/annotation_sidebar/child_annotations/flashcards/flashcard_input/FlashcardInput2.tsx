@@ -12,7 +12,6 @@ import {
 } from "../../../AnnotationMutationsContext";
 import {useAnnotationActiveInputContext} from "../../../AnnotationActiveInputContext";
 import {IDocAnnotationRef} from "../../../DocAnnotation";
-import {Refs} from "polar-shared/src/metadata/Refs";
 
 export interface IProps {
 
@@ -27,7 +26,7 @@ export interface IProps {
 
     readonly flashcardType?: FlashcardType;
 
-    readonly cancelButton: JSX.Element;
+    readonly onCancel: () => void;
 
     readonly existingFlashcard?: Flashcard;
 
@@ -92,12 +91,12 @@ export const FlashcardInput2 = React.memo((props: IProps) => {
 
         flashcardCallback(mutation);
 
-    }, []);
+    }, [annotationInputContext, flashcardCallback, props]);
 
     if (flashcardType === FlashcardType.BASIC_FRONT_BACK) {
 
         return ( <FlashcardInputForFrontAndBack id={props.id}
-                                                cancelButton={props.cancelButton}
+                                                onCancel={props.onCancel}
                                                 existingFlashcard={props.existingFlashcard}
                                                 defaultValue={props.defaultValue}
                                                 onFlashcard={onFlashcard}
@@ -106,7 +105,7 @@ export const FlashcardInput2 = React.memo((props: IProps) => {
     } else {
 
         return ( <FlashcardInputForCloze id={props.id}
-                                         cancelButton={props.cancelButton}
+                                         onCancel={props.onCancel}
                                          existingFlashcard={props.existingFlashcard}
                                          defaultValue={props.defaultValue}
                                          onFlashcard={onFlashcard}

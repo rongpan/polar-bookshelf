@@ -8,8 +8,8 @@ import {
     FlashcardInputs,
     FrontAndBackFields
 } from './FlashcardInputs';
-import {FlashcardStyles} from './FlashcardStyles';
 import {Flashcard} from '../../../../metadata/Flashcard';
+import {InputCompleteListener} from "../../../../mui/complete_listeners/InputCompleteListener";
 
 // TODO: to functional component.
 export class FlashcardInputForFrontAndBack extends React.Component<IProps, IState> {
@@ -33,30 +33,33 @@ export class FlashcardInputForFrontAndBack extends React.Component<IProps, IStat
 
     public render() {
 
-        const { id } = this.props;
-
         const fields = this.toFields();
 
         return (
 
             <div id="annotation-flashcard-box" className="m-1">
 
-                <RichTextArea label="front"
-                              id={`front-${this.props.id}`}
-                              value={fields.front}
-                              autofocus={true}
-                              onKeyDown={event => this.onKeyDown(event)}
-                              onChange={(html) => this.fields.front = html}
-                />
+                <InputCompleteListener type='meta+enter'
+                                       onCancel={this.props.onCancel}
+                                       onComplete={() => this.onCreate()}>
+                    <>
 
-                <RichTextArea label="back"
-                              id={`back-${this.props.id}`}
-                              value={fields.back}
-                              onKeyDown={event => this.onKeyDown(event)}
-                              onChange={(html) => this.fields.back = html}
-                />
+                        <RichTextArea label="front"
+                                      id={`front-${this.props.id}`}
+                                      value={fields.front}
+                                      autofocus={true}
+                                      onKeyDown={event => this.onKeyDown(event)}
+                                      onChange={(html) => this.fields.front = html}/>
 
-                {/*- quote annotation ... to copy the annotation text.*/}
+                        <RichTextArea label="back"
+                                      id={`back-${this.props.id}`}
+                                      value={fields.back}
+                                      onKeyDown={event => this.onKeyDown(event)}
+                                      onChange={(html) => this.fields.back = html}/>
+
+                    </>
+
+                </InputCompleteListener>
 
                 <div style={{
                         display: 'flex',
@@ -73,7 +76,7 @@ export class FlashcardInputForFrontAndBack extends React.Component<IProps, IStat
 
                     <div>
 
-                        <FlashcardButtons cancelButton={this.props.cancelButton}
+                        <FlashcardButtons onCancel={this.props.onCancel}
                                           existingFlashcard={this.props.existingFlashcard}
                                           onCreate={() => this.onCreate()}/>
 
@@ -118,20 +121,6 @@ export class FlashcardInputForFrontAndBack extends React.Component<IProps, IStat
 
     }
 
-    // private onCancel(): void {
-    //
-    //     if (this.props.onCancel) {
-    //         this.props.onCancel();
-    //     }
-    //
-    //     this.reset();
-    //
-    // }
-    //
-    // private reset(): void {
-    //     this.fields = {front: "", back: ""};
-    // }
-
 }
 
 interface IProps {
@@ -142,9 +131,7 @@ interface IProps {
 
     readonly onFlashcardChangeType: (flashcardType: FlashcardType) => void;
 
-    readonly onCancel?: () => void;
-
-    readonly cancelButton: JSX.Element;
+    readonly onCancel: () => void;
 
     readonly existingFlashcard?: Flashcard;
 
