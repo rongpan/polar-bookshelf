@@ -1,3 +1,30 @@
+- added support for webCapture: true through all parts of the capture process
+- AnnotationSidebarStore.tsx and FolderSidebarStore.tsx now use shallow equals for performance boost
+- added support for Firestore 8.0 and new Firebase UI auth
+
+# 2.0.81
+
+- Upgrade to the latest version of RXJS
+
+- implemented shallow vs deep comparison in the main store which can be optionally enabled
+  per store and makes UI clicks just about 1ms on average.
+
+# 2.0.80
+
+- Fixed bug with PDF documents not properly resuming pagemarks 
+
+# 2.0.79
+
+- keyboard shortcut duration now shorter
+- When deleting a tag we reset and select the default folder now to avoid
+  confusing the user that a file has been deleted.
+- Fixed a bug with uploading files ending in .PDF 
+- Fixed a bug where only one docMeta field could be changed when editing document metadata.
+- Fixed react bug with not rendering the month properly when editing doc metadata
+- Fixed a bug with dispatchPDFDocMeta in PDF documents.  Order was incorrect.
+- Improved sorting so that empty strings sort last.
+- Fixed a bug with the UI not sorting properly for authors and other new columns.
+
 # 2.0.60
 
 - can edit metadata on documents directly now.

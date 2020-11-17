@@ -26,6 +26,8 @@ import { IntersectionListTableStory } from './impl/IntersectionListTableStory';
 import {MUIImageBottomFadeStory} from "./impl/MUIImageBottomFadeStory";
 import {MUITooltipStory} from "./impl/MUITooltipStory";
 import { MUIPaletteStory } from './impl/MUIPaletteStory';
+import { FirestoreSnapshotsStory } from './impl/FirestoreSnapshotsStory';
+import { HeightFitImgStory } from './impl/HeightFitImgStory';
 
 interface IStory {
     readonly name: string;
@@ -129,6 +131,14 @@ const stories = createStoryIndex([
     {
         name: "MUIPaletteStory",
         component: <MUIPaletteStory/>
+    },
+    {
+        name: "FirestoreSnapshotsStory",
+        component: <FirestoreSnapshotsStory/>
+    },
+    {
+        name: "HeightFitImgStory",
+        component: <HeightFitImgStory/>
     }
 
 ]);
