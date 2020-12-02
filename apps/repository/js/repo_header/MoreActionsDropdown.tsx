@@ -9,6 +9,7 @@ import {Nav} from "../../../../web/js/ui/util/Nav";
 import SyncIcon from '@material-ui/icons/Sync';
 import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
 import {FADiscordIcon} from "../../../../web/js/mui/MUIFontAwesome";
+import ForumIcon from '@material-ui/icons/Forum';
 
 export const MoreActionsDropdown = React.memo(() => {
 
@@ -16,6 +17,10 @@ export const MoreActionsDropdown = React.memo(() => {
 
     function onChat() {
         Nav.openLinkWithNewTab('https://discord.gg/GT8MhA6')
+    }
+
+    function onForum() {
+        Nav.openLinkWithNewTab('https://forum.getpolarized.io')
     }
 
     function onDocumentation() {
@@ -44,6 +49,10 @@ export const MoreActionsDropdown = React.memo(() => {
                 <MUIMenuItem icon={<FADiscordIcon/>}
                              text="Chat with Polar Community"
                              onClick={onChat}/>
+
+                <MUIMenuItem icon={<ForumIcon/>}
+                             text="Forum"
+                             onClick={onForum}/>
 
                 <MUIMenuItem icon={<LibraryBooksIcon/>}
                              text="Documentation"

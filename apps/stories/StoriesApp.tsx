@@ -28,6 +28,13 @@ import {MUITooltipStory} from "./impl/MUITooltipStory";
 import { MUIPaletteStory } from './impl/MUIPaletteStory';
 import { FirestoreSnapshotsStory } from './impl/FirestoreSnapshotsStory';
 import { HeightFitImgStory } from './impl/HeightFitImgStory';
+import {FirestoreInitStory} from "./impl/FirestoreInitStory";
+import {ActionMenuStory} from "./impl/ActionMenuStory";
+import {YoutubePlayerStory} from "./impl/YoutubePlayerStory";
+import {AutoFlashcardsStory} from "./impl/AutoFlashcardsStory";
+import { ProgressButtonStory } from './impl/ProgressButtonStory';
+import {FunctionalChildStory} from "./impl/FunctionalChildStory";
+import { UnmountComponentStory } from './impl/UnmountComponentStory';
 
 interface IStory {
     readonly name: string;
@@ -139,7 +146,35 @@ const stories = createStoryIndex([
     {
         name: "HeightFitImgStory",
         component: <HeightFitImgStory/>
-    }
+    },
+    {
+        name: "Firebase Init",
+        component: <FirestoreInitStory/>
+    },
+    {
+        name: "ActionMenuStory",
+        component: <ActionMenuStory/>
+    },
+    {
+        name: "Youtube Player",
+        component: <YoutubePlayerStory/>
+    },
+    {
+        name: "Auto Flashcards",
+        component: <AutoFlashcardsStory/>
+    },
+    {
+        name: "Circular Progress",
+        component: <ProgressButtonStory/>
+    },
+    {
+        name: 'FunctionalChildStory',
+        component: <FunctionalChildStory/>
+    },
+    {
+        name: 'UnmountComponentStory',
+        component: <UnmountComponentStory/>
+    },
 
 ]);
 

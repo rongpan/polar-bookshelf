@@ -56,6 +56,8 @@ import { PHZMigrationScreen } from './migrations/PHZMigrationScreen';
 import { AddFileDropzoneRoot } from './upload/AddFileDropzoneRoot';
 import {TwoMigrationForBrowser} from "../../../../apps/repository/js/gateways/two_migration/TwoMigrationForBrowser";
 import {AnalyticsLocationListener} from "../../analytics/AnalyticsLocationListener";
+import {LogsScreen} from "../../../../apps/repository/js/logs/LogsScreen";
+import {PrefsContext2} from "../../../../apps/repository/js/persistence_layer/PrefsContext2";
 
 interface IProps {
     readonly app: App;
@@ -74,21 +76,22 @@ export const RepositoryDocViewerScreen = deepMemo((props: RepositoryDocViewerScr
 
     return (
         <AuthRequired>
-            <PersistenceLayerContext.Provider
-                value={{persistenceLayerProvider: props.persistenceLayerProvider}}>
-                <UserTagsProvider>
-                    <DocMetaContextProvider>
-                        <DocViewerDocMetaLookupContextProvider>
-                            <DocViewerStore>
-                                <DocFindStore>
-                                    <AnnotationSidebarStoreProvider>
-                                        <DocViewer/>
-                                    </AnnotationSidebarStoreProvider>
-                                </DocFindStore>
-                            </DocViewerStore>
-                        </DocViewerDocMetaLookupContextProvider>
-                    </DocMetaContextProvider>
-                </UserTagsProvider>
+            <PersistenceLayerContext.Provider value={{persistenceLayerProvider: props.persistenceLayerProvider}}>
+                <PrefsContext2>
+                    <UserTagsProvider>
+                        <DocMetaContextProvider>
+                            <DocViewerDocMetaLookupContextProvider>
+                                <DocViewerStore>
+                                    <DocFindStore>
+                                        <AnnotationSidebarStoreProvider>
+                                            <DocViewer/>
+                                        </AnnotationSidebarStoreProvider>
+                                    </DocFindStore>
+                                </DocViewerStore>
+                            </DocViewerDocMetaLookupContextProvider>
+                        </DocMetaContextProvider>
+                    </UserTagsProvider>
+                </PrefsContext2>
             </PersistenceLayerContext.Provider>
         </AuthRequired>
     );
@@ -109,21 +112,22 @@ export const RepositoryApp = (props: IProps) => {
                 <PersistenceLayerApp tagsType="documents"
                                      repoDocMetaManager={repoDocMetaManager}
                                      repoDocMetaLoader={repoDocMetaLoader}
-                                     persistenceLayerManager={persistenceLayerManager}
-                                     render={() =>
-                                         <DocRepoStore2>
-                                             <DocRepoSidebarTagStore>
-                                                 <TwoMigrationForBrowser>
-                                                     <>
-                                                         <AnkiSyncController/>
-                                                         <DocRepoScreen2/>
-                                                     </>
-                                                 </TwoMigrationForBrowser>
-                                             </DocRepoSidebarTagStore>
-                                         </DocRepoStore2>
-                                     }/>
+                                     persistenceLayerManager={persistenceLayerManager}>
+                     <DocRepoStore2>
+                         <DocRepoSidebarTagStore>
+                             <TwoMigrationForBrowser>
+                                 <>
+                                     <AnkiSyncController/>
+                                     <DocRepoScreen2/>
+                                 </>
+                             </TwoMigrationForBrowser>
+                         </DocRepoSidebarTagStore>
+                     </DocRepoStore2>
+                </PersistenceLayerApp>
             </AuthRequired>
         ));
+
+    RenderDocRepoScreen.displayName='RenderDocRepoScreen';
 
     const RenderAnnotationRepoScreen = React.memo(() => {
         return (
@@ -131,17 +135,16 @@ export const RepositoryApp = (props: IProps) => {
                 <PersistenceLayerApp tagsType="annotations"
                                      repoDocMetaManager={repoDocMetaManager}
                                      repoDocMetaLoader={repoDocMetaLoader}
-                                     persistenceLayerManager={persistenceLayerManager}
-                                     render={(props) =>
-                                         <AnnotationRepoStore2>
-                                             <AnnotationRepoSidebarTagStore>
-                                                 <>
-                                                     <ReviewRouter/>
-                                                     <AnnotationRepoScreen2/>
-                                                 </>
-                                             </AnnotationRepoSidebarTagStore>
-                                         </AnnotationRepoStore2>
-                                     }/>
+                                     persistenceLayerManager={persistenceLayerManager}>
+                     <AnnotationRepoStore2>
+                         <AnnotationRepoSidebarTagStore>
+                             <>
+                                 <ReviewRouter/>
+                                 <AnnotationRepoScreen2/>
+                             </>
+                         </AnnotationRepoSidebarTagStore>
+                     </AnnotationRepoStore2>
+                </PersistenceLayerApp>
             </AuthRequired>
         );
     });
@@ -170,6 +173,8 @@ export const RepositoryApp = (props: IProps) => {
         <RenderDocRepoScreen/>
     ));
 
+    RenderDefaultScreen.displayName='RenderDefaultScreen';
+
     const renderWhatsNewScreen = () => (
         <WhatsNewScreen/>
     );
@@ -186,22 +191,11 @@ export const RepositoryApp = (props: IProps) => {
             <PersistenceLayerApp tagsType="documents"
                                  repoDocMetaManager={repoDocMetaManager}
                                  repoDocMetaLoader={repoDocMetaLoader}
-                                 persistenceLayerManager={persistenceLayerManager}
-                                 render={(docRepo) =>
-                                     <StatsScreen/>
-                                 }/>
+                                 persistenceLayerManager={persistenceLayerManager}>
+                <StatsScreen/>
+            </PersistenceLayerApp>
         </AuthRequired>
     );
-
-    // const renderLogsScreen = () => {
-    //     return (
-    //         <AuthRequired authStatus={app.authStatus}>
-    //             <LogsScreen
-    //                 persistenceLayerProvider={app.persistenceLayerProvider}
-    //                 persistenceLayerController={app.persistenceLayerController}/>
-    //         </AuthRequired>
-    //     );
-    // };
 
     // const editorsPicksScreen = () => {
     //     return (
@@ -334,6 +328,9 @@ export const RepositoryApp = (props: IProps) => {
                                                                     <Route exact path="/settings"
                                                                            component={RenderSettingsScreen}/>
 
+                                                                    <Route exact path="/logs"
+                                                                           component={LogsScreen}/>
+
                                                                     <Route exact path="/device"
                                                                            component={renderDeviceScreen}/>
 
@@ -377,3 +374,5 @@ export const RepositoryApp = (props: IProps) => {
     );
 
 };
+
+RepositoryApp.displayName='RepositoryApp';

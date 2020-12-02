@@ -181,5 +181,5 @@ export const DocRepoScreen2 = React.memo(() => {
 
 }, isEqual);
 
-
+DocRepoScreen2.displayName='DocRepoScreen2';
 

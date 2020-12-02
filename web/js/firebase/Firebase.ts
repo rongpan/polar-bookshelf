@@ -32,6 +32,8 @@ export class Firebase {
 
     private static app?: firebase.app.App;
 
+    private static user?: firebase.User | null;
+
     /**
      * Perform init of Firebase with our auth credentials.
      */
@@ -67,39 +69,33 @@ export class Firebase {
 
         Preconditions.assertPresent(config, "config");
 
-        return firebase.initializeApp(config);
+        const app = firebase.initializeApp(config);
 
+        this.startListeningForUser();
+
+        return app;
+
+    }
+
+    /**
+     * This API is sort of broken by design
+     *
+     * https://medium.com/firebase-developers/why-is-my-currentuser-null-in-firebase-auth-4701791f74f0
+     *
+     */
+    private static startListeningForUser() {
+        const auth = firebase.auth();
+        auth.onAuthStateChanged(user => this.user = user, err => console.error(err));
     }
 
     public static currentUser(): firebase.User | undefined {
         Firebase.init();
-        const auth = firebase.auth();
-        return auth.currentUser || undefined;
+        return this.user || undefined;
     }
 
-    public static async currentUserAsync(): Promise<firebase.User | null> {
-
+    public static async currentUserAsync(): Promise<firebase.User | undefined> {
         Firebase.init();
-
-        // const auth = firebase.auth();
-        // const user = auth.currentUser;
-        // return user;
-
-        // TODO: I think this actually might be wrong.
-        return new Promise<firebase.User | null>((resolve, reject) => {
-
-            const unsubscribe = firebase.auth()
-                .onAuthStateChanged((user) => {
-                                        unsubscribe();
-                                        resolve(user);
-                                    },
-                                    (err) => {
-                                        unsubscribe();
-                                        reject(err);
-                                    });
-
-        });
-
+        return this.user || undefined;
     }
 
     public static async currentUserID(): Promise<UserIDStr | undefined> {

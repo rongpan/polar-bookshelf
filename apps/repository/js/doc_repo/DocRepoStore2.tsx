@@ -704,7 +704,7 @@ function useCreateCallbacks(storeProvider: Provider<IDocRepoStore>,
         dialogs.confirm({
             title: "Are you sure you want to delete these item(s)?",
             subtitle: "This is a permanent operation and can't be undone.  ",
-            type: 'danger',
+            type: 'warning',
             onAccept: () => doDeleted(repoDocInfos),
         });
 
@@ -817,6 +817,8 @@ export const [DocRepoStoreProvider, useDocRepoStore, useDocRepoCallbacks, useDoc
         callbacksFactory: useCallbacksFactory,
         enableShallowEquals: true
     });
+
+DocRepoStoreProvider.displayName='DocRepoStoreProvider';
 
 interface IProps {
     readonly children: JSX.Element;

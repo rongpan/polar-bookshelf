@@ -8,12 +8,13 @@ import {GlobalCssMobile} from "./css/GlobalCssMobile";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import {createMuiTheme, ThemeProvider} from "@material-ui/core/styles";
 import {KeyboardShortcuts} from "../keyboard_shortcuts/KeyboardShortcuts";
+import {UndoQueueProvider} from "../undo/UndoQueueProvider";
 
 interface IProps {
     readonly children: React.ReactNode;
 }
 
-export const MUIAppRoot = (props: IProps) => {
+export const MUIAppRoot = React.memo((props: IProps) => {
 
     const usePersistedTheme = createPersistedState('theme');
     const [theme, setTheme] = usePersistedTheme<ThemeType>("dark");
@@ -48,7 +49,11 @@ export const MUIAppRoot = (props: IProps) => {
                         <GlobalCssSummernote/>
                         <GlobalCssMobile/>
 
-                        {props.children}
+                        <UndoQueueProvider>
+                            <>
+                                {props.children}
+                            </>
+                        </UndoQueueProvider>
 
                     </>
                 </MUIThemeTypeContext.Provider>
@@ -56,4 +61,6 @@ export const MUIAppRoot = (props: IProps) => {
         </>
     );
 
-};
+});
+
+MUIAppRoot.displayName='MUIAppRoot';

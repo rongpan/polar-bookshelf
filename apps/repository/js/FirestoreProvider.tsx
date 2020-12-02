@@ -30,7 +30,7 @@ interface IProps {
 async function doAsync(): Promise<IFirestore> {
 
     const firestore = await Firestore.getInstance();
-    const user = Firebase.currentUser();
+    const user = await Firebase.currentUserAsync();
     const uid = user?.uid;
 
     await FirestoreCollections.configure(firestore);
@@ -53,6 +53,8 @@ export const FirestoreProvider = deepMemo((props: IProps) => {
         );
     }
 
-    return null;
+    return (
+        <div className="no-firestore-provider"/>
+    );
 
 });

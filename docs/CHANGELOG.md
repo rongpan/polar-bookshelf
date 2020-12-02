@@ -1,5 +1,48 @@
+- added more aggressive sentry exception reporting in order to detect and handle
+  bugs more aggressively.
+ 
+# 2.0.86
+
+- Added back in a logs capture system so that the user can copy their logs and
+  send them to us if they're having a bug and we need more data.
+
+- Fixed bug with prefs not always loading and then blocking the UI.
+
+- Now canonicalizing /doc URLs for analytics.
+
+- Link to Polar forum
+
+- Fixed a bad bug preventing repository in Safari from being snappy on login.  
+  It was far far too latent.  Also, will speed things up for other users.  
+
+- The PDF outliner can be expanded and collapsed and we collapse by default such
+  that only folders with depth=1 are collapsed by default.  
+
+# 2.0.85
+
+- properly handling user authentication now.
+
+- We now properly assert that the number of web captures you're making is
+  compatible with your account and show the limits in the UI.
+  
+- Can now right click the annotation in the doc viewer to scroll the annotation
+  in the annotation sidebar.
+
+- Fixed help menu in the desktop app
+
+- Implemented phrase search in the PDF viewer
+
+# 2.0.83
+
+- more stores are now shallow
+
+# 2.0.82
+
 - added support for webCapture: true through all parts of the capture process
-- AnnotationSidebarStore.tsx and FolderSidebarStore.tsx now use shallow equals for performance boost
+
+- AnnotationSidebarStore.tsx and FolderSidebarStore.tsx now use shallow equals
+  for performance boost
+
 - added support for Firestore 8.0 and new Firebase UI auth
 
 # 2.0.81
