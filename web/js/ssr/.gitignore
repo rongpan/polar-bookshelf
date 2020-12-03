@@ -1,0 +1,9 @@
+node_modules
+npm-debug.log
+v8.log
+dist
+.vercel
+src/**/*.js
+src/**/*.map
+tests/**/*.js
+tests/**/*.map

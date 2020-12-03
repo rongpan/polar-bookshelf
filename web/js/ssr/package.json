@@ -1,0 +1,36 @@
+{
+  "name": "react-server-example-tsx",
+  "version": "7.0.0",
+  "description": "Boilerplate for isomorphic web app with React server-side rendering in TypeScript.",
+  "main": "dist/server.js",
+  "repository": "styfle/react-server-example-tsx",
+  "scripts": {
+    "start": "node dist/server.js",
+    "compile": "tsc",
+    "build": "webpack --mode production",
+    "watch": "webpack --mode development --watch",
+    "prettier": "prettier \"./src/**/*.ts\" \"./src/**/*.tsx\" --write",
+    "test": "mocha --timeout 20000 --exit 'dist/src/*Test.js'"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "devDependencies": {
+    "@types/cheerio": "^0.22.22",
+    "@types/mocha": "^8.0.4",
+    "@types/node": "^14.11.2",
+    "@types/react": "^16.9.49",
+    "@types/react-dom": "^16.9.8",
+    "@types/webpack": "^4.41.22",
+    "cheerio": "^1.0.0-rc.3",
+    "mocha": "^8.2.1",
+    "prettier": "2.1.2",
+    "ts-loader": "^8.0.4",
+    "typescript": "^4.0.5",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12",
+    "webpack-node-externals": "^2.5.2"
+  }
+}
