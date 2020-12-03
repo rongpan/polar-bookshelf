@@ -1,4 +1,8 @@
-- added more aggressive sentry exception reporting in order to detect and handle
+- Worked on 'Personas' for when users go premium
+
+- Fixed bug where tags could not be created
+
+- Added more aggressive sentry exception reporting in order to detect and handle
   bugs more aggressively.
  
 # 2.0.86
